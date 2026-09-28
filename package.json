@@ -1,0 +1,16 @@
+{
+  "name": "seonyul-block-island",
+  "version": "1.1.0",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 4173 --bind 0.0.0.0",
+    "test": "node tests/smoke.cjs && node tests/adventure.cjs && node tests/math-link.cjs",
+    "test:platformer": "node tests/platformer.cjs && node tests/platformer-ipad-touch.cjs",
+    "test:platformer-blocks": "node tests/platformer-blocks.cjs",
+    "test:platformer-rewards": "node tests/platformer-progress.cjs && node tests/platformer-rewards.cjs",
+    "test:platformer-timer": "node tests/platformer-timer.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

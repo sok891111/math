@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#edf4eb"><title>선율이의 열칸 블록섬</title>
+<link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+<main id="app">
+  <header class="topbar"><a class="brand" href="./" aria-label="열칸 블록섬 홈"><span class="brand-icon">▦</span><span>열칸 블록섬<small>SEONYUL’S LITTLE ADVENTURE</small></span></a><div class="header-actions"><a href="platformer/" class="album-launch" style="text-decoration:none;color:inherit">☀ 햇살 모험</a><button id="open-album" class="album-launch" aria-label="내 배지 앨범 열기">🏅 <b id="badge-count">0</b><span> 배지</span></button><span id="collection" class="collection">✦ 발견한 섬 1 / 4</span><button id="sound" class="icon-button" aria-label="효과음 켜기" aria-pressed="false">♫</button><button id="settings" class="icon-button" aria-label="놀이 안내">?</button></div></header>
+  <section class="world" aria-label="블록섬 탐험 지도">
+    <canvas id="world" tabindex="0" aria-label="방향키나 WASD로 이동하세요. 다음 모험으로 버튼으로 목적지까지 걸어갈 수도 있어요."></canvas>
+    <div class="world-heading"><span class="eyebrow">작은 블록, 커다란 모험</span><h1>반가워, 선율아<span>!</span></h1><p>한 칸씩 채우면, 새로운 세상이 열려.</p></div>
+    <aside class="quest-card"><div class="quest-top"><span class="quest-icon" id="quest-icon">🌿</span><span class="eyebrow" id="quest-chapter">첫 번째 모험</span><span id="quest-step">01 / 03</span></div><h2 id="quest-title">여우의 숲으로 가는 길</h2><p id="quest-desc">강 너머 여우가 기다려.<br>블록으로 열 칸 다리를 만들어 볼까?</p><button class="primary" id="go-quest">다리 만들러 가기 <span>→</span></button><button id="practice-now" class="practice-link" hidden>🎲 다른 문제도 풀래!</button><div class="progress-dots" id="progress-dots"><i></i><i></i><i></i></div></aside>
+    <nav class="friend-dock" aria-label="친구 만나기"><button data-friend="fox"><span>🦊</span><b>여우</b><small>만나기</small></button><button data-friend="bear"><span>🐻</span><b>곰</b><small>만나기</small></button><button data-friend="rabbit"><span>🐰</span><b>토끼</b><small>만나기</small></button></nav>
+    <div class="map-label"><span class="live-dot"></span><span id="location-label">풀빛 시작섬</span></div>
+    <div class="world-controls"><span><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> 걷기</span><span class="control-divider"></span><span>땅을 눌러도 걸어가요</span><button id="home-camera" aria-label="내 위치 보기">⌖ 내 위치</button></div>
+    <div class="dpad" aria-label="이동 조작"><button data-dir="up" aria-label="위로 걷기">↑</button><button data-dir="left" aria-label="왼쪽으로 걷기">←</button><button data-dir="down" aria-label="아래로 걷기">↓</button><button data-dir="right" aria-label="오른쪽으로 걷기">→</button></div>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <button class="free-build" id="free-build" hidden>▦ 내 블록 놀이터</button>
+    <div class="map-caption">마음껏 둘러봐. 서두르지 않아도 괜찮아.</div>
+  </section>
+  <footer><span>EXPLORE · MOVE · DISCOVER</span><span>열 개가 모이면, 하나의 새로운 시작.</span></footer>
+</main>
+<dialog id="welcome" class="welcome-dialog"><div class="welcome-art"><span class="tiny-spark s1">✦</span><div class="art-island"><div class="art-tree">🌳</div><div class="art-fox">🦊</div><div class="art-cubes"><i></i><i></i><i></i></div></div><span class="tiny-spark s2">✧</span><span class="art-label">YOUR FIRST LITTLE WORLD</span></div><div class="welcome-copy"><span class="eyebrow">선율이만의 블록 모험</span><h2>열 칸을 채우면<br>어디까지 갈 수 있을까?</h2><p>블록을 옮겨 다리를 만들고,<br>친구들과 놀고 반짝이는 배지를 모아 봐!</p><div class="welcome-tags"><span>🌱 자유롭게 걷기</span><span>🧊 블록 옮기기</span><span>🦊 친구 만나기</span></div><button class="primary" id="start">모험 시작하기 <span>→</span></button><small>정답을 서두르지 않아도 돼. 마음껏 만져 봐!</small><a href="platformer/" class="text-button" style="display:block;text-align:center;margin-top:14px">☀ 점프하며 좀비를 잡는 햇살 모험 →</a><button class="text-button" id="reset-save">처음부터 새로 놀기</button></div></dialog>
+<dialog id="puzzle" class="puzzle-dialog guided-puzzle" aria-labelledby="puzzle-title">
+  <div class="puzzle-header">
+    <div class="puzzle-steps" aria-label="놀이 순서"><span id="step-move" class="active">① 블록 옮기기</span><b>→</b><span id="step-answer">② 숫자 쓰기</span></div>
+    <button id="close-puzzle" class="icon-button" aria-label="섬으로 돌아가기">×</button>
+  </div>
+  <div class="friend-message"><span id="friend-face">🦊</span><div><h2 id="puzzle-title">파란 블록을 톡 눌러 봐!</h2><p id="instruction">반짝이는 빈칸으로 옮겨 줘.</p></div><button id="speak" class="secondary listen-button" aria-label="설명 듣기">🔊 듣기</button></div>
+  <div id="activity-banner" class="activity-banner" hidden></div>
+  <div class="problem-question linked-equation" aria-label="블록을 옮겨도 같은 덧셈">
+    <div class="equation-part"><small>처음 블록</small><span id="original-sum"><button id="original-a" class="number-origin origin-a-number" aria-label="처음 주황 블록 보기">7</button><span> + </span><button id="original-b" class="number-origin origin-b-number" aria-label="처음 파란 블록 보기">8</button></span></div>
+    <span id="regroup-equals" class="equation-equals" hidden>=</span>
+    <div id="regrouped-sum" class="equation-part" hidden><small>옮긴 뒤에도 같아!</small><span><b id="current-a">7</b> + <b id="current-b" class="origin-b-number">8</b></span></div>
+    <span>=</span><strong>?</strong>
+  </div>
+  <div class="puzzle-workspace">
+    <section class="blocks-workspace" aria-label="블록으로 세어 보기">
+      <div class="build-area" id="build-area">
+        <section class="block-group target-group"><div class="origin-label origin-a-label" id="origin-a-label">처음 주황 7개</div><div class="group-title"><h3 id="left-name">🌉 열 칸 다리</h3><span><b id="left-count">7</b>개</span></div><div class="ten-frame" id="left-frame" aria-label="블록을 놓을 열 칸 다리"></div><p id="left-caption">반짝이는 곳을 채워 줘!</p></section>
+        <div class="transfer-mark" aria-hidden="true">←</div>
+        <section class="block-group source-group"><div class="origin-label origin-b-label" id="origin-b-label">처음 파란 8개</div><div class="group-title"><h3 id="right-name">🧊 파란 블록</h3><span><b id="right-count">8</b>개</span></div><div class="ten-frame cart-frame" id="right-frame" aria-label="옮길 파란 블록"></div><p id="right-caption">👆 파란 블록을 눌러!</p></section>
+        <span id="demo-hand" aria-hidden="true" hidden>👆</span>
+      </div>
+      <div id="move-story" class="move-story" role="status" aria-live="polite"></div>
+      <div id="split-story" class="split-story" hidden><span id="split-original"></span><span> = </span><b id="split-moved"></b><span> + </span><b id="split-left"></b></div>
+      <div id="completion-note" class="completion-note" hidden>✨ 10개가 모였어!</div>
+      <div class="block-tools"><button id="hint" class="secondary">👆 어떻게 해?</button><button id="undo" class="secondary" disabled>↶ 한 개 돌려놓기</button></div>
+    </section>
+    <section id="answer-panel" class="answer-panel" aria-labelledby="answer-label" hidden>
+      <label id="answer-label" for="answer-input">모두 몇 개야?</label>
+      <p class="answer-help">아래 숫자를 눌러 써 봐!</p>
+      <div class="answer-entry"><input id="answer-input" type="text" inputmode="none" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-describedby="answer-feedback" placeholder="?" aria-label="모두 몇 개인지 숫자 입력"><span>개</span></div>
+      <div id="number-pad" class="number-pad" aria-label="숫자 버튼">
+        <button type="button" data-digit="1">1</button><button type="button" data-digit="2">2</button><button type="button" data-digit="3">3</button><button type="button" data-digit="4">4</button><button type="button" data-digit="5">5</button><button type="button" data-digit="6">6</button><button type="button" data-digit="7">7</button><button type="button" data-digit="8">8</button><button type="button" data-digit="9">9</button><button type="button" data-digit="0">0</button>
+      </div>
+      <div class="answer-actions"><button id="erase-answer" class="secondary" aria-label="숫자 한 자리 지우기">⌫ 지우기</button><button id="finish" class="primary" disabled>확인! ✓</button></div>
+      <p id="answer-feedback" class="answer-feedback" role="status" aria-live="polite">천천히 세어도 괜찮아.</p>
+    </section>
+  </div>
+</dialog>
+<dialog id="reward" tabindex="-1" class="reward-dialog badge-reward" aria-labelledby="reward-title">
+  <div id="reward-confetti" class="reward-confetti" aria-hidden="true"></div>
+  <div class="reward-content"><span id="reward-kicker" class="reward-kicker">새 배지를 받았어!</span>
+    <div class="medal"><div class="medal-face"><span id="reward-icon">🦊</span><small id="reward-badge-name">숲 친구 배지</small></div><i></i><i></i></div>
+    <h2 id="reward-title">선율아, 해냈어!</h2><p id="reward-text"></p>
+    <div id="reward-equation" class="reward-equation"></div><p id="reward-math-story" class="reward-math-story"></p>
+    <div class="reward-totals"><span>이번에 <b>배지 +1</b></span><span>모은 배지 <b id="reward-total">1개</b></span></div>
+    <div id="reward-milestone" class="reward-milestone"></div>
+    <button class="primary" id="continue">계속 모험하기 →</button>
+    <div class="reward-links"><button class="secondary" id="reward-album">🏅 내 배지 보기</button><button class="secondary" id="reward-world">🌴 섬에서 놀기</button></div>
+    <button class="text-button" id="replay">한 번 더 풀기</button>
+  </div>
+</dialog>
+<dialog id="album" class="album-dialog" aria-labelledby="album-title">
+ <div class="puzzle-header"><div><span class="eyebrow">선율이의 반짝반짝 보물함</span><h2 id="album-title">나의 배지 앨범 🏅</h2></div><button class="icon-button" id="close-album" aria-label="배지 앨범 닫기">×</button></div>
+ <div class="album-summary"><div><strong id="album-total">0</strong><span>받은 배지</span></div><div><strong id="album-unique">0 / 45</strong><span>서로 다른 문제</span></div><div><strong id="album-treasures">0 / 4</strong><span>찾은 섬 보물</span></div></div>
+ <p class="album-caption">한 문제를 풀 때마다 배지 하나! 다시 풀면 배지가 하나 더 쌓여.</p>
+ <div id="milestone-shelf" class="milestone-shelf"></div><div id="badge-grid" class="badge-grid"></div>
+ <button id="album-play" class="primary">새 배지 받으러 가기 →</button>
+</dialog>
+<dialog id="friend-dialog" class="friend-dialog" aria-labelledby="friend-title">
+ <button id="close-friend" class="icon-button dialog-close" aria-label="친구 창 닫기">×</button>
+ <button id="friend-avatar" class="friend-avatar" aria-label="친구 쓰다듬기">🦊</button><h2 id="friend-title">여우 루루</h2>
+ <div id="friend-hearts" class="friend-hearts" aria-label="친구와 친해진 정도"></div>
+ <p id="friend-speech" class="friend-speech" role="status" aria-live="polite"></p>
+ <div class="friend-actions"><button id="pet-friend" class="secondary">🖐 쓰다듬기</button><button id="dance-friend" class="secondary">🎵 같이 춤추기</button></div>
+ <div id="friend-supplies" class="friend-supplies"></div>
+ <button id="friend-play" class="primary">같이 놀기 →</button>
+ <button id="friend-visit" class="text-button">친구에게 걸어가기</button>
+</dialog>
+<dialog id="discovery" class="discovery-dialog" aria-labelledby="discovery-title"><div class="discovery-icon">🎁</div><h2 id="discovery-title">섬 보물을 찾았어!</h2><p id="discovery-text"></p><button id="close-discovery" class="primary">더 찾아볼래! →</button></dialog>
+<dialog id="sandbox" class="puzzle-dialog"><div class="puzzle-header"><div><span class="eyebrow">MY LITTLE BLOCK GARDEN</span><h2>선율이의 블록 놀이터</h2></div><button class="icon-button" id="close-sandbox" aria-label="놀이터 닫기">×</button></div><p class="sandbox-intro">빈 땅을 누르면 블록이 생겨. 블록을 누르면 다시 돌아와!</p><div class="sandbox-stats"><span id="sandbox-count">놓은 블록 0개</span><button class="secondary" id="clear-garden">블록 모두 돌려놓기</button></div><div id="garden" class="garden" aria-label="자유 블록 만들기"></div><div class="garden-palette"><button class="color-choice selected" data-color="0" aria-label="주황 블록" aria-pressed="true"></button><button class="color-choice" data-color="1" aria-label="파랑 블록" aria-pressed="false"></button><button class="color-choice" data-color="2" aria-label="노랑 블록" aria-pressed="false"></button><button class="color-choice" data-color="3" aria-label="초록 블록" aria-pressed="false"></button></div><p class="puzzle-tip">열 개씩 모이면 아래에 묶음으로 보여 줄게.</p><div id="garden-bundles" class="garden-bundles">어떤 모양을 만들어 볼까?</div></dialog>
+<dialog id="rescue-dialog" class="action-dialog rescue-theme" aria-labelledby="rescue-title">
+  <div class="action-header">
+    <span class="action-icon">🛟</span>
+    <div>
+      <span class="action-kicker">첨벙! 강에 빠졌어!</span>
+      <h2 id="rescue-title">10개 튜브 징검다리 만들기</h2>
+    </div>
+    <button id="close-rescue" class="icon-button" aria-label="닫기">×</button>
+  </div>
+  <p id="rescue-desc" class="action-desc">강에서 나오려면 10개의 튜브가 필요해!<br>빈칸을 채워 10을 만들어 줘.</p>
+  <div class="ten-frame-mini" id="rescue-ten-frame" aria-label="튜브 열 칸 틀"></div>
+  <div class="action-equation" id="rescue-equation"><span id="rescue-a">6</span> + <b>?</b> = 10</div>
+  <div class="action-choices" id="rescue-choices"></div>
+  <p id="rescue-feedback" class="action-feedback" role="status" aria-live="polite"></p>
+</dialog>
+<dialog id="zombie-dialog" class="action-dialog zombie-theme" aria-labelledby="zombie-title">
+  <div class="action-header">
+    <span class="action-icon" id="zombie-icon">🧟</span>
+    <div>
+      <span class="action-kicker">으어어~ 배고픈 블록 좀비!</span>
+      <h2 id="zombie-title">좀비에게 10개 블록 선물하기</h2>
+    </div>
+    <button id="close-zombie" class="icon-button" aria-label="닫기">×</button>
+  </div>
+  <p id="zombie-desc" class="action-desc">좀비가 10칸 블록을 완성하고 싶어 해!<br>마법 햇빛 블록으로 정화해 주자!</p>
+  <div class="ten-frame-mini" id="zombie-ten-frame" aria-label="좀비 블록 열 칸 틀"></div>
+  <div class="action-equation" id="zombie-equation"><span id="zombie-a">7</span> + <b>?</b> = 10</div>
+  <div class="action-choices" id="zombie-choices"></div>
+  <p id="zombie-feedback" class="action-feedback" role="status" aria-live="polite"></p>
+</dialog>
+<dialog id="bomb-dialog" class="action-dialog bomb-theme" aria-labelledby="bomb-title">
+  <div class="action-header">
+    <span class="action-icon" id="bomb-icon">💣</span>
+    <div>
+      <span class="action-kicker">째깍째깍! 시한폭탄 발견!</span>
+      <h2 id="bomb-title">10 카운트다운 폭탄 해체</h2>
+    </div>
+    <button id="close-bomb" class="icon-button" aria-label="닫기">×</button>
+  </div>
+  <div class="bomb-timer-bar"><div id="bomb-timer-progress"></div></div>
+  <p id="bomb-desc" class="action-desc">폭탄 도화선이 타고 있어!<br>10을 만드는 짝꿍 암호를 눌러 해체해!</p>
+  <div class="ten-frame-mini" id="bomb-ten-frame" aria-label="폭탄 암호 열 칸 틀"></div>
+  <div class="action-equation" id="bomb-equation"><span id="bomb-a">4</span> + <b>?</b> = 10</div>
+  <div class="action-choices" id="bomb-choices"></div>
+  <p id="bomb-feedback" class="action-feedback" role="status" aria-live="polite"></p>
+</dialog>
+<script src="game.js?v=6"></script>
+</body></html>

@@ -1,0 +1,25 @@
+const {chromium}=require('playwright');const assert=require('node:assert/strict');const path=require('node:path');
+(async()=>{
+ const b=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})});const p=await b.newPage({viewport:{width:1280,height:900}});const errors=[];p.on('pageerror',e=>errors.push(e.message));
+ await p.clock.install({time:new Date('2026-09-28T12:00:00Z')});await p.addInitScript(()=>localStorage.setItem('seonyul-sunshine-progress-v1',JSON.stringify({counts:{zombie:2}})));
+ await p.goto('http://localhost:4173/platformer/');await p.clock.pauseAt(new Date('2026-09-28T12:00:10Z'));await p.locator('#start').click();const snap=()=>p.evaluate(()=>sunshine.snapshot());
+ async function meet(ms){await p.keyboard.down('ArrowRight');await p.clock.runFor(ms);await p.keyboard.up('ArrowRight');assert.equal((await snap()).mode,'quiz');}
+ const sum=async()=>Number(await p.locator('#a').textContent())+Number(await p.locator('#b').textContent());
+ await meet(2600);const before=await snap();assert.equal(before.battle.outcome,'pending');assert.ok(before.battle.remainingMs<=15000&&before.battle.remainingMs>14000);
+ const correct=await sum();await p.keyboard.type('99');await p.locator('#submit').click();assert.equal((await snap()).progress.total,2);
+ await p.clock.runFor(Math.floor((await snap()).battle.remainingMs-4900));assert.ok((await p.locator('#battle-timer').getAttribute('class')).includes('urgent'));
+ assert.equal((await snap()).battle.outcome,'pending');await p.clock.runFor(Math.ceil((await snap()).battle.remainingMs));
+ const lost=await snap();assert.equal(lost.battle.outcome,'lost');assert.equal(lost.progress.total,2);assert.equal(lost.progress.badgeCount,1);assert.equal(lost.defeated,0);assert.equal(lost.monsters[0].defeated,false);assert.equal(lost.score,before.score);assert.match(await p.locator('#quiz-title').textContent(),/승리/);assert.equal(await p.locator('#submit').isVisible(),false);assert.equal(await p.locator('#badge-reward').isVisible(),false);
+ await p.keyboard.type(String(correct));await p.locator('#submit').evaluate(e=>e.click());assert.equal((await snap()).progress.total,2,'Late answer must not award a kill');await p.screenshot({path:path.join(__dirname,'../test-artifacts/platformer-timeout.png')});
+ await p.locator('#continue').click();await meet(800);const retry=await snap();assert.equal(retry.battle.outcome,'pending');assert.ok(retry.battle.remainingMs>14500);
+ const winAnswer=await sum();await p.keyboard.type(String(winAnswer));await p.clock.runFor(Math.floor((await snap()).battle.remainingMs)-1);assert.equal((await snap()).battle.outcome,'pending');
+ await p.locator('#submit').evaluate(e=>{e.click();e.click();});assert.equal((await snap()).battle.outcome,'won');assert.equal((await snap()).progress.total,3);assert.equal((await snap()).progress.badgeCount,2);assert.equal((await snap()).defeated,1);assert.equal(await p.locator('#battle-seconds').textContent(),'승리!');
+ await p.clock.runFor(16000);assert.equal((await snap()).battle.outcome,'won');assert.equal((await snap()).progress.total,3);await p.screenshot({path:path.join(__dirname,'../test-artifacts/platformer-timed-win.png')});
+ // Start another encounter, then simulate a throttled tab: deadline is checked on submit even with no timer callback.
+ await p.locator('#continue').click();await p.locator('#restart').click();await meet(2600);const finalAnswer=await sum();await p.keyboard.type(String(finalAnswer));
+ await p.evaluate(()=>{const original=performance.now.bind(performance);performance.now=()=>original()+16000;document.getElementById('submit').click();performance.now=original;});assert.equal((await snap()).battle.outcome,'lost');assert.equal((await snap()).progress.total,3);
+ await p.locator('#continue').click();await meet(800);await p.locator('#retreat').click();await p.locator('#pause').click();await p.clock.runFor(16000);assert.equal((await snap()).mode,'pause');assert.equal((await snap()).battle.outcome,'idle');assert.equal((await snap()).progress.total,3);
+ // The next battle has a fresh countdown and fits mobile/fullscreen layouts.
+ await p.locator('#resume').click();await meet(800);await p.setViewportSize({width:390,height:844});await p.screenshot({path:path.join(__dirname,'../test-artifacts/platformer-mobile-timer.png')});const timer=await p.locator('#battle-timer').boundingBox();assert.ok(timer.x>=0&&timer.x+timer.width<=390);const submit=await p.locator('#submit').boundingBox();assert.ok(submit.y+submit.height<=844);
+ await p.setViewportSize({width:844,height:390});const landscape=await p.locator('#battle-timer').boundingBox();assert.ok(landscape.y>=0&&landscape.y+landscape.height<=390);assert.deepEqual(errors,[]);await b.close();console.log('PASS: 15-second timeout, urgency, no reward on loss/late answer, retry reset, last-millisecond win, exact-once badges, stopped timers, throttled submission, retreat cleanup and mobile timer.');
+})().catch(e=>{console.error(e);process.exit(1);});
