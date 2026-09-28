@@ -8,7 +8,8 @@
     "test:platformer": "node tests/platformer.cjs && node tests/platformer-ipad-touch.cjs",
     "test:platformer-blocks": "node tests/platformer-blocks.cjs",
     "test:platformer-rewards": "node tests/platformer-progress.cjs && node tests/platformer-rewards.cjs",
-    "test:platformer-timer": "node tests/platformer-timer.cjs"
+    "test:platformer-timer": "node tests/platformer-timer.cjs",
+    "test:platformer-expansion": "node tests/platformer-expansion-unit.cjs && node tests/platformer-expansion.cjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"
