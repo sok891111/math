@@ -108,6 +108,8 @@ export default function UserBadgesPage({ user, initialBadges }) {
 
   const runnerCount = BADGE_CATALOG.filter(b => b.game === 'runner' && earnedSet.has(b.id)).length;
   const islandCount = BADGE_CATALOG.filter(b => b.game === 'island' && earnedSet.has(b.id)).length;
+  const runnerTotal = BADGE_CATALOG.filter(b => b.game === 'runner').length;
+  const islandTotal = BADGE_CATALOG.filter(b => b.game === 'island').length;
 
   const filteredBadges = BADGE_CATALOG.filter(b => {
     const isEarned = earnedSet.has(b.id);
@@ -201,7 +203,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
               <span className="stat-icon">🏃</span>
               <div className="stat-info">
                 <span className="stat-label">크래프트 Runner</span>
-                <strong className="stat-val">{runnerCount} <small>/ 143</small></strong>
+                <strong className="stat-val">{runnerCount} <small>/ {runnerTotal}</small></strong>
               </div>
             </div>
 
@@ -209,7 +211,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
               <span className="stat-icon">🏝️</span>
               <div className="stat-info">
                 <span className="stat-label">완성! block island</span>
-                <strong className="stat-val">{islandCount} <small>/ 56</small></strong>
+                <strong className="stat-val">{islandCount} <small>/ {islandTotal}</small></strong>
               </div>
             </div>
           </section>
@@ -235,14 +237,14 @@ export default function UserBadgesPage({ user, initialBadges }) {
               className={`filter-btn ${activeFilter === 'runner' ? 'active' : ''}`}
               onClick={() => setActiveFilter('runner')}
             >
-              🏃 크래프트 Runner (143)
+              🏃 크래프트 Runner ({runnerTotal})
             </button>
             <button
               type="button"
               className={`filter-btn ${activeFilter === 'island' ? 'active' : ''}`}
               onClick={() => setActiveFilter('island')}
             >
-              🏝️ 완성! block island (56)
+              🏝️ 완성! block island ({islandTotal})
             </button>
             <button
               type="button"

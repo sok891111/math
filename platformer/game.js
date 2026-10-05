@@ -193,7 +193,22 @@ function submit(){
  const elapsedMs=battleDurationMs-(battleDeadline-performance.now());
  battleOutcome='won';consecutiveLosses=0;stopBattleTimer();$('battle-timer').classList.remove('urgent');$('battle-timer').dataset.state='won';$('battle-seconds').textContent='승리!';solved=true;cancelBlockDrag();renderBlocks();active.defeated=true;defeated++;
  const windWasUnlocked=progress.snapshot().windUnlocked;
- const earned=progress.award(active.kind,{elapsedMs,perfect:wrongAttempts===0,tenFrame:!isMultiply()&&(active.q[0]-movedOrange+movedBlocks===10||active.q[1]+movedOrange-movedBlocks===10),mapId:currentMap.id});
+ const isHard=isHardAddition();
+ const sumVal=isMultiply()?0:(active.q[0]+active.q[1]);
+ const isTens=!isMultiply()&&(active.q[0]%10===0&&active.q[1]%10===0);
+ const isCarry=!isMultiply()&&((active.q[0]%10)+(active.q[1]%10)>=10);
+ const earned=progress.award(active.kind,{
+  elapsedMs,
+  perfect:wrongAttempts===0,
+  tenFrame:!isMultiply()&&(active.q[0]-movedOrange+movedBlocks===10||active.q[1]+movedOrange-movedBlocks===10),
+  mapId:currentMap.id,
+  hardAddition:isHard,
+  sum:sumVal,
+  bigTens:isTens,
+  bigCarry:isCarry,
+  bigFast:isHard&&elapsedMs<=10000,
+  q:active.q
+ });
  if(!windWasUnlocked&&progress.snapshot().windUnlocked)activateWindCourse();
  makeDrop(active,earned,elapsedMs);showNewBadges(earned);score+=100;
  checkpoint=safePosition(active.x+65,player.w).x;
@@ -424,6 +439,10 @@ function submitExamAnswer(){
  if(!examAnswer){$('exam-feedback').textContent='먼저 숫자로 답을 써 줘.';return;}
  const index=state.exam.answers.length,q=state.exam.questions[index],correct=Number(examAnswer)===SunshineCampaign.solution(q);
  if(!campaign.submitTest(Number(examAnswer))){updateLevelTest();return;}
+ if(correct&&q.operator==='+'&&(q.a>=10||q.b>=10||q.a+q.b>=20)){
+  const earnedBadges=progress.recordExamMath?progress.recordExamMath(q):[];
+  if(earnedBadges&&earnedBadges.length)showNewBadges(earnedBadges);
+ }
  examReviewIndex=index;renderExamQuestion();
  if(campaign.snapshot().test.finished)return;
  $('exam-feedback').textContent=correct?`${q.a} ${q.operator} ${q.b} = ${SunshineCampaign.solution(q)} · 맞혔어! 다음 문제도 차근차근.`:`${q.a} ${q.operator} ${q.b} = ${SunshineCampaign.solution(q)} · 이 문제는 결과 화면에서 같이 연습하자.`;

@@ -271,6 +271,8 @@ export default function UserLobbyPage({ user, initialBadges }) {
   const earnedSet = new Set(earnedBadgeIds);
   const earnedCount = BADGE_CATALOG.filter(b => earnedSet.has(b.id)).length;
   const totalBadgeCount = BADGE_CATALOG.length;
+  const runnerBadgeTotal = BADGE_CATALOG.filter(b => b.game === 'runner').length;
+  const islandBadgeTotal = BADGE_CATALOG.filter(b => b.game === 'island').length;
 
   const modalBadges = BADGE_CATALOG.filter(b => {
     if (badgeFilter === 'earned') return earnedSet.has(b.id);
@@ -610,14 +612,14 @@ export default function UserLobbyPage({ user, initialBadges }) {
                   className={`tab-filter-btn ${badgeFilter === 'runner' ? 'active' : ''}`}
                   onClick={() => setBadgeFilter('runner')}
                 >
-                  🏃 크래프트 Runner (143)
+                  🏃 크래프트 Runner ({runnerBadgeTotal})
                 </button>
                 <button
                   type="button"
                   className={`tab-filter-btn ${badgeFilter === 'island' ? 'active' : ''}`}
                   onClick={() => setBadgeFilter('island')}
                 >
-                  🏝️ 완성! block island (56)
+                  🏝️ 완성! block island ({islandBadgeTotal})
                 </button>
                 <button
                   type="button"
