@@ -4,6 +4,9 @@ import { getUser } from '../../lib/stateManager';
 import { personalizeHtml } from '../../lib/koreanHelper';
 
 export default function UserPlatformerGamePage() {
+  if (typeof window !== 'undefined') {
+    window.location.reload();
+  }
   return null;
 }
 

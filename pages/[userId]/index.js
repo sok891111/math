@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import Link from 'next/link';
 import { getUser } from '../../lib/stateManager';
 import { hasFinalConsonant } from '../../lib/koreanHelper';
 
@@ -301,7 +300,11 @@ export default function UserLobbyPage({ user }) {
         {/* 게임 선택 그리드 */}
         <main className="games-grid">
           {/* 게임 1: 햇살 플랫포머 */}
-          <article className="dot-card sunshine">
+          <article
+            className="dot-card sunshine"
+            onClick={() => { window.location.href = `/${user.id}/platformer`; }}
+            style={{ cursor: 'pointer' }}
+          >
             <div className="card-top">
               <span className="card-tag">☀️ 점프 액션</span>
               <span style={{ fontSize: '0.8rem', color: '#facc15', fontWeight: 800 }}>Lv 1~3 캠페인</span>
@@ -333,14 +336,18 @@ export default function UserLobbyPage({ user }) {
               </div>
             </div>
 
-            <Link href={`/${user.id}/platformer`} className="btn-entry btn-sunshine">
+            <a href={`/${user.id}/platformer`} className="btn-entry btn-sunshine">
               <span>햇살 모험 시작하기</span>
               <span>→</span>
-            </Link>
+            </a>
           </article>
 
           {/* 게임 2: 열칸 블록섬 */}
-          <article className="dot-card island">
+          <article
+            className="dot-card island"
+            onClick={() => { window.location.href = `/${user.id}/island`; }}
+            style={{ cursor: 'pointer' }}
+          >
             <div className="card-top">
               <span className="card-tag">🏝️ 블록 다리 건축</span>
               <span style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>10 만들기 퍼즐</span>
@@ -372,10 +379,10 @@ export default function UserLobbyPage({ user }) {
               </div>
             </div>
 
-            <Link href={`/${user.id}/island`} className="btn-entry btn-island">
+            <a href={`/${user.id}/island`} className="btn-entry btn-island">
               <span>블록섬 탐험하기</span>
               <span>→</span>
-            </Link>
+            </a>
           </article>
         </main>
 
