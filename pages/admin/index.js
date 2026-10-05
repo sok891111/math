@@ -524,7 +524,6 @@ export default function AdminPage() {
             <form className="login-form" onSubmit={handleLogin}>
               <input
                 type="password"
-                placeholder="관리자 비밀번호 (기본: admin)"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 autoFocus
@@ -537,9 +536,6 @@ export default function AdminPage() {
               >
                 {authLoading ? '확인 중...' : '🔓 로그인'}
               </button>
-              <div style={{ fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center', marginTop: '4px', lineHeight: '1.5' }}>
-                💡 기본 비밀번호: <code style={{ color: '#4ade80', background: 'rgba(74,222,128,0.1)', padding: '2px 6px', borderRadius: '4px' }}>admin</code>
-              </div>
             </form>
           </div>
         </div>

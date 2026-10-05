@@ -18,6 +18,6 @@ export default function handler(req, res) {
   }
 
   return res.status(401).json({
-    error: '비밀번호가 일치하지 않습니다. (기본 비밀번호: admin)'
+    error: '비밀번호가 일치하지 않습니다.'
   });
 }
