@@ -12,13 +12,22 @@ export default function UserBadgesPage({ user, initialBadges }) {
   const possessive = hasBatchim ? `${childName}이의` : `${childName}의`;
 
   const [activeFilter, setActiveFilter] = useState('all');
+  const [showShareBox, setShowShareBox] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedBadge, setSelectedBadge] = useState(null);
-  const [badgesData, setBadgesData] = useState(initialBadges || { earnedIds: [], stats: {} });
+  const [badgesData, setBadgesData] = useState(initialBadges || { earnedIds: [] });
   const [toastMsg, setToastMsg] = useState('');
   const toastTimeoutRef = useRef(null);
 
-  // Sync client-side localStorage to state if available (child visiting their own page)
+  const [shareUrl, setShareUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShareUrl(window.location.href);
+    }
+  }, []);
+
+  // Sync client-side localStorage to state if available
   useEffect(() => {
     try {
       const runnerRaw = localStorage.getItem(`seonyul-sunshine-progress-v1_${user.id}`);
@@ -35,14 +44,18 @@ export default function UserBadgesPage({ user, initialBadges }) {
       if (islandRaw) {
         const iData = JSON.parse(islandRaw);
         if (iData && iData.completed > 0) {
-          if (iData.completed >= 1) earnedSet.add('island-fox-bridge');
-          if (iData.completed >= 2) earnedSet.add('island-bear-bridge');
-          if (iData.completed >= 3) earnedSet.add('island-rabbit-bridge');
-          if (iData.completed >= 3) earnedSet.add('island-rainbow-bridge');
+          if (iData.completed >= 1) earnedSet.add('island-bridge-0');
+          if (iData.completed >= 2) earnedSet.add('island-bridge-1');
+          if (iData.completed >= 3) earnedSet.add('island-bridge-2');
+        }
+        if (iData && Array.isArray(iData.treasures)) {
+          iData.treasures.forEach(tid => earnedSet.add(`island-treasure-${tid}`));
         }
         if (iData && iData.badges) {
+          Object.keys(iData.badges).forEach(qKey => {
+            earnedSet.add(`island-q-${qKey}`);
+          });
           const count = Object.keys(iData.badges).length;
-          if (count >= 1) earnedSet.add('island-milestone-1');
           if (count >= 5) earnedSet.add('island-milestone-5');
           if (count >= 10) earnedSet.add('island-milestone-10');
           if (count >= 20) earnedSet.add('island-milestone-20');
@@ -53,7 +66,6 @@ export default function UserBadgesPage({ user, initialBadges }) {
       const earnedArray = Array.from(earnedSet);
       if (earnedArray.length > (badgesData.earnedIds?.length || 0)) {
         setBadgesData(prev => ({ ...prev, earnedIds: earnedArray }));
-        // Sync to server silently
         fetch(`/api/user/${user.id}/badges`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -69,24 +81,24 @@ export default function UserBadgesPage({ user, initialBadges }) {
     toastTimeoutRef.current = setTimeout(() => setToastMsg(''), 3000);
   };
 
-  const handleCopyLink = async () => {
+  const handleCopyUrl = async () => {
     try {
-      const url = window.location.href;
+      const urlToCopy = shareUrl || window.location.href;
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(urlToCopy);
       } else {
         const textarea = document.createElement('textarea');
-        textarea.value = url;
+        textarea.value = urlToCopy;
         document.body.appendChild(textarea);
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
       }
       setCopied(true);
-      showToast('🎉 자랑 링크가 복사되었어요! 친구에게 공유해 보세요.');
+      showToast('🎉 나의 뱃지 링크가 클립보드에 복사되었어요!');
       setTimeout(() => setCopied(false), 2500);
     } catch (e) {
-      showToast('주소창의 링크를 복사해 친구에게 전달해 주세요!');
+      showToast('주소창의 링크를 복사해 주세요!');
     }
   };
 
@@ -94,11 +106,17 @@ export default function UserBadgesPage({ user, initialBadges }) {
   const earnedCount = BADGE_CATALOG.filter(b => earnedSet.has(b.id)).length;
   const totalCount = BADGE_CATALOG.length;
 
+  const runnerCount = BADGE_CATALOG.filter(b => b.game === 'runner' && earnedSet.has(b.id)).length;
+  const islandCount = BADGE_CATALOG.filter(b => b.game === 'island' && earnedSet.has(b.id)).length;
+
   const filteredBadges = BADGE_CATALOG.filter(b => {
     const isEarned = earnedSet.has(b.id);
     if (activeFilter === 'earned') return isEarned;
     if (activeFilter === 'runner') return b.game === 'runner';
     if (activeFilter === 'island') return b.game === 'island';
+    if (activeFilter === 'monster') return b.category === 'monster';
+    if (activeFilter === 'math') return b.category === 'math';
+    if (activeFilter === 'treasure') return b.category === 'treasure' || b.category === 'adventure' || b.category === 'bridge';
     return true;
   });
 
@@ -134,21 +152,47 @@ export default function UserBadgesPage({ user, initialBadges }) {
             <div className="header-right">
               <button
                 type="button"
-                className={`share-btn ${copied ? 'copied' : ''}`}
-                onClick={handleCopyLink}
-                title="친구에게 자랑할 링크 복사하기"
+                className="share-btn"
+                onClick={() => setShowShareBox(!showShareBox)}
+                title="나의 뱃지 링크 보기"
               >
-                <span>{copied ? '✅ 복사 완료!' : '🔗 친구에게 자랑하기'}</span>
+                <span>🔗 나의 뱃지 링크</span>
               </button>
             </div>
           </header>
+
+          {/* Dedicated Share URL Box */}
+          {showShareBox && (
+            <div className="share-url-panel">
+              <div className="share-url-top">
+                <span className="share-url-tag">🔗 나의 뱃지 링크</span>
+                <span className="share-url-hint">친구들에게 보여줄 수 있는 전용 주소입니다.</span>
+              </div>
+              <div className="share-url-row">
+                <input
+                  type="text"
+                  readOnly
+                  value={shareUrl}
+                  className="share-url-input"
+                  onClick={(e) => e.target.select()}
+                />
+                <button
+                  type="button"
+                  className={`share-url-copy-btn ${copied ? 'copied' : ''}`}
+                  onClick={handleCopyUrl}
+                >
+                  {copied ? '✅ 복사 완료!' : '📋 복사하기'}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Stats Bar */}
           <section className="stats-bar">
             <div className="stat-card total-card">
               <span className="stat-icon">🏅</span>
               <div className="stat-info">
-                <span className="stat-label">획득한 뱃지</span>
+                <span className="stat-label">총 획득한 뱃지</span>
                 <strong className="stat-val">{earnedCount} <small>/ {totalCount}</small></strong>
               </div>
             </div>
@@ -157,9 +201,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
               <span className="stat-icon">🏃</span>
               <div className="stat-info">
                 <span className="stat-label">크래프트 Runner</span>
-                <strong className="stat-val">
-                  {BADGE_CATALOG.filter(b => b.game === 'runner' && earnedSet.has(b.id)).length}개
-                </strong>
+                <strong className="stat-val">{runnerCount} <small>/ 143</small></strong>
               </div>
             </div>
 
@@ -167,21 +209,19 @@ export default function UserBadgesPage({ user, initialBadges }) {
               <span className="stat-icon">🏝️</span>
               <div className="stat-info">
                 <span className="stat-label">완성! block island</span>
-                <strong className="stat-val">
-                  {BADGE_CATALOG.filter(b => b.game === 'island' && earnedSet.has(b.id)).length}개
-                </strong>
+                <strong className="stat-val">{islandCount} <small>/ 56</small></strong>
               </div>
             </div>
           </section>
 
-          {/* Filter Navigation */}
+          {/* Clean, Non-broken Filter Navigation */}
           <nav className="filter-nav" aria-label="뱃지 필터">
             <button
               type="button"
               className={`filter-btn ${activeFilter === 'all' ? 'active' : ''}`}
               onClick={() => setActiveFilter('all')}
             >
-              전체 뱃지 ({totalCount})
+              전체 ({totalCount})
             </button>
             <button
               type="button"
@@ -195,14 +235,35 @@ export default function UserBadgesPage({ user, initialBadges }) {
               className={`filter-btn ${activeFilter === 'runner' ? 'active' : ''}`}
               onClick={() => setActiveFilter('runner')}
             >
-              🏃 크래프트 Runner
+              🏃 크래프트 Runner (143)
             </button>
             <button
               type="button"
               className={`filter-btn ${activeFilter === 'island' ? 'active' : ''}`}
               onClick={() => setActiveFilter('island')}
             >
-              🏝️ 완성! block island
+              🏝️ 완성! block island (56)
+            </button>
+            <button
+              type="button"
+              className={`filter-btn ${activeFilter === 'monster' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('monster')}
+            >
+              👾 몬스터 도감
+            </button>
+            <button
+              type="button"
+              className={`filter-btn ${activeFilter === 'math' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('math')}
+            >
+              🧮 수학 도전
+            </button>
+            <button
+              type="button"
+              className={`filter-btn ${activeFilter === 'treasure' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('treasure')}
+            >
+              💎 보물/탐험
             </button>
           </nav>
 
@@ -236,7 +297,9 @@ export default function UserBadgesPage({ user, initialBadges }) {
                     {isEarned ? (
                       <span className="status-earned">✨ 획득 완료</span>
                     ) : (
-                      <span className="status-locked">🔒 도전 중</span>
+                      <span className="status-locked">
+                        {badge.target ? `0 / ${badge.target}` : '🔒 도전 중'}
+                      </span>
                     )}
                   </div>
                 </article>
@@ -247,15 +310,22 @@ export default function UserBadgesPage({ user, initialBadges }) {
           {/* Invitation Banner */}
           <section className="invite-banner">
             <div className="invite-text">
-              <h2>친구야, 나 벌써 뱃지 {earnedCount}개 모았어! 🚀</h2>
-              <p>재미있는 수학 액션 게임과 퍼즐을 풀고 함께 도전해 봐!</p>
+              <h2>{possessive} 뱃지 보관함 (총 {earnedCount}개 획득) 🚀</h2>
+              <p>나의 뱃지 링크를 친구들에게 보내면 내가 모은 멋진 뱃지들을 구경할 수 있어요!</p>
             </div>
             <div className="invite-actions">
-              <button type="button" className="invite-copy-btn" onClick={handleCopyLink}>
-                <span>{copied ? '✅ 복사됨!' : '📋 자랑 링크 복사하기'}</span>
+              <button
+                type="button"
+                className="invite-copy-btn"
+                onClick={() => {
+                  setShowShareBox(true);
+                  handleCopyUrl();
+                }}
+              >
+                <span>{copied ? '✅ 복사됨!' : '📋 나의 뱃지 링크 복사'}</span>
               </button>
               <a href={`/${user.id}`} className="invite-play-btn">
-                <span>🎮 나도 플레이하기 ▶</span>
+                <span>🎮 게임하러 가기 ▶</span>
               </a>
             </div>
           </section>
@@ -317,7 +387,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
         html, body {
           background: #080a10;
           color: #f1f5f9;
-          font-family: 'NeoDGM', 'Press Start 2P', monospace, sans-serif;
+          font-family: 'NeoDGM', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
           min-height: 100vh;
         }
 
@@ -357,7 +427,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
           justify-content: space-between;
           border-bottom: 3px dashed #28344e;
           padding-bottom: 18px;
-          margin-bottom: 24px;
+          margin-bottom: 20px;
           gap: 12px;
           flex-wrap: wrap;
         }
@@ -370,7 +440,8 @@ export default function UserBadgesPage({ user, initialBadges }) {
           border: 2px solid #2e3d5e;
           color: #94a3b8;
           text-decoration: none;
-          font-size: 0.85rem;
+          font-size: 0.88rem;
+          font-weight: 800;
           padding: 8px 14px;
           border-radius: 8px;
           box-shadow: 0 4px 0 #000;
@@ -389,7 +460,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
         }
 
         .sub-title {
-          font-size: 0.78rem;
+          font-size: 0.8rem;
           color: #ffe600;
           letter-spacing: 2px;
           margin-bottom: 4px;
@@ -405,8 +476,8 @@ export default function UserBadgesPage({ user, initialBadges }) {
 
         .share-btn {
           font-family: inherit;
-          font-size: 0.85rem;
-          font-weight: 900;
+          font-size: 0.88rem;
+          font-weight: 800;
           background: #ff0055;
           border: 2px solid #ff4d88;
           color: #fff;
@@ -422,10 +493,81 @@ export default function UserBadgesPage({ user, initialBadges }) {
           box-shadow: 0 1px 0 #000;
         }
 
-        .share-btn.copied {
+        /* Dedicated Share URL Box */
+        .share-url-panel {
+          background: #18233a;
+          border: 2px solid #3b4d75;
+          border-radius: 12px;
+          padding: 16px 20px;
+          margin-bottom: 24px;
+          box-shadow: 0 6px 0 #000;
+          animation: popUp 0.2s ease;
+        }
+
+        .share-url-top {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 10px;
+          flex-wrap: wrap;
+        }
+
+        .share-url-tag {
+          font-size: 0.88rem;
+          font-weight: 900;
+          color: #38bdf8;
+        }
+
+        .share-url-hint {
+          font-size: 0.8rem;
+          color: #94a3b8;
+        }
+
+        .share-url-row {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+        }
+
+        .share-url-input {
+          flex: 1;
+          background: #0a0d18;
+          border: 2px solid #334466;
+          border-radius: 8px;
+          color: #ffe600;
+          font-family: monospace;
+          font-size: 0.9rem;
+          padding: 10px 14px;
+          outline: none;
+        }
+
+        .share-url-input:focus {
+          border-color: #00f0ff;
+        }
+
+        .share-url-copy-btn {
+          font-family: inherit;
+          font-size: 0.88rem;
+          font-weight: 800;
           background: #10b981;
-          border-color: #34d399;
-          box-shadow: 0 4px 0 #000, 0 0 15px rgba(16, 185, 129, 0.5);
+          border: 2px solid #34d399;
+          color: #fff;
+          padding: 10px 18px;
+          border-radius: 8px;
+          cursor: pointer;
+          white-space: nowrap;
+          box-shadow: 0 4px 0 #000;
+          transition: all 0.1s ease;
+        }
+
+        .share-url-copy-btn:active {
+          transform: translateY(2px);
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .share-url-copy-btn.copied {
+          background: #059669;
+          border-color: #10b981;
         }
 
         /* Stats Bar */
@@ -457,9 +599,10 @@ export default function UserBadgesPage({ user, initialBadges }) {
         }
 
         .stat-label {
-          font-size: 0.75rem;
+          font-size: 0.78rem;
           color: #8fa0be;
           margin-bottom: 2px;
+          font-weight: 700;
         }
 
         .stat-val {
@@ -475,35 +618,42 @@ export default function UserBadgesPage({ user, initialBadges }) {
         /* Filter Navigation */
         .filter-nav {
           display: flex;
-          gap: 10px;
+          gap: 8px;
           margin-bottom: 24px;
           flex-wrap: wrap;
+          align-items: center;
         }
 
         .filter-btn {
           font-family: inherit;
-          font-size: 0.82rem;
+          font-size: 0.85rem;
           font-weight: 800;
-          background: #131929;
-          border: 2px solid #283754;
-          color: #94a3b8;
+          background: #141b2d;
+          border: 2px solid #2a3956;
+          color: #cbd5e1;
           padding: 8px 16px;
           border-radius: 8px;
           cursor: pointer;
-          box-shadow: 0 4px 0 #000;
+          box-shadow: 0 3px 0 #000;
           transition: all 0.1s ease;
+          white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+          background: #1c2740;
+          color: #fff;
         }
 
         .filter-btn.active {
           background: #00f0ff;
           color: #000;
           border-color: #00f0ff;
-          box-shadow: 0 4px 0 #000, 0 0 12px rgba(0, 240, 255, 0.4);
+          box-shadow: 0 3px 0 #000, 0 0 12px rgba(0, 240, 255, 0.4);
         }
 
         .filter-btn:active {
           transform: translateY(2px);
-          box-shadow: 0 2px 0 #000;
+          box-shadow: 0 1px 0 #000;
         }
 
         /* Badges Grid */
@@ -542,14 +692,14 @@ export default function UserBadgesPage({ user, initialBadges }) {
 
         .badge-card.locked {
           opacity: 0.65;
-          filter: grayscale(0.5);
+          filter: grayscale(0.55);
         }
 
         .card-top-tag {
           width: 100%;
           display: flex;
           justify-content: space-between;
-          font-size: 0.68rem;
+          font-size: 0.7rem;
           margin-bottom: 12px;
         }
 
@@ -560,6 +710,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
 
         .game-tag {
           color: #64748b;
+          font-weight: 700;
         }
 
         .badge-icon-wrap {
@@ -596,6 +747,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
           color: #fff;
           font-weight: 900;
           margin-bottom: 6px;
+          line-height: 1.25;
         }
 
         .badge-desc {
@@ -655,7 +807,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
         .invite-copy-btn, .invite-play-btn {
           font-family: inherit;
           font-size: 0.88rem;
-          font-weight: 900;
+          font-weight: 800;
           padding: 12px 18px;
           border-radius: 8px;
           cursor: pointer;
@@ -740,7 +892,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
         }
 
         .modal-rarity {
-          font-size: 0.8rem;
+          font-size: 0.82rem;
           font-weight: 800;
           display: block;
           margin-bottom: 8px;
@@ -809,6 +961,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
           .hall-header { justify-content: center; }
           .header-center { order: -1; width: 100%; margin-bottom: 8px; }
           .badges-grid { grid-template-columns: repeat(2, 1fr); }
+          .share-url-row { flex-direction: column; align-items: stretch; }
         }
       `}</style>
     </>

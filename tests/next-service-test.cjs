@@ -136,7 +136,7 @@ async function run() {
   const badgesRes = await request(`http://localhost:${PORT}/${createdUser.id}/badges`);
   assert.strictEqual(badgesRes.status, 200, 'User badges route should return 200');
   assert(badgesRes.body.includes('지우의 뱃지 보관함') || badgesRes.body.includes('지우'), 'Should serve personalized badge showcase page');
-  assert(badgesRes.body.includes('친구에게 자랑하기'), 'Should include share button');
+  assert(badgesRes.body.includes('나의 뱃지 링크'), 'Should include share button');
   console.log('✅ Badge Showcase page served successfully.');
 
   console.log('\n--- 5.2 Testing Badge Sync API (/api/user/:userId/badges) ---');

@@ -21,13 +21,22 @@ export default function UserLobbyPage({ user, initialBadges }) {
   const touchStartXRef = useRef(null);
   const touchStartYRef = useRef(null);
 
-  // Badge Modal & Share state
+  // Badge Modal & Share URL state
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+  const [showShareBox, setShowShareBox] = useState(false);
   const [badgeFilter, setBadgeFilter] = useState('all');
   const [earnedBadgeIds, setEarnedBadgeIds] = useState(initialBadges?.earnedIds || []);
   const [copied, setCopied] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const toastTimeoutRef = useRef(null);
+
+  const [shareUrl, setShareUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShareUrl(`${window.location.origin}/${user.id}/badges`);
+    }
+  }, [user.id]);
 
   const games = [
     {
@@ -81,13 +90,14 @@ export default function UserLobbyPage({ user, initialBadges }) {
     };
   }, []);
 
-  // Sync earned badges from localStorage
+  // Sync earned badges from localStorage across both games
   useEffect(() => {
     try {
       const runnerRaw = localStorage.getItem(`seonyul-sunshine-progress-v1_${user.id}`);
       const islandRaw = localStorage.getItem(`seonyul-block-island-v1_${user.id}`);
       const earnedSet = new Set(earnedBadgeIds);
 
+      // 1. Craft Runner earned badges
       if (runnerRaw) {
         const rData = JSON.parse(runnerRaw);
         if (rData && rData.earned) {
@@ -95,17 +105,22 @@ export default function UserLobbyPage({ user, initialBadges }) {
         }
       }
 
+      // 2. Block Island earned badges
       if (islandRaw) {
         const iData = JSON.parse(islandRaw);
         if (iData && iData.completed > 0) {
-          if (iData.completed >= 1) earnedSet.add('island-fox-bridge');
-          if (iData.completed >= 2) earnedSet.add('island-bear-bridge');
-          if (iData.completed >= 3) earnedSet.add('island-rabbit-bridge');
-          if (iData.completed >= 3) earnedSet.add('island-rainbow-bridge');
+          if (iData.completed >= 1) earnedSet.add('island-bridge-0');
+          if (iData.completed >= 2) earnedSet.add('island-bridge-1');
+          if (iData.completed >= 3) earnedSet.add('island-bridge-2');
+        }
+        if (iData && Array.isArray(iData.treasures)) {
+          iData.treasures.forEach(tid => earnedSet.add(`island-treasure-${tid}`));
         }
         if (iData && iData.badges) {
+          Object.keys(iData.badges).forEach(qKey => {
+            earnedSet.add(`island-q-${qKey}`);
+          });
           const count = Object.keys(iData.badges).length;
-          if (count >= 1) earnedSet.add('island-milestone-1');
           if (count >= 5) earnedSet.add('island-milestone-5');
           if (count >= 10) earnedSet.add('island-milestone-10');
           if (count >= 20) earnedSet.add('island-milestone-20');
@@ -131,24 +146,24 @@ export default function UserLobbyPage({ user, initialBadges }) {
     toastTimeoutRef.current = setTimeout(() => setToastMsg(''), 3000);
   };
 
-  const handleCopyShareUrl = async () => {
+  const handleCopyUrl = async () => {
     try {
-      const shareUrl = `${window.location.origin}/${user.id}/badges`;
+      const urlToCopy = shareUrl || `${window.location.origin}/${user.id}/badges`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(urlToCopy);
       } else {
         const ta = document.createElement('textarea');
-        ta.value = shareUrl;
+        ta.value = urlToCopy;
         document.body.appendChild(ta);
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
       }
       setCopied(true);
-      showToast('🎉 자랑 링크가 복사되었어요! 친구에게 공유해 보세요.');
+      showToast('🎉 나의 뱃지 링크가 클립보드에 복사되었어요!');
       setTimeout(() => setCopied(false), 2500);
     } catch (e) {
-      showToast('주소창에서 뱃지 링크를 복사해 주세요!');
+      showToast('주소창에서 링크를 복사해 주세요!');
     }
   };
 
@@ -261,6 +276,9 @@ export default function UserLobbyPage({ user, initialBadges }) {
     if (badgeFilter === 'earned') return earnedSet.has(b.id);
     if (badgeFilter === 'runner') return b.game === 'runner';
     if (badgeFilter === 'island') return b.game === 'island';
+    if (badgeFilter === 'monster') return b.category === 'monster';
+    if (badgeFilter === 'math') return b.category === 'math';
+    if (badgeFilter === 'treasure') return b.category === 'treasure' || b.category === 'adventure' || b.category === 'bridge';
     return true;
   });
 
@@ -474,7 +492,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
             </button>
           </div>
 
-          {/* Badge Launcher Button Area (Under game selection) */}
+          {/* Badge Launcher Area */}
           <section className="badge-launcher-area">
             <button
               type="button"
@@ -487,18 +505,18 @@ export default function UserLobbyPage({ user, initialBadges }) {
             >
               <span className="launcher-icon">🏅</span>
               <span className="launcher-title">지금까지 모은 뱃지 보러가기</span>
-              <span className="launcher-badge-pill">{earnedCount}개 획득!</span>
+              <span className="launcher-badge-pill">{earnedCount} / {totalBadgeCount}개 획득!</span>
               <span className="launcher-arrow">▶</span>
             </button>
           </section>
 
-          {/* Arcade Cabinet Controller Guide Footer */}
+          {/* Arcade Cabinet Footer */}
           <footer className="arcade-footer">
             <div className="key-guides">
               <span className="touch-tip">📱 화면을 좌우로 밀거나 탭하세요</span>
               <span className="guide-divider">|</span>
               <a href={`/${user.id}/badges`} className="footer-badge-link">
-                🏅 뱃지 명예의 전당 보러가기 ↗
+                🏅 나의 뱃지 링크 바로가기 ↗
               </a>
             </div>
             <div className="insert-coin">● INSERT COIN TO PLAY ●</div>
@@ -509,13 +527,15 @@ export default function UserLobbyPage({ user, initialBadges }) {
         {isBadgeModalOpen && (
           <div className="badge-modal-backdrop" onClick={() => setIsBadgeModalOpen(false)}>
             <div className="badge-modal-card" onClick={e => e.stopPropagation()}>
-              {/* Modal Header with Title & Top-Right Share Button */}
+              {/* Modal Header */}
               <div className="modal-header">
                 <div className="modal-title-group">
                   <span className="modal-header-icon">🏆</span>
                   <div>
                     <h2 className="modal-title">{childName}이의 뱃지 보관함</h2>
-                    <span className="modal-subtitle">총 {earnedCount} / {totalBadgeCount}개 획득</span>
+                    <span className="modal-subtitle">
+                      총 {totalBadgeCount}개 중 <strong>{earnedCount}개 획득</strong>
+                    </span>
                   </div>
                 </div>
 
@@ -523,11 +543,14 @@ export default function UserLobbyPage({ user, initialBadges }) {
                 <div className="modal-actions-right">
                   <button
                     type="button"
-                    className={`modal-share-btn ${copied ? 'copied' : ''}`}
-                    onClick={handleCopyShareUrl}
-                    title="친구에게 자랑할 수 있는 URL 복사"
+                    className="modal-share-btn"
+                    onClick={() => {
+                      setShowShareBox(!showShareBox);
+                      playSound('select');
+                    }}
+                    title="나의 뱃지 링크 보기"
                   >
-                    <span>{copied ? '✅ 복사됨!' : '🔗 공유하기'}</span>
+                    <span>🔗 나의 뱃지 링크</span>
                   </button>
                   <button
                     type="button"
@@ -540,35 +563,75 @@ export default function UserLobbyPage({ user, initialBadges }) {
                 </div>
               </div>
 
-              {/* Modal Filters */}
-              <div className="modal-filters">
+              {/* Dedicated Share URL Display Panel */}
+              {showShareBox && (
+                <div className="share-url-panel">
+                  <div className="share-url-top">
+                    <span className="share-url-tag">🔗 나의 뱃지 링크</span>
+                    <span className="share-url-hint">친구들에게 보여줄 전용 링크입니다.</span>
+                  </div>
+                  <div className="share-url-input-row">
+                    <input
+                      type="text"
+                      readOnly
+                      value={shareUrl}
+                      className="share-url-field"
+                      onClick={(e) => e.target.select()}
+                    />
+                    <button
+                      type="button"
+                      className={`share-url-btn ${copied ? 'copied' : ''}`}
+                      onClick={handleCopyUrl}
+                    >
+                      {copied ? '✅ 복사됨!' : '📋 복사하기'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Clean, Non-broken Filter Tabs */}
+              <div className="modal-filters-bar">
                 <button
                   type="button"
-                  className={`m-filter ${badgeFilter === 'all' ? 'active' : ''}`}
+                  className={`tab-filter-btn ${badgeFilter === 'all' ? 'active' : ''}`}
                   onClick={() => setBadgeFilter('all')}
                 >
                   전체 ({totalBadgeCount})
                 </button>
                 <button
                   type="button"
-                  className={`m-filter ${badgeFilter === 'earned' ? 'active' : ''}`}
+                  className={`tab-filter-btn ${badgeFilter === 'earned' ? 'active' : ''}`}
                   onClick={() => setBadgeFilter('earned')}
                 >
                   ✨ 획득 ({earnedCount})
                 </button>
                 <button
                   type="button"
-                  className={`m-filter ${badgeFilter === 'runner' ? 'active' : ''}`}
+                  className={`tab-filter-btn ${badgeFilter === 'runner' ? 'active' : ''}`}
                   onClick={() => setBadgeFilter('runner')}
                 >
-                  🏃 Runner
+                  🏃 크래프트 Runner (143)
                 </button>
                 <button
                   type="button"
-                  className={`m-filter ${badgeFilter === 'island' ? 'active' : ''}`}
+                  className={`tab-filter-btn ${badgeFilter === 'island' ? 'active' : ''}`}
                   onClick={() => setBadgeFilter('island')}
                 >
-                  🏝️ Island
+                  🏝️ 완성! block island (56)
+                </button>
+                <button
+                  type="button"
+                  className={`tab-filter-btn ${badgeFilter === 'monster' ? 'active' : ''}`}
+                  onClick={() => setBadgeFilter('monster')}
+                >
+                  👾 몬스터 도감
+                </button>
+                <button
+                  type="button"
+                  className={`tab-filter-btn ${badgeFilter === 'math' ? 'active' : ''}`}
+                  onClick={() => setBadgeFilter('math')}
+                >
+                  🧮 수학 도전
                 </button>
               </div>
 
@@ -581,16 +644,29 @@ export default function UserLobbyPage({ user, initialBadges }) {
                       <div
                         key={badge.id}
                         className={`m-badge-card ${isEarned ? 'earned' : 'locked'}`}
-                        style={{ '--rarity': badge.rarityColor }}
+                        style={{ '--rarity-color': badge.rarityColor }}
                       >
+                        <div className="m-card-top">
+                          <span className="m-rarity-pill">{badge.rarityName}</span>
+                          <span className="m-game-pill">{badge.game === 'runner' ? 'Runner' : 'Island'}</span>
+                        </div>
+
                         <div className="m-icon-box">
                           <span className="m-icon">{badge.icon}</span>
                           {!isEarned && <span className="m-lock">🔒</span>}
                         </div>
+
                         <h4 className="m-badge-name">{badge.title}</h4>
                         <p className="m-badge-desc">{badge.desc}</p>
-                        <div className="m-badge-tag">
-                          {isEarned ? '✨ 획득!' : '🔒 도전 중'}
+
+                        <div className="m-status-row">
+                          {isEarned ? (
+                            <span className="m-earned-text">✨ 획득 완료</span>
+                          ) : (
+                            <span className="m-locked-text">
+                              {badge.target ? `0 / ${badge.target}` : '🔒 도전 중'}
+                            </span>
+                          )}
                         </div>
                       </div>
                     );
@@ -598,17 +674,20 @@ export default function UserLobbyPage({ user, initialBadges }) {
                 </div>
               </div>
 
-              {/* Modal Footer with Direct Page Link */}
+              {/* Modal Footer Bar */}
               <div className="modal-footer-bar">
                 <a href={`/${user.id}/badges`} className="modal-hall-link">
-                  <span>🌟 전체화면 명예의 전당 보러가기 ↗</span>
+                  <span>🌟 전체화면 뱃지 명예의 전당 보러가기 ↗</span>
                 </a>
                 <button
                   type="button"
                   className="modal-copy-link-btn"
-                  onClick={handleCopyShareUrl}
+                  onClick={() => {
+                    setShowShareBox(true);
+                    handleCopyUrl();
+                  }}
                 >
-                  <span>{copied ? '✅ 복사됨!' : '📋 친구에게 자랑 링크 복사'}</span>
+                  <span>{copied ? '✅ 복사 완료!' : '📋 나의 뱃지 링크 복사'}</span>
                 </button>
               </div>
             </div>
@@ -638,7 +717,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
         html, body {
           background: #08090d;
           color: #f1f5f9;
-          font-family: 'NeoDGM', 'Press Start 2P', -apple-system, BlinkMacSystemFont, monospace, sans-serif;
+          font-family: 'NeoDGM', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
           min-height: 100vh;
           overflow-x: hidden;
         }
@@ -698,8 +777,8 @@ export default function UserLobbyPage({ user, initialBadges }) {
           border-bottom: 3px dashed #2a344d;
           padding-bottom: 12px;
           margin-bottom: 20px;
-          font-size: 0.85rem;
-          letter-spacing: 1px;
+          font-size: 0.88rem;
+          letter-spacing: 0.5px;
         }
 
         .hud-badge {
@@ -714,6 +793,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
         .player-badge {
           color: #ffe600;
+          font-weight: 800;
           text-shadow: 0 0 8px rgba(255, 230, 0, 0.5);
         }
 
@@ -724,12 +804,14 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
         .credit-badge {
           color: #00f0ff;
+          font-weight: 800;
           text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
         }
 
         .hud-btn {
           font-family: inherit;
           font-size: 0.8rem;
+          font-weight: 800;
           background: #192033;
           border: 2px solid #3d4f77;
           color: #94a3b8;
@@ -753,7 +835,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
         }
 
         .marquee-sub {
-          font-size: 0.8rem;
+          font-size: 0.82rem;
           color: #00f0ff;
           letter-spacing: 2px;
           text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
@@ -858,9 +940,9 @@ export default function UserLobbyPage({ user, initialBadges }) {
         }
 
         .pod-indicator {
-          font-size: 0.78rem;
-          font-weight: bold;
-          letter-spacing: 1px;
+          font-size: 0.82rem;
+          font-weight: 800;
+          letter-spacing: 0.5px;
           color: #64748b;
           margin-bottom: 8px;
           height: 18px;
@@ -881,19 +963,18 @@ export default function UserLobbyPage({ user, initialBadges }) {
         }
 
         .pod-type {
-          font-size: 0.72rem;
+          font-size: 0.75rem;
+          font-weight: 800;
           padding: 3px 8px;
           background: #1d2538;
           border: 1.5px solid var(--border-color);
           color: var(--accent);
           border-radius: 4px;
-          letter-spacing: 0.5px;
         }
 
         .pod-meta {
-          font-size: 0.68rem;
+          font-size: 0.72rem;
           color: #94a3b8;
-          letter-spacing: 0.5px;
         }
 
         .preview-screen {
@@ -1040,7 +1121,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
           color: #fff;
           text-align: center;
           margin-bottom: 16px;
-          letter-spacing: 1px;
+          letter-spacing: 0.5px;
           text-shadow: 2px 2px 0 #000;
         }
 
@@ -1062,7 +1143,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
           color: #fff;
           font-size: 0.95rem;
           font-weight: 900;
-          letter-spacing: 1px;
+          letter-spacing: 0.5px;
           box-shadow: 0 6px 0 #000;
           transition: all 0.1s ease;
           position: relative;
@@ -1195,7 +1276,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
         .launcher-title {
           font-family: inherit;
-          font-size: 1.1rem;
+          font-size: 1.08rem;
           font-weight: 900;
           color: #fff;
           letter-spacing: 0.5px;
@@ -1230,7 +1311,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
           align-items: center;
           justify-content: center;
           gap: 10px;
-          font-size: 0.8rem;
+          font-size: 0.82rem;
           color: #94a3b8;
           margin-bottom: 8px;
           flex-wrap: wrap;
@@ -1245,9 +1326,9 @@ export default function UserLobbyPage({ user, initialBadges }) {
           color: #facc15;
           text-decoration: none;
           font-weight: 900;
-          padding: 4px 8px;
-          border-radius: 4px;
-          background: rgba(250, 204, 21, 0.1);
+          padding: 4px 10px;
+          border-radius: 6px;
+          background: rgba(250, 204, 21, 0.12);
           border: 1px solid rgba(250, 204, 21, 0.4);
         }
 
@@ -1267,7 +1348,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
           animation: blink 0.9s infinite;
         }
 
-        /* ─── Badge Modal Styles ─── */
+        /* ─── Retro Badge Collection Modal ─── */
         .badge-modal-backdrop {
           position: fixed;
           top: 0; left: 0; width: 100vw; height: 100vh;
@@ -1282,8 +1363,8 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
         .badge-modal-card {
           width: 100%;
-          max-width: 780px;
-          max-height: 88vh;
+          max-width: 860px;
+          max-height: 90vh;
           background: #0f1524;
           border: 4px solid #293856;
           border-radius: 18px;
@@ -1322,9 +1403,13 @@ export default function UserLobbyPage({ user, initialBadges }) {
         }
 
         .modal-subtitle {
-          font-size: 0.8rem;
+          font-size: 0.82rem;
+          color: #94a3b8;
+          font-weight: 700;
+        }
+
+        .modal-subtitle strong {
           color: #facc15;
-          font-weight: 800;
         }
 
         .modal-actions-right {
@@ -1336,7 +1421,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
         .modal-share-btn {
           font-family: inherit;
           font-size: 0.85rem;
-          font-weight: 900;
+          font-weight: 800;
           background: #ff0055;
           border: 2px solid #ff4d88;
           color: #fff;
@@ -1352,17 +1437,12 @@ export default function UserLobbyPage({ user, initialBadges }) {
           box-shadow: 0 2px 0 #000;
         }
 
-        .modal-share-btn.copied {
-          background: #10b981;
-          border-color: #34d399;
-          box-shadow: 0 4px 0 #000, 0 0 12px rgba(16, 185, 129, 0.5);
-        }
-
         .modal-close-x {
           background: #1c263c;
           border: 2px solid #3d4f75;
           color: #fff;
           font-size: 1.1rem;
+          font-weight: bold;
           width: 38px;
           height: 38px;
           border-radius: 8px;
@@ -1378,35 +1458,124 @@ export default function UserLobbyPage({ user, initialBadges }) {
           box-shadow: 0 1px 0 #000;
         }
 
-        .modal-filters {
+        /* Dedicated Share URL Display Panel */
+        .share-url-panel {
+          background: #18233a;
+          border-bottom: 2px solid #283756;
+          padding: 14px 22px;
+          animation: popUp 0.2s ease;
+        }
+
+        .share-url-top {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 8px;
+          flex-wrap: wrap;
+        }
+
+        .share-url-tag {
+          font-size: 0.82rem;
+          font-weight: 900;
+          color: #38bdf8;
+        }
+
+        .share-url-hint {
+          font-size: 0.78rem;
+          color: #94a3b8;
+        }
+
+        .share-url-input-row {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+        }
+
+        .share-url-field {
+          flex: 1;
+          background: #0a0d18;
+          border: 2px solid #334466;
+          border-radius: 8px;
+          color: #ffe600;
+          font-family: monospace;
+          font-size: 0.88rem;
+          padding: 8px 12px;
+          outline: none;
+        }
+
+        .share-url-field:focus {
+          border-color: #00f0ff;
+        }
+
+        .share-url-btn {
+          font-family: inherit;
+          font-size: 0.85rem;
+          font-weight: 800;
+          background: #10b981;
+          border: 2px solid #34d399;
+          color: #fff;
+          padding: 8px 16px;
+          border-radius: 8px;
+          cursor: pointer;
+          white-space: nowrap;
+          box-shadow: 0 4px 0 #000;
+          transition: all 0.1s ease;
+        }
+
+        .share-url-btn:active {
+          transform: translateY(2px);
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .share-url-btn.copied {
+          background: #059669;
+          border-color: #10b981;
+        }
+
+        /* Clean, Non-broken Filter Tabs */
+        .modal-filters-bar {
           display: flex;
           gap: 8px;
           padding: 12px 20px;
           background: #111728;
           border-bottom: 2px solid #1c273e;
           overflow-x: auto;
+          scrollbar-width: thin;
         }
 
-        .m-filter {
+        .tab-filter-btn {
           font-family: inherit;
-          font-size: 0.78rem;
+          font-size: 0.82rem;
           font-weight: 800;
-          background: #192238;
-          border: 2px solid #2e3d5e;
-          color: #94a3b8;
-          padding: 6px 12px;
-          border-radius: 6px;
+          background: #182238;
+          border: 2px solid #2b3956;
+          color: #cbd5e1;
+          padding: 8px 14px;
+          border-radius: 8px;
           cursor: pointer;
           white-space: nowrap;
+          box-shadow: 0 2px 0 #000;
+          transition: all 0.1s ease;
         }
 
-        .m-filter.active {
+        .tab-filter-btn:hover {
+          background: #202d4a;
+          color: #fff;
+        }
+
+        .tab-filter-btn.active {
           background: #00f0ff;
           color: #000;
           border-color: #00f0ff;
-          box-shadow: 0 2px 0 #000;
+          box-shadow: 0 2px 0 #000, 0 0 10px rgba(0, 240, 255, 0.4);
         }
 
+        .tab-filter-btn:active {
+          transform: translateY(2px);
+          box-shadow: none;
+        }
+
+        /* Modal Badges Grid */
         .modal-badge-scroll {
           flex: 1;
           overflow-y: auto;
@@ -1416,7 +1585,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
         .modal-badges-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
           gap: 14px;
         }
 
@@ -1424,24 +1593,43 @@ export default function UserLobbyPage({ user, initialBadges }) {
           background: #121829;
           border: 3px solid #212c44;
           border-radius: 12px;
-          padding: 14px 10px;
+          padding: 12px 10px;
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
           position: relative;
           box-shadow: 0 4px 0 #000;
+          transition: all 0.15s ease;
         }
 
         .m-badge-card.earned {
-          border-color: var(--rarity);
-          box-shadow: 0 4px 0 #000, 0 0 14px var(--rarity);
+          border-color: var(--rarity-color);
+          box-shadow: 0 4px 0 #000, 0 0 14px var(--rarity-color);
           background: linear-gradient(180deg, #162035 0%, #0e1422 100%);
         }
 
         .m-badge-card.locked {
-          opacity: 0.6;
-          filter: grayscale(0.6);
+          opacity: 0.65;
+          filter: grayscale(0.55);
+        }
+
+        .m-card-top {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.68rem;
+          margin-bottom: 8px;
+        }
+
+        .m-rarity-pill {
+          color: var(--rarity-color);
+          font-weight: 800;
+        }
+
+        .m-game-pill {
+          color: #64748b;
+          font-weight: 700;
         }
 
         .m-icon-box {
@@ -1453,13 +1641,13 @@ export default function UserLobbyPage({ user, initialBadges }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           position: relative;
         }
 
         .m-badge-card.earned .m-icon-box {
-          border-color: var(--rarity);
-          box-shadow: inset 0 0 8px var(--rarity);
+          border-color: var(--rarity-color);
+          box-shadow: inset 0 0 8px var(--rarity-color);
         }
 
         .m-icon {
@@ -1478,20 +1666,29 @@ export default function UserLobbyPage({ user, initialBadges }) {
           color: #fff;
           font-weight: 900;
           margin-bottom: 4px;
+          line-height: 1.25;
         }
 
         .m-badge-desc {
-          font-size: 0.68rem;
+          font-size: 0.7rem;
           color: #8fa0be;
           line-height: 1.3;
           margin-bottom: 8px;
           flex: 1;
         }
 
-        .m-badge-tag {
-          font-size: 0.7rem;
+        .m-status-row {
+          font-size: 0.72rem;
           font-weight: 800;
-          color: var(--rarity, #64748b);
+        }
+
+        .m-earned-text {
+          color: var(--rarity-color);
+          text-shadow: 0 0 6px var(--rarity-color);
+        }
+
+        .m-locked-text {
+          color: #64748b;
         }
 
         .modal-footer-bar {
@@ -1519,7 +1716,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
         .modal-copy-link-btn {
           font-family: inherit;
           font-size: 0.85rem;
-          font-weight: 900;
+          font-weight: 800;
           background: #ff0055;
           border: 2px solid #ff4d88;
           color: #fff;
@@ -1527,6 +1724,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
           border-radius: 8px;
           cursor: pointer;
           box-shadow: 0 4px 0 #000;
+          transition: all 0.1s ease;
         }
 
         .modal-copy-link-btn:active {
@@ -1633,6 +1831,10 @@ export default function UserLobbyPage({ user, initialBadges }) {
           }
           .modal-badges-grid {
             grid-template-columns: repeat(2, 1fr);
+          }
+          .share-url-input-row {
+            flex-direction: column;
+            align-items: stretch;
           }
         }
       `}</style>
