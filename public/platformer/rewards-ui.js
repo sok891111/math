@@ -1,0 +1,38 @@
+'use strict';
+window.createRewardUI=function(progress){
+ const $=id=>document.getElementById(id),data=SunshineProgress;
+ const categories={all:'전체',monster:'몬스터',math:'수학 도전',treasure:'보물',adventure:'탐험'};
+ let category='all',ownership='all',detailId='',revealBadges=[],revealIndex=-1,revealDone=null,equippedSymbol='';
+ function node(tag,className,copy){const el=document.createElement(tag);if(className)el.className=className;if(copy!==undefined)el.textContent=copy;return el;}
+ function color(el,b){el.style.setProperty('--badge-color',data.rarities[b.rarity].color);}
+ function closestGoal(){return progress.collection().filter(b=>!b.earned).sort((a,b)=>b.current/b.target-a.current/a.target||a.target-a.current-(b.target-b.current))[0];}
+ function dashboard(){const s=progress.snapshot(),b=closestGoal();$('collection-total').textContent=s.badgeCount+' / '+s.badgeTotal;$('gem-total').textContent=s.stats.gems;$('next-goal').textContent=b?b.icon+' '+b.title+' · '+b.current+' / '+b.target:'모든 배지를 모았어!';$('open-badges').classList.toggle('has-new',s.newCount>0);const equipped=data.badges.find(b=>b.id===s.equipped);equippedSymbol=equipped?.icon||'';$('equipped-badge').textContent=equipped?equipped.icon+' '+equipped.title:'나만의 대표 배지를 골라 봐';}
+ function renderAlbum(){
+  const s=progress.snapshot(),all=progress.collection();$('album-summary').textContent='몬스터 '+s.total+'마리 · 배지 '+s.badgeCount+' / '+s.badgeTotal+'개';$('album-percent').textContent=Math.round(s.badgeCount/s.badgeTotal*100)+'%';$('album-progress').value=s.badgeCount;$('album-progress').max=s.badgeTotal;$('album-wallet').textContent='💎 보석 '+s.stats.gems+'개 · 🎁 상자 '+s.stats.chests+'개';
+  const filters=$('badge-filters');filters.replaceChildren();for(const [id,label] of Object.entries(categories)){const button=node('button',category===id?'selected':'',label);button.dataset.category=id;button.setAttribute('aria-pressed',String(category===id));button.onclick=()=>{category=id;renderAlbum();};filters.append(button);}
+  const grid=$('badge-grid');grid.replaceChildren();const visible=all.filter(b=>(category==='all'||b.category===category)&&(ownership==='all'||b.earned===(ownership==='earned')));visible.sort((a,b)=>Number(b.isNew)-Number(a.isNew)||Number(b.earned)-Number(a.earned));
+  for(const b of visible){const card=node('button','collectible-card '+(b.earned?'earned':'locked'));card.dataset.badge=b.id;card.setAttribute('aria-label',b.title+', '+(b.earned?'획득':'도전 중')+', '+b.current+' / '+b.target);color(card,b);card.append(node('span','badge-rarity',data.rarities[b.rarity].name+(b.isNew?' · NEW':'')),node('span','badge-art',b.icon),node('b','',b.title),node('small','',b.description));const bar=node('progress');bar.max=b.target;bar.value=b.current;card.append(bar,node('small','badge-status',b.earned?'✓ 획득 · 눌러 크게 보기':b.current+' / '+b.target));card.onclick=()=>openDetail(b.id);grid.append(card);}
+  if(!visible.length)grid.append(node('p','album-empty','아직 여기에 모인 배지는 없어. 다음 도전을 해 보자!'));
+  const shelf=$('treasure-shelf');shelf.replaceChildren();for(const [kind,[icon,title]] of Object.entries(data.treasures)){const tile=node('div','relic '+(s.relics[kind]?'owned':''));tile.append(node('span','',icon),node('b','',title),node('small','',s.relics[kind]+'개'));shelf.append(tile);}
+  dashboard();
+ }
+ function openDetail(id){detailId=id;const b=progress.collection().find(b=>b.id===id);if(!b)return;const dialog=$('badge-detail');color(dialog,b);$('detail-rarity').textContent=data.rarities[b.rarity].name+' · '+(b.earned?'획득한 배지':'도전 중인 배지');$('detail-icon').textContent=b.icon;$('detail-title').textContent=b.title;$('detail-description').textContent=b.description;$('detail-progress').textContent=b.current+' / '+b.target+(b.earned?' · 수집 완료':' · 조금씩 가까워지고 있어!');$('detail-date').textContent=b.earnedAt==='legacy'?'이전 모험에서 모은 배지':b.earnedAt?'획득일 '+new Date(b.earnedAt).toLocaleDateString('ko-KR'):'';$('equip-badge').disabled=!b.earned;$('equip-badge').textContent=progress.snapshot().equipped===id?'지금 사용 중인 대표 배지':'이 배지를 대표로 달기';if(b.earned)progress.see(id);if(!dialog.open)dialog.showModal();renderAlbum();}
+ $('badge-ownership').onchange=e=>{ownership=e.target.value;renderAlbum();};$('close-detail').onclick=()=>$('badge-detail').close();$('equip-badge').onclick=()=>{if(progress.equip(detailId))openDetail(detailId);};
+ function finishReveal(){if(!$('loot-dialog').open)return;$('loot-dialog').close();dashboard();const done=revealDone;revealDone=null;if(done)done();}
+ function showRevealPage(){
+  const b=revealBadges[revealIndex];if(!b){finishReveal();return;}
+  progress.see(b.id);color($('loot-dialog'),b);$('loot-eyebrow').textContent='새 배지 '+(revealIndex+1)+' / '+revealBadges.length+' · '+data.rarities[b.rarity].name;$('loot-icon').textContent=b.icon;$('loot-title').textContent=b.title;$('loot-description').textContent=b.description;$('loot-values').textContent='선율이의 도감에 영원히 보관했어!';$('loot-equip').hidden=false;$('loot-equip').textContent='대표 배지로 달기';$('loot-next').textContent=revealIndex<revealBadges.length-1?'다음 배지 펼치기 →':'멋져! 모험 계속하기 →';$('loot-dialog').classList.remove('revealing');void $('loot-dialog').offsetWidth;$('loot-dialog').classList.add('revealing');dashboard();
+ }
+ function reveal(drop,badges,done){
+  $('loot-dialog').classList.toggle('dragon-reward',drop.tier==='dragon');revealBadges=badges;revealIndex=-1;revealDone=done;const relic=data.treasures[drop.kind];$('loot-dialog').style.setProperty('--badge-color',drop.tier==='prism'?'#a48be0':drop.tier==='gold'?'#e4bc5e':'#8bb4a0');$('loot-eyebrow').textContent='VICTORY TREASURE · 직접 찾은 승리의 보물';$('loot-icon').textContent=drop.tier==='prism'?'💎':'🎁';$('loot-title').textContent=(drop.tier==='prism'?'무지개':drop.tier==='gold'?'황금':'햇살')+' 보물상자 획득!';$('loot-description').textContent=relic[0]+' '+relic[1]+' +1 · 몬스터 보물 도감에 모았어!';$('loot-values').textContent='💎 보석 +'+drop.gems+'     ✦ 보너스 +'+drop.points+'점';const gear=SunshineWeapons.catalog[drop.weapon];if(gear){$('loot-icon').textContent=gear.icon;$('loot-title').textContent=gear.name+' 자동 장착!';const previous=SunshineWeapons.catalog[drop.previousWeapon];$('loot-description').textContent=(previous?previous.name+' → ':'')+gear.name;$('loot-eyebrow').textContent='WEAPON GET · 새 무기로 자동 교체';}if(drop.tier==='dragon'){
+   $('loot-eyebrow').textContent='LEGENDARY VICTORY · 엔더드래곤 정복';
+   const trophy=document.createElement('canvas');trophy.width=348;trophy.height=228;trophy.className='dragon-trophy-art';trophy.setAttribute('role','img');MonsterArt.portrait(trophy,'enderdragon');$('loot-icon').replaceChildren(trophy);$('loot-title').textContent='선율이, 드래곤을 이겼다!';
+   $('loot-description').textContent='끝까지 생각해서 해냈어! 전설의 드래곤 알을 선율이의 보물 도감에 보관했어.';
+   $('loot-values').replaceChildren();
+   for(const value of ['🥚 전설의 드래곤 알 +1','💎 보석 +'+drop.gems,'⭐ 보너스 +'+drop.points+'점',...(gear?[gear.icon+' '+gear.name+' 자동 장착!']:[])])$('loot-values').append(node('div','dragon-prize',value));
+  }
+  $('loot-equip').hidden=true;$('loot-next').textContent=badges.length?'새 배지 '+badges.length+'개 펼치기 →':'보물 잘 챙겼어! 계속하기 →';$('loot-dialog').classList.add('revealing');$('loot-dialog').showModal();$('loot-next').focus();dashboard();
+ }
+ $('loot-next').onclick=()=>{revealIndex++;showRevealPage();};$('loot-close').onclick=finishReveal;$('loot-dialog').addEventListener('cancel',e=>{e.preventDefault();finishReveal();});$('loot-equip').onclick=()=>{const b=revealBadges[revealIndex];if(b&&progress.equip(b.id)){$('loot-equip').textContent='대표 배지로 달았어!';dashboard();}};
+ return {dashboard,renderAlbum,reveal,openDetail,equippedIcon:()=>equippedSymbol};
+};

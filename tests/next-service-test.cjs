@@ -1,0 +1,148 @@
+const http = require('http');
+const assert = require('assert');
+const { spawn } = require('child_process');
+
+function request(url, options = {}, body = null) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const payload = body ? (typeof body === 'string' ? body : JSON.stringify(body)) : null;
+    const reqOptions = {
+      hostname: parsed.hostname,
+      port: parsed.port,
+      path: parsed.pathname + parsed.search,
+      method: options.method || 'GET',
+      headers: {
+        ...(options.headers || {}),
+        ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {})
+      }
+    };
+
+    const req = http.request(reqOptions, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: data }));
+    });
+
+    req.on('error', reject);
+    if (payload) {
+      req.write(payload);
+    }
+    req.end();
+  });
+}
+
+async function run() {
+  const PORT = 4188;
+  console.log(`Starting Next.js server on port ${PORT}...`);
+
+  const server = spawn('npx', ['next', 'start', '-p', String(PORT)], {
+    cwd: process.cwd(),
+    env: { ...process.env, PORT: String(PORT), ADMIN_SECRET: 'test-admin-secret' }
+  });
+
+  server.stdout.on('data', d => process.stdout.write('[server] ' + d));
+  server.stderr.on('data', d => process.stderr.write('[server-err] ' + d));
+
+  // Wait for server to start
+  let ready = false;
+  for (let i = 0; i < 30; i++) {
+    try {
+      const res = await request(`http://localhost:${PORT}/admin`);
+      if (res.status === 200) {
+        ready = true;
+        break;
+      }
+    } catch {
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
+
+  if (!ready) {
+    server.kill();
+    throw new Error('Server failed to start within timeout');
+  }
+
+  console.log('\n--- 1. Testing Admin Auth API ---');
+  // Wrong password
+  const failAuth = await request(`http://localhost:${PORT}/api/admin/auth`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  }, { password: 'wrong' });
+  assert.strictEqual(failAuth.status, 401, 'Should fail auth with wrong password');
+
+  // Correct password
+  const successAuth = await request(`http://localhost:${PORT}/api/admin/auth`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  }, { password: 'test-admin-secret' });
+  assert.strictEqual(successAuth.status, 200, 'Should succeed auth with correct password');
+  const authData = JSON.parse(successAuth.body);
+  const secret = authData.secret;
+  assert.strictEqual(secret, 'test-admin-secret');
+  console.log('✅ Admin Auth API test passed.');
+
+  console.log('\n--- 2. Testing User Creation API ---');
+  // Add User "지우" (no final consonant, should have '야', '의')
+  const addUserRes = await request(`http://localhost:${PORT}/api/admin/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-secret': secret
+    }
+  }, { name: '지우' });
+  assert.strictEqual(addUserRes.status, 200, 'User creation should succeed');
+  const createdUser = JSON.parse(addUserRes.body).user;
+  assert(createdUser.id && createdUser.id.length === 6, 'User should have 6-char id');
+  assert.strictEqual(createdUser.name, '지우');
+  console.log(`✅ User created: ${createdUser.name} (${createdUser.id})`);
+
+  console.log('\n--- 3. Testing Default User Route (Platformer) ---');
+  const defaultRes = await request(`http://localhost:${PORT}/${createdUser.id}`);
+  assert.strictEqual(defaultRes.status, 200, 'Default user route should return 200');
+  assert(defaultRes.body.includes('햇살 모험') || defaultRes.body.includes('지우'), 'Should serve platformer as default with personalized name');
+  assert(defaultRes.body.includes(`window.__BLOCK_USER__`), 'Should inject __BLOCK_USER__ script');
+  assert(defaultRes.body.includes(createdUser.id), 'Should include user id in HTML');
+  assert(defaultRes.body.includes(`/${createdUser.id}/island`), 'Should link back to user block island');
+  console.log('✅ Default route serves Sunshine Platformer successfully.');
+
+  console.log('\n--- 4. Testing User Block Island Route (/island) ---');
+  const islandRes = await request(`http://localhost:${PORT}/${createdUser.id}/island`);
+  assert.strictEqual(islandRes.status, 200, 'User island route should return 200');
+  assert(islandRes.body.includes('지우의 열칸 블록섬') || islandRes.body.includes('반가워, 지우야!'), 'Should personalize Korean name with correct particle in island game');
+  assert(islandRes.body.includes(`window.__BLOCK_USER__`), 'Should inject __BLOCK_USER__ in island game');
+  assert(islandRes.body.includes(`href="/${createdUser.id}"`), 'Should link to default platformer route');
+  console.log('✅ User Block Island (/island) served and personalized successfully.');
+
+  console.log('\n--- 5. Testing Platformer Alias / Redirect ---');
+  const platAliasRes = await request(`http://localhost:${PORT}/${createdUser.id}/platformer`);
+  assert(platAliasRes.status === 200 || platAliasRes.status === 307 || platAliasRes.status === 302, 'Should handle /platformer route');
+  console.log('✅ /platformer route handled correctly.');
+
+  console.log('\n--- 6. Testing Non-existent User Route ---');
+  const notFoundRes = await request(`http://localhost:${PORT}/nonexist123`);
+  assert.strictEqual(notFoundRes.status, 404, 'Non-existent user route should return 404');
+  console.log('✅ Non-existent user returns 404 as expected.');
+
+  console.log('\n--- 7. Testing User Deletion ---');
+  const deleteRes = await request(`http://localhost:${PORT}/api/admin/users`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-secret': secret
+    }
+  }, { userId: createdUser.id });
+  assert.strictEqual(deleteRes.status, 200, 'User deletion should succeed');
+
+  const afterDeleteRes = await request(`http://localhost:${PORT}/${createdUser.id}`);
+  assert.strictEqual(afterDeleteRes.status, 404, 'Deleted user route should now return 404');
+  console.log('✅ User deletion test passed and URL invalidated.');
+
+  console.log('\n🎉 ALL SERVICE INTEGRATION TESTS PASSED!\n');
+  server.kill();
+  process.exit(0);
+}
+
+run().catch(err => {
+  console.error('Test failed:', err);
+  process.exit(1);
+});

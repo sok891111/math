@@ -198,3 +198,40 @@ HTML/CSS/Canvas JavaScript로 제작했습니다. 서버, 계정, 결제, 광고
 - 레벨 3 시험까지 통과하면 레벨 1로 돌아갑니다. 배지·보물·보석·점수·햇살·장비·슈퍼 점프 보상은 유지되며 저장됩니다. 잠금 해제한 브리즈와 바람길은 모든 레벨에서 사용할 수 있습니다.
 - 수학 학습 연구와 넛지 적용 근거는 [학습 설계 문서](docs/math-learning-design.md)에 정리했습니다. 동작 줄이기 설정에서는 TNT 움직임을 생략합니다.
 - `npm run test:platformer-campaign`: 레벨별 출현과 문제, 6개 스테이지의 승급 차단, 10/11개 경계, 시간 초과, 새로고침 복원, TNT, 연습, 모바일 화면과 마지막 레벨 순환·보상 보존을 검증합니다.
+
+## 🛸 관리자 페이지 및 사용자별 접속 URL 서비스 (Vercel 배포)
+
+`sun` 프로젝트를 기반으로 관리자 페이지(`/admin`)에서 아이별 고유 접속 URL을 발급하고 관리할 수 있는 Next.js 웹 서비스 구조를 구축했습니다.
+
+### 1. 주요 기능
+- **관리자 페이지 (`/admin`)**:
+  - 비밀번호 인증 (`ADMIN_SECRET`)
+  - 새 사용자 추가: 아이 이름 입력 시 고유 6자리 ID(`userId`) 자동 생성
+  - 사용자별 독립 URL 발급 및 클립보드 원클릭 복사:
+    - ☀️ **햇살 플랫포머 (기본 게임)**: `https://<domain>/<userId>`
+    - 🏝️ **열칸 블록섬 (별도 게임)**: `https://<domain>/<userId>/island`
+  - 사용자 삭제 시 해당 접속 링크 즉시 비활성화 (404)
+- **사용자별 맞춤 게임 화면 & 한국어 조사 지원**:
+  - 접속한 아이의 이름에 맞춰 "지우의 열칸 블록섬", "반가워, 지우야!" 등 이름과 조사가 자동 치환됩니다.
+  - 브라우저 로컬 스토리지 키가 사용자 ID별로 분리(`_userId`)되어, 같은 기기에서 여러 아이가 플레이해도 점수, 배지, 레벨이 섞이지 않습니다.
+- **데이터 저장소 (Vercel 배포 및 로컬 겸용)**:
+  - Vercel 배포 시 Supabase (`kv_store` 테이블) 연동을 지원하여 영구 저장됩니다.
+  - 로컬/개발 환경에서는 `users.json` 파일 기반으로 즉시 동작합니다.
+
+### 2. 로컬 실행
+```sh
+npm run dev     # Next.js 개발 서버 (http://localhost:3000)
+npm run build   # 정적 자산 동기화 및 Next.js 빌드
+npm run start   # 프로덕션 모드 실행
+npm run test:service # 관리자 인증/유저 추가/삭제/동적 페이지 서빙 검증 테스트
+```
+
+### 3. Vercel 배포 방법
+1. 저장소를 GitHub에 푸시합니다.
+2. Vercel 대시보드에서 `New Project`로 저장소를 가져옵니다. (`framework: Next.js` 자동 인식)
+3. **Environment Variables** 설정:
+   - `ADMIN_SECRET`: 관리자 로그인 비밀번호 (미설정 시 기본값: `block-admin-2024`)
+   - `SUPABASE_URL`: Supabase 프로젝트 URL (선택, Vercel 서버리스 영구 저장용)
+   - `SUPABASE_ANON_KEY`: Supabase anon key (선택, Vercel 서버리스 영구 저장용)
+4. 배포 완료 후 `https://<your-vercel-domain>/admin`에 접속하여 아이들을 등록하고 링크를 공유합니다.
+

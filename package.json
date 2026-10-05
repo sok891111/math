@@ -3,7 +3,10 @@
   "version": "1.1.0",
   "private": true,
   "scripts": {
-    "start": "python3 -m http.server 4173 --bind 0.0.0.0",
+    "dev": "node scripts/sync-public.cjs && next dev",
+    "build": "node scripts/sync-public.cjs && next build",
+    "start": "next start",
+    "serve": "python3 -m http.server 4173 --bind 0.0.0.0",
     "test": "node tests/smoke.cjs && node tests/adventure.cjs && node tests/math-link.cjs",
     "test:platformer-wind": "node tests/platformer-wind-unlock.cjs",
     "test:platformer-enemies": "node tests/platformer-enemy-combat.cjs",
@@ -17,9 +20,16 @@
     "test:platformer-expansion": "node tests/platformer-expansion-unit.cjs && node tests/platformer-expansion.cjs",
     "test:platformer-elite": "node tests/platformer-elite.cjs",
     "test:platformer-multiply-lesson": "node tests/platformer-multiply-lesson.cjs",
-    "test:platformer-campaign": "node tests/platformer-campaign-unit.cjs && node tests/platformer-campaign.cjs"
+    "test:platformer-campaign": "node tests/platformer-campaign-unit.cjs && node tests/platformer-campaign.cjs",
+    "test:service": "node tests/next-service-test.cjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "next": "^14.2.35",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }

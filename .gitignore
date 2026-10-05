@@ -1,2 +1,7 @@
 node_modules/
 test-artifacts/
+.next/
+.env*.local
+users.json
+state_*.json
+events_*.json
