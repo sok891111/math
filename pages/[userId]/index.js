@@ -1535,27 +1535,33 @@ export default function UserLobbyPage({ user, initialBadges }) {
         /* Clean, Non-broken Filter Tabs */
         .modal-filters-bar {
           display: flex;
-          gap: 8px;
-          padding: 12px 20px;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 10px;
+          padding: 14px 20px;
           background: #111728;
           border-bottom: 2px solid #1c273e;
-          overflow-x: auto;
-          scrollbar-width: thin;
+          overflow: visible;
         }
 
         .tab-filter-btn {
           font-family: inherit;
-          font-size: 0.82rem;
+          font-size: 0.85rem;
           font-weight: 800;
+          line-height: 1.35;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           background: #182238;
           border: 2px solid #2b3956;
           color: #cbd5e1;
-          padding: 8px 14px;
+          padding: 8px 15px;
           border-radius: 8px;
           cursor: pointer;
           white-space: nowrap;
-          box-shadow: 0 2px 0 #000;
+          box-shadow: 0 3px 0 #000;
           transition: all 0.1s ease;
+          box-sizing: border-box;
         }
 
         .tab-filter-btn:hover {
@@ -1567,12 +1573,12 @@ export default function UserLobbyPage({ user, initialBadges }) {
           background: #00f0ff;
           color: #000;
           border-color: #00f0ff;
-          box-shadow: 0 2px 0 #000, 0 0 10px rgba(0, 240, 255, 0.4);
+          box-shadow: 0 3px 0 #000, 0 0 10px rgba(0, 240, 255, 0.4);
         }
 
         .tab-filter-btn:active {
           transform: translateY(2px);
-          box-shadow: none;
+          box-shadow: 0 1px 0 #000;
         }
 
         /* Modal Badges Grid */

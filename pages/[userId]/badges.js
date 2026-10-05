@@ -628,6 +628,10 @@ export default function UserBadgesPage({ user, initialBadges }) {
           font-family: inherit;
           font-size: 0.85rem;
           font-weight: 800;
+          line-height: 1.35;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           background: #141b2d;
           border: 2px solid #2a3956;
           color: #cbd5e1;
@@ -637,6 +641,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
           box-shadow: 0 3px 0 #000;
           transition: all 0.1s ease;
           white-space: nowrap;
+          box-sizing: border-box;
         }
 
         .filter-btn:hover {
