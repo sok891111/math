@@ -13,7 +13,7 @@ if (!fs.existsSync(platformerPublicDir)) {
 }
 
 // Root assets to copy to public/
-const rootFiles = ['index.html', 'game.js', 'style.css'];
+const rootFiles = ['index.html', 'game.js', 'style.css', 'og-image.png'];
 for (const file of rootFiles) {
   const src = path.join(rootDir, file);
   const dest = path.join(publicDir, file);

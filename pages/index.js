@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { getBaseUrl } from '../lib/config';
 
-export default function HomePage() {
+export default function HomePage({ initialBaseUrl = 'https://www.opyeung.com' }) {
   const [showModal, setShowModal] = useState(true);
-  const [baseUrl, setBaseUrl] = useState('https://www.opyeung.com');
+  const [baseUrl, setBaseUrl] = useState(initialBaseUrl);
 
   useEffect(() => {
     setBaseUrl(getBaseUrl());
@@ -13,8 +13,26 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>열칸 블록섬 & 햇살 모험</title>
+        <title>아이들을 위한 수학 게임 플랫폼 · 블록 아일랜드</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="description" content="신나는 마인크래프트 감성의 모험과 함께 10칸 블록으로 자연스럽게 배우는 아이들을 위한 수학 게임 플랫폼!" />
+
+        {/* Open Graph / KakaoTalk */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="아이들을 위한 수학 게임 플랫폼 · 블록 아일랜드" />
+        <meta property="og:description" content="신나는 마인크래프트 감성의 모험과 함께 10칸 블록으로 자연스럽게 배우는 아이들을 위한 수학 게임 플랫폼!" />
+        <meta property="og:image" content={`${baseUrl}/og-image.png`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="워든과 함께하는 아이들을 위한 수학 게임 플랫폼" />
+        <meta property="og:site_name" content="블록 아일랜드" />
+        <meta property="og:url" content={baseUrl} />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="아이들을 위한 수학 게임 플랫폼 · 블록 아일랜드" />
+        <meta name="twitter:description" content="신나는 마인크래프트 감성의 모험과 함께 10칸 블록으로 자연스럽게 배우는 아이들을 위한 수학 게임 플랫폼!" />
+        <meta name="twitter:image" content={`${baseUrl}/og-image.png`} />
       </Head>
 
       <style>{`
@@ -234,4 +252,15 @@ export default function HomePage() {
       )}
     </>
   );
+}
+
+export async function getServerSideProps({ req }) {
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const baseUrl = host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.opyeung.com');
+  return {
+    props: {
+      initialBaseUrl: baseUrl,
+    },
+  };
 }

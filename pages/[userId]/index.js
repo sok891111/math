@@ -4,7 +4,7 @@ import { getUser, getUserBadges } from '../../lib/stateManager';
 import { hasFinalConsonant } from '../../lib/koreanHelper';
 import { BADGE_CATALOG } from '../../lib/badgeCatalog';
 
-export default function UserLobbyPage({ user, initialBadges }) {
+export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://www.opyeung.com' }) {
   if (!user) return null;
 
   const childName = user.name;
@@ -23,6 +23,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
   // Badge Modal & Share URL state
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+  const [selectedBadge, setSelectedBadge] = useState(null);
   const [showShareBox, setShowShareBox] = useState(false);
   const [badgeFilter, setBadgeFilter] = useState('all');
   const [earnedBadgeIds, setEarnedBadgeIds] = useState(initialBadges?.earnedIds || []);
@@ -239,6 +240,10 @@ export default function UserLobbyPage({ user, initialBadges }) {
   // Keyboard controls for iPad Magic Keyboard / PC
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (selectedBadge) {
+        if (e.key === 'Escape') setSelectedBadge(null);
+        return;
+      }
       if (isBadgeModalOpen) {
         if (e.key === 'Escape') setIsBadgeModalOpen(false);
         return;
@@ -265,7 +270,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIdx, sfxEnabled, isBadgeModalOpen, games.length]);
+  }, [selectedIdx, sfxEnabled, isBadgeModalOpen, selectedBadge, games.length]);
 
   // Touch Swipe Handlers for iPad
   const onTouchStart = (e) => {
@@ -277,7 +282,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
   };
 
   const onTouchEnd = (e) => {
-    if (touchStartXRef.current === null || isBadgeModalOpen) return;
+    if (touchStartXRef.current === null || isBadgeModalOpen || selectedBadge) return;
     const endX = e.changedTouches ? e.changedTouches[0].clientX : null;
     const endY = e.changedTouches ? e.changedTouches[0].clientY : null;
     if (endX !== null && endY !== null) {
@@ -318,8 +323,27 @@ export default function UserLobbyPage({ user, initialBadges }) {
   return (
     <>
       <Head>
-        <title>{possessive} 매트로 게임 선택기 · {childName}</title>
+        <title>{possessive} 수학 게임 플랫폼 · {childName}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        <meta name="description" content={`신나는 모험과 함께 10칸 블록으로 배우는 ${childName}이의 수학 게임 플랫폼! 크래프트 러너, 10칸 블록섬, 워든의 동물공원`} />
+
+        {/* KakaoTalk & Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`${childName}이의 수학 게임 플랫폼 · 블록 아일랜드`} />
+        <meta property="og:description" content="신나는 마인크래프트 감성의 모험과 함께 자연스럽게 익히는 아이들을 위한 수학 게임 플랫폼!" />
+        <meta property="og:image" content={`${baseUrl}/og-image.png`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="워든과 함께하는 아이들을 위한 수학 게임 플랫폼" />
+        <meta property="og:url" content={`${baseUrl}/${user.id}`} />
+        <meta property="og:site_name" content="블록 아일랜드" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${childName}이의 수학 게임 플랫폼 · 블록 아일랜드`} />
+        <meta name="twitter:description" content="신나는 마인크래프트 감성의 모험과 함께 자연스럽게 익히는 아이들을 위한 수학 게임 플랫폼!" />
+        <meta name="twitter:image" content={`${baseUrl}/og-image.png`} />
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
@@ -572,7 +596,12 @@ export default function UserLobbyPage({ user, initialBadges }) {
         {/* ─── Retro Badge Collection Modal ─── */}
         {isBadgeModalOpen && (
           <div className="badge-modal-backdrop" onClick={() => setIsBadgeModalOpen(false)}>
-            <div className="badge-modal-card" onClick={e => e.stopPropagation()}>
+            <div
+              className="badge-modal-card"
+              onClick={e => e.stopPropagation()}
+              onTouchStart={e => e.stopPropagation()}
+              onTouchEnd={e => e.stopPropagation()}
+            >
               {/* Modal Header */}
               <div className="modal-header">
                 <div className="modal-title-group">
@@ -694,10 +723,17 @@ export default function UserLobbyPage({ user, initialBadges }) {
                   {modalBadges.map(badge => {
                     const isEarned = earnedSet.has(badge.id);
                     return (
-                      <div
+                      <button
                         key={badge.id}
+                        type="button"
                         className={`m-badge-card ${isEarned ? 'earned' : 'locked'}`}
                         style={{ '--rarity-color': badge.rarityColor }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          try { unlockAudio(); playSound('select'); } catch (err) {}
+                          setSelectedBadge(badge);
+                        }}
+                        aria-label={`${badge.title} (${badge.rarityName}, ${isEarned ? '획득 완료' : '도전 중'})`}
                       >
                         <div className="m-card-top">
                           <span className="m-rarity-pill">{badge.rarityName}</span>
@@ -721,7 +757,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
                             </span>
                           )}
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
@@ -741,6 +777,106 @@ export default function UserLobbyPage({ user, initialBadges }) {
                   }}
                 >
                   <span>{copied ? '✅ 복사 완료!' : '📋 나의 뱃지 링크 복사'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── Badge Detail Modal inside Lobby ─── */}
+        {selectedBadge && (
+          <div className="badge-detail-backdrop" onClick={() => setSelectedBadge(null)}>
+            <div
+              className="badge-detail-card"
+              onClick={e => e.stopPropagation()}
+              onTouchStart={e => e.stopPropagation()}
+              onTouchEnd={e => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="badge-detail-close"
+                onClick={() => setSelectedBadge(null)}
+                aria-label="상세 닫기"
+              >
+                ✕
+              </button>
+
+              <div
+                className="badge-detail-icon-wrap"
+                style={{ '--rarity-color': selectedBadge.rarityColor }}
+              >
+                <span className="badge-detail-big-icon">{selectedBadge.icon}</span>
+                {!earnedSet.has(selectedBadge.id) && (
+                  <span className="badge-detail-lock">🔒</span>
+                )}
+              </div>
+
+              <div className="badge-detail-meta-row">
+                <span className="badge-detail-rarity" style={{ color: selectedBadge.rarityColor }}>
+                  ★ {selectedBadge.rarityName} 등급 배지 ★
+                </span>
+                <span className="badge-detail-game-tag">
+                  {selectedBadge.game === 'runner'
+                    ? '🏃 크래프트 Runner'
+                    : selectedBadge.game === 'island'
+                    ? '🏝️ 완성! block island'
+                    : '🌿 Creative 크래프트'}
+                </span>
+              </div>
+
+              <h3 className="badge-detail-title">{selectedBadge.title}</h3>
+              <p className="badge-detail-desc">{selectedBadge.desc}</p>
+
+              {/* Status section tailored for earned vs locked */}
+              <div className="badge-detail-status-box">
+                {earnedSet.has(selectedBadge.id) ? (
+                  <div className="detail-status-earned">
+                    <span className="status-badge-icon">🏆</span>
+                    <div className="status-badge-texts">
+                      <strong className="status-head">멋지게 획득 완료!</strong>
+                      <p className="status-sub">모험을 완수하여 자랑스럽게 획득한 배지입니다 ✨</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="detail-status-locked">
+                    <span className="status-badge-icon">🔒</span>
+                    <div className="status-badge-texts">
+                      <strong className="status-head">도전 진행 중인 배지</strong>
+                      <p className="status-sub">
+                        {selectedBadge.target
+                          ? `목표 달성 조건: ${selectedBadge.target}회 완료 도전!`
+                          : selectedBadge.desc}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action to launch the relevant game directly if user wants */}
+              <div className="badge-detail-actions">
+                {(() => {
+                  const gameTarget = games.find(g => g.id === selectedBadge.game) || games[0];
+                  return (
+                    <button
+                      type="button"
+                      className="badge-detail-play-btn"
+                      onClick={() => {
+                        unlockAudio();
+                        playSound('start');
+                        handleLaunch(gameTarget.path);
+                      }}
+                      style={{ '--btn-color': gameTarget.themeColor }}
+                    >
+                      <span>🎮 {gameTarget.title} 플레이하러 가기 ▶</span>
+                    </button>
+                  );
+                })()}
+                <button
+                  type="button"
+                  className="badge-detail-back-btn"
+                  onClick={() => setSelectedBadge(null)}
+                >
+                  배지 보관함으로 돌아가기
                 </button>
               </div>
             </div>
@@ -810,7 +946,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
         .arcade-screen {
           width: 100%;
-          max-width: 920px;
+          max-width: 1380px;
           background: #0d101a;
           border: 6px solid #202638;
           box-shadow:
@@ -818,7 +954,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
             0 0 35px rgba(0, 240, 255, 0.15),
             inset 0 0 40px rgba(0, 0, 0, 0.8);
           border-radius: 20px;
-          padding: 24px 22px 18px;
+          padding: 24px 28px 20px;
           position: relative;
           z-index: 10;
         }
@@ -959,8 +1095,8 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
         .select-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-          gap: 22px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 20px;
           margin-bottom: 24px;
         }
 
@@ -975,6 +1111,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
           position: relative;
           transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
           box-shadow: 0 8px 0 #000, 0 12px 20px rgba(0, 0, 0, 0.5);
+          min-width: 0;
         }
 
         .game-pod.active {
@@ -1012,27 +1149,34 @@ export default function UserLobbyPage({ user, initialBadges }) {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          gap: 6px;
           margin-bottom: 12px;
         }
 
         .pod-type {
-          font-size: 0.75rem;
+          font-size: 0.72rem;
           font-weight: 800;
           padding: 3px 8px;
           background: #1d2538;
           border: 1.5px solid var(--border-color);
           color: var(--accent);
           border-radius: 4px;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
         .pod-meta {
-          font-size: 0.72rem;
+          font-size: 0.7rem;
           color: #94a3b8;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: right;
         }
 
         .preview-screen {
           width: 100%;
-          height: 150px;
+          height: 160px;
           border-radius: 10px;
           border: 3px solid #000;
           box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.9);
@@ -1184,13 +1328,14 @@ export default function UserLobbyPage({ user, initialBadges }) {
         .pixel-bridge-wood {
           position: absolute;
           bottom: 24px;
-          left: 70px;
-          right: 70px;
+          left: 50%;
+          transform: translateX(-50%);
           display: flex;
           justify-content: center;
           gap: 2px;
           font-size: 1.1rem;
           filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+          white-space: nowrap;
         }
 
         .pixel-warden {
@@ -1207,13 +1352,16 @@ export default function UserLobbyPage({ user, initialBadges }) {
         }
 
         .game-name {
-          font-size: 1.45rem;
+          font-size: clamp(1.15rem, 1.45vw, 1.45rem);
           font-weight: 900;
           color: #fff;
           text-align: center;
           margin-bottom: 16px;
-          letter-spacing: 0.5px;
+          letter-spacing: -0.3px;
           text-shadow: 2px 2px 0 #000;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .game-pod.active .game-name {
@@ -1227,17 +1375,18 @@ export default function UserLobbyPage({ user, initialBadges }) {
           justify-content: center;
           text-decoration: none;
           min-height: 52px;
-          padding: 12px 16px;
+          padding: 12px 8px;
           background: #1b2336;
           border: 3px solid var(--accent);
           border-radius: 10px;
           color: #fff;
-          font-size: 0.95rem;
+          font-size: clamp(0.82rem, 0.95vw, 0.95rem);
           font-weight: 900;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.3px;
           box-shadow: 0 6px 0 #000;
           transition: all 0.1s ease;
           position: relative;
+          white-space: nowrap;
         }
 
         .game-pod.active .arcade-btn {
@@ -1291,7 +1440,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
         .ipad-start-main-btn {
           flex: 1;
-          max-width: 480px;
+          max-width: 560px;
           min-height: 58px;
           border-radius: 14px;
           background: linear-gradient(180deg, var(--main-color) 0%, #101626 220%);
@@ -1334,7 +1483,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
         .badge-launcher-btn {
           width: 100%;
-          max-width: 680px;
+          max-width: 820px;
           min-height: 60px;
           background: linear-gradient(90deg, #1b233a 0%, #18283d 50%, #1a2338 100%);
           border: 3px solid #facc15;
@@ -1687,6 +1836,11 @@ export default function UserLobbyPage({ user, initialBadges }) {
         }
 
         .m-badge-card {
+          width: 100%;
+          font-family: inherit;
+          color: inherit;
+          -webkit-appearance: none;
+          appearance: none;
           background: #121829;
           border: 3px solid #212c44;
           border-radius: 12px;
@@ -1697,7 +1851,26 @@ export default function UserLobbyPage({ user, initialBadges }) {
           text-align: center;
           position: relative;
           box-shadow: 0 4px 0 #000;
-          transition: all 0.15s ease;
+          cursor: pointer;
+          transition: all 0.15s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+          outline: none;
+          touch-action: manipulation;
+        }
+
+        .m-badge-card:hover {
+          transform: translateY(-3px);
+          border-color: var(--rarity-color);
+          box-shadow: 0 7px 0 #000, 0 0 16px var(--rarity-color);
+        }
+
+        .m-badge-card:active {
+          transform: translateY(2px);
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .m-badge-card:focus-visible {
+          border-color: #00f0ff;
+          box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.5);
         }
 
         .m-badge-card.earned {
@@ -1706,9 +1879,18 @@ export default function UserLobbyPage({ user, initialBadges }) {
           background: linear-gradient(180deg, #162035 0%, #0e1422 100%);
         }
 
+        .m-badge-card.earned:hover {
+          box-shadow: 0 7px 0 #000, 0 0 22px var(--rarity-color);
+        }
+
         .m-badge-card.locked {
           opacity: 0.65;
           filter: grayscale(0.55);
+        }
+
+        .m-badge-card.locked:hover {
+          opacity: 0.95;
+          filter: grayscale(0.2);
         }
 
         .m-card-top {
@@ -1829,6 +2011,217 @@ export default function UserLobbyPage({ user, initialBadges }) {
           box-shadow: 0 2px 0 #000;
         }
 
+        /* ─── Lobby Badge Detail Modal ─── */
+        .badge-detail-backdrop {
+          position: fixed;
+          top: 0; left: 0; width: 100vw; height: 100vh;
+          background: rgba(3, 5, 12, 0.85);
+          backdrop-filter: blur(8px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+          z-index: 350;
+          animation: popUp 0.2s ease;
+        }
+
+        .badge-detail-card {
+          width: 100%;
+          max-width: 440px;
+          background: #101626;
+          border: 4px solid #2b3956;
+          border-radius: 18px;
+          padding: 28px 22px 22px;
+          box-shadow: 0 14px 0 #000, 0 0 40px rgba(0, 0, 0, 0.9);
+          text-align: center;
+          position: relative;
+          animation: popUp 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .badge-detail-close {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          background: #1c263c;
+          border: 2px solid #3d4f75;
+          color: #fff;
+          font-size: 1.1rem;
+          font-weight: bold;
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 3px 0 #000;
+          transition: transform 0.1s ease;
+        }
+
+        .badge-detail-close:active {
+          transform: translateY(2px);
+          box-shadow: 0 1px 0 #000;
+        }
+
+        .badge-detail-icon-wrap {
+          width: 92px;
+          height: 92px;
+          border-radius: 16px;
+          background: #080c16;
+          border: 3.5px solid var(--rarity-color);
+          box-shadow: 0 0 24px var(--rarity-color), inset 0 0 16px rgba(0, 0, 0, 0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 14px;
+          position: relative;
+        }
+
+        .badge-detail-big-icon {
+          font-size: 3.2rem;
+          filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+        }
+
+        .badge-detail-lock {
+          position: absolute;
+          bottom: 4px;
+          right: 4px;
+          font-size: 1.25rem;
+          filter: drop-shadow(0 2px 4px #000);
+        }
+
+        .badge-detail-meta-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          margin-bottom: 10px;
+          flex-wrap: wrap;
+        }
+
+        .badge-detail-rarity {
+          font-size: 0.85rem;
+          font-weight: 900;
+          letter-spacing: 0.5px;
+        }
+
+        .badge-detail-game-tag {
+          font-size: 0.75rem;
+          font-weight: 800;
+          background: #182236;
+          border: 1.5px solid #334366;
+          color: #94a3b8;
+          padding: 2px 8px;
+          border-radius: 6px;
+        }
+
+        .badge-detail-title {
+          font-size: 1.35rem;
+          color: #fff;
+          font-weight: 900;
+          letter-spacing: 0.5px;
+          margin-bottom: 8px;
+          text-shadow: 2px 2px 0 #000;
+        }
+
+        .badge-detail-desc {
+          font-size: 0.88rem;
+          color: #cbd5e1;
+          line-height: 1.45;
+          margin-bottom: 18px;
+        }
+
+        .badge-detail-status-box {
+          background: #090d18;
+          border: 2px solid #23304a;
+          border-radius: 12px;
+          padding: 12px 14px;
+          margin-bottom: 18px;
+          text-align: left;
+        }
+
+        .detail-status-earned, .detail-status-locked {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .status-badge-icon {
+          font-size: 1.6rem;
+          line-height: 1;
+        }
+
+        .status-head {
+          display: block;
+          font-size: 0.92rem;
+          font-weight: 900;
+          margin-bottom: 2px;
+        }
+
+        .detail-status-earned .status-head {
+          color: #34d399;
+          text-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+        }
+
+        .detail-status-locked .status-head {
+          color: #cbd5e1;
+        }
+
+        .status-sub {
+          font-size: 0.78rem;
+          color: #94a3b8;
+          line-height: 1.35;
+        }
+
+        .badge-detail-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .badge-detail-play-btn {
+          width: 100%;
+          min-height: 48px;
+          background: var(--btn-color);
+          border: 2px solid #000;
+          border-radius: 10px;
+          color: #000;
+          font-family: inherit;
+          font-size: 0.95rem;
+          font-weight: 900;
+          padding: 10px 16px;
+          cursor: pointer;
+          box-shadow: 0 5px 0 #000;
+          transition: transform 0.1s ease;
+        }
+
+        .badge-detail-play-btn:active {
+          transform: translateY(3px);
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .badge-detail-back-btn {
+          background: #182236;
+          border: 2px solid #2e3e60;
+          color: #94a3b8;
+          font-family: inherit;
+          font-size: 0.85rem;
+          font-weight: 800;
+          padding: 8px 14px;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.1s ease, color 0.1s ease;
+        }
+
+        .badge-detail-back-btn:hover {
+          background: #22304d;
+          color: #fff;
+        }
+
+        .badge-detail-back-btn:active {
+          transform: translateY(2px);
+        }
+
         /* Global Toast */
         .toast-pop {
           position: fixed;
@@ -1890,6 +2283,25 @@ export default function UserLobbyPage({ user, initialBadges }) {
           100% { transform: translateX(0); }
         }
 
+        @media (max-width: 860px) {
+          .select-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+          .touch-tab-nav {
+            gap: 8px;
+          }
+          .touch-tab {
+            font-size: 0.88rem;
+            min-height: 48px;
+            padding: 8px 10px;
+            gap: 6px;
+          }
+          .tab-icon {
+            font-size: 1.15rem;
+          }
+        }
+
         @media (max-width: 768px) {
           .arcade-screen {
             padding: 16px 12px 14px;
@@ -1903,9 +2315,9 @@ export default function UserLobbyPage({ user, initialBadges }) {
             font-size: 1.25rem;
           }
           .touch-tab {
-            font-size: 0.9rem;
-            min-height: 48px;
-            padding: 8px 10px;
+            font-size: 0.85rem;
+            min-height: 46px;
+            padding: 6px 8px;
           }
           .arcade-btn {
             font-size: 0.88rem;
@@ -1933,13 +2345,27 @@ export default function UserLobbyPage({ user, initialBadges }) {
             flex-direction: column;
             align-items: stretch;
           }
+          .badge-detail-card {
+            padding: 22px 18px 18px;
+            max-width: 90vw;
+          }
+          .badge-detail-title {
+            font-size: 1.2rem;
+          }
+          .badge-detail-icon-wrap {
+            width: 80px;
+            height: 80px;
+          }
+          .badge-detail-big-icon {
+            font-size: 2.8rem;
+          }
         }
       `}</style>
     </>
   );
 }
 
-export async function getServerSideProps({ params }) {
+export async function getServerSideProps({ params, req }) {
   const { userId } = params;
   if (!/^[A-Za-z0-9]{4,10}$/.test(userId)) {
     return { notFound: true };
@@ -1952,6 +2378,10 @@ export async function getServerSideProps({ params }) {
 
   const initialBadges = await getUserBadges(userId);
 
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const baseUrl = host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.opyeung.com');
+
   return {
     props: {
       user: {
@@ -1959,6 +2389,7 @@ export async function getServerSideProps({ params }) {
         name: user.name,
       },
       initialBadges: initialBadges || { earnedIds: [] },
+      baseUrl,
     },
   };
 }

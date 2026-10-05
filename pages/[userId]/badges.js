@@ -4,7 +4,7 @@ import { getUser, getUserBadges } from '../../lib/stateManager';
 import { hasFinalConsonant } from '../../lib/koreanHelper';
 import { BADGE_CATALOG } from '../../lib/badgeCatalog';
 
-export default function UserBadgesPage({ user, initialBadges }) {
+export default function UserBadgesPage({ user, initialBadges, baseUrl = 'https://www.opyeung.com' }) {
   if (!user) return null;
 
   const childName = user.name;
@@ -142,6 +142,25 @@ export default function UserBadgesPage({ user, initialBadges }) {
       <Head>
         <title>{possessive} 뱃지 명예의 전당 · {childName}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        <meta name="description" content={`아이들을 위한 수학 게임 플랫폼에서 ${childName}이가 모은 ${earnedCount}개의 모험 배지 명예의 전당!`} />
+
+        {/* KakaoTalk & Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`${childName}이의 뱃지 명예의 전당 · 블록 아일랜드`} />
+        <meta property="og:description" content={`아이들을 위한 수학 게임 플랫폼에서 ${childName}이가 모은 ${earnedCount}개의 모험 배지를 확인해보세요!`} />
+        <meta property="og:image" content={`${baseUrl}/og-image.png`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="워든과 함께하는 아이들을 위한 수학 게임 플랫폼" />
+        <meta property="og:url" content={`${baseUrl}/${user.id}/badges`} />
+        <meta property="og:site_name" content="블록 아일랜드" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${childName}이의 뱃지 명예의 전당 · 블록 아일랜드`} />
+        <meta name="twitter:description" content={`아이들을 위한 수학 게임 플랫폼에서 ${childName}이가 모은 ${earnedCount}개의 모험 배지를 확인해보세요!`} />
+        <meta name="twitter:image" content={`${baseUrl}/og-image.png`} />
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
@@ -1006,7 +1025,7 @@ export default function UserBadgesPage({ user, initialBadges }) {
   );
 }
 
-export async function getServerSideProps({ params }) {
+export async function getServerSideProps({ params, req }) {
   const { userId } = params;
   if (!/^[A-Za-z0-9]{4,10}$/.test(userId)) {
     return { notFound: true };
@@ -1019,6 +1038,10 @@ export async function getServerSideProps({ params }) {
 
   const savedBadges = await getUserBadges(userId);
 
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const baseUrl = host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.opyeung.com');
+
   return {
     props: {
       user: {
@@ -1026,6 +1049,7 @@ export async function getServerSideProps({ params }) {
         name: user.name,
       },
       initialBadges: savedBadges || { earnedIds: [] },
+      baseUrl,
     },
   };
 }
