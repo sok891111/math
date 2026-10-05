@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 
 export default function HomePage() {
   const [showModal, setShowModal] = useState(true);
@@ -41,7 +40,7 @@ export default function HomePage() {
         .guide-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(4, 12, 16, 0.82);
+          background: rgba(4, 12, 16, 0.85);
           backdrop-filter: blur(8px);
           z-index: 9999;
           display: flex;
@@ -60,9 +59,9 @@ export default function HomePage() {
           background: linear-gradient(145deg, #132722, #0d1a18);
           border: 2px solid rgba(74, 222, 128, 0.4);
           border-radius: 24px;
-          max-width: 520px;
+          max-width: 480px;
           width: 100%;
-          padding: 32px 28px;
+          padding: 36px 28px;
           text-align: center;
           box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(74, 222, 128, 0.15);
           animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -107,7 +106,7 @@ export default function HomePage() {
           font-size: 0.95rem;
           color: #cbd5e1;
           line-height: 1.7;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
           word-break: keep-all;
         }
 
@@ -121,55 +120,41 @@ export default function HomePage() {
           border: 1px dashed rgba(74, 222, 128, 0.35);
           border-radius: 12px;
           padding: 12px;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
           font-family: monospace;
           font-size: 0.9rem;
           color: #4ade80;
         }
 
-        .guide-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
+        .guide-subtext {
+          font-size: 0.82rem;
+          color: #94a3b8;
+          margin-bottom: 24px;
+          line-height: 1.5;
         }
 
-        .btn-admin {
-          display: flex;
+        .btn-confirm {
+          display: inline-flex;
           align-items: center;
           justify-content: center;
+          width: 100%;
           gap: 8px;
           background: linear-gradient(135deg, #10b981, #0284c7);
           color: #ffffff;
+          border: none;
           padding: 14px 24px;
           border-radius: 12px;
           font-size: 1rem;
           font-weight: 800;
-          text-decoration: none;
+          cursor: pointer;
+          font-family: inherit;
           transition: all 0.2s;
           box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
         }
 
-        .btn-admin:hover {
+        .btn-confirm:hover {
           transform: translateY(-2px);
           box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
-        }
-
-        .btn-dismiss {
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: #94a3b8;
-          padding: 12px 20px;
-          border-radius: 12px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          cursor: pointer;
-          font-family: inherit;
-          transition: all 0.2s;
-        }
-
-        .btn-dismiss:hover {
-          background: rgba(255, 255, 255, 0.12);
-          color: #ffffff;
         }
 
         .floating-guide-btn {
@@ -201,7 +186,7 @@ export default function HomePage() {
         />
       </div>
 
-      {/* 배포된 전용 URL 접속 안내 가이드 모달 */}
+      {/* 배포된 전용 URL 접속 안내 가이드 모달 (관리자 링크 일체 노출 없음) */}
       {showModal && (
         <div className="guide-overlay">
           <div className="guide-card">
@@ -211,25 +196,24 @@ export default function HomePage() {
               개인별 전용 접속 링크로<br />접속해 주세요!
             </h1>
             <p className="guide-desc">
-              열칸 블록섬과 햇살 모험은 각 아이마다 <strong>학습 진도, 배지, 점수</strong>를 개별 관리하기 위해 <strong>개인별 전용 주소</strong>로 운영됩니다.<br />
+              열칸 블록섬과 햇살 모험은 각 아이마다 <strong>학습 진도, 배지, 점수</strong>를 개별 보관하기 위해 <strong>개인별 전용 주소</strong>로 운영됩니다.<br />
               선생님이나 부모님께 전달받으신 고유 링크로 접속하시면 나만의 모험이 시작됩니다!
             </p>
 
             <div className="url-example-box">
-              예시: https://도메인/<strong>[아이코드]</strong>
+              전용 주소 형식: https://도메인/<strong>[개인코드]</strong>
             </div>
 
-            <div className="guide-actions">
-              <Link href="/admin" className="btn-admin">
-                🛸 관리자 페이지 바로가기 (링크 발급) ↗
-              </Link>
-              <button
-                className="btn-dismiss"
-                onClick={() => setShowModal(false)}
-              >
-                🎮 게스트 모드로 둘러보기 (모달 닫기)
-              </button>
-            </div>
+            <p className="guide-subtext">
+              ※ 전용 주소를 아직 전달받지 못하셨다면 선생님 또는 부모님께 문의해 주세요.
+            </p>
+
+            <button
+              className="btn-confirm"
+              onClick={() => setShowModal(false)}
+            >
+              🎮 블록섬 먼저 둘러보기
+            </button>
           </div>
         </div>
       )}

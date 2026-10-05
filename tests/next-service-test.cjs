@@ -92,8 +92,8 @@ async function run() {
   const rootRes = await request(`http://localhost:${PORT}/`);
   assert.strictEqual(rootRes.status, 200, 'Root path should return 200');
   assert(rootRes.body.includes('개인별 전용 접속 링크로'), 'Root path should show personalized URL guide modal');
-  assert(rootRes.body.includes('/admin'), 'Root path should provide link to admin page');
-  console.log('✅ Base URL Guide Modal displayed correctly.');
+  assert(!rootRes.body.includes('/admin'), 'Root path should NEVER expose admin link publicly');
+  console.log('✅ Base URL Guide Modal displayed correctly without exposing admin link.');
 
   console.log('\n--- 2. Testing User Creation API ---');
   // Add User "지우" (no final consonant, should have '야', '의')
