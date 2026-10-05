@@ -1,6 +1,5 @@
 import { getUsers, saveUsers } from '../../../lib/stateManager';
-
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'block-admin-2024';
+import { isValidSecret } from '../../../lib/authHelper';
 
 function generateUserId(existingIds) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
@@ -13,7 +12,7 @@ function generateUserId(existingIds) {
 
 function checkAuth(req) {
   const secret = req.headers['x-admin-secret'];
-  return secret === ADMIN_SECRET;
+  return isValidSecret(secret);
 }
 
 export default async function handler(req, res) {

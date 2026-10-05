@@ -67,19 +67,33 @@ async function run() {
   const failAuth = await request(`http://localhost:${PORT}/api/admin/auth`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
-  }, { password: 'wrong' });
+  }, { password: 'wrong-password' });
   assert.strictEqual(failAuth.status, 401, 'Should fail auth with wrong password');
 
-  // Correct password
+  // Login with default 'admin'
+  const adminAuth = await request(`http://localhost:${PORT}/api/admin/auth`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  }, { password: 'admin' });
+  assert.strictEqual(adminAuth.status, 200, 'Should succeed auth with default admin password');
+
+  // Login with env ADMIN_SECRET
   const successAuth = await request(`http://localhost:${PORT}/api/admin/auth`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   }, { password: 'test-admin-secret' });
-  assert.strictEqual(successAuth.status, 200, 'Should succeed auth with correct password');
+  assert.strictEqual(successAuth.status, 200, 'Should succeed auth with correct env password');
   const authData = JSON.parse(successAuth.body);
   const secret = authData.secret;
   assert.strictEqual(secret, 'test-admin-secret');
-  console.log('✅ Admin Auth API test passed.');
+  console.log('✅ Admin Auth API test passed (both "admin" and env secret work).');
+
+  console.log('\n--- 1.1 Testing Base URL Guide Modal ---');
+  const rootRes = await request(`http://localhost:${PORT}/`);
+  assert.strictEqual(rootRes.status, 200, 'Root path should return 200');
+  assert(rootRes.body.includes('개인별 전용 접속 링크로'), 'Root path should show personalized URL guide modal');
+  assert(rootRes.body.includes('/admin'), 'Root path should provide link to admin page');
+  console.log('✅ Base URL Guide Modal displayed correctly.');
 
   console.log('\n--- 2. Testing User Creation API ---');
   // Add User "지우" (no final consonant, should have '야', '의')

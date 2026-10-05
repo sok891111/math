@@ -1,14 +1,23 @@
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'block-admin-2024';
+import { isValidSecret, getPrimarySecret } from '../../../lib/authHelper';
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { password } = req.body || {};
-  if (password === ADMIN_SECRET) {
-    return res.status(200).json({ ok: true, secret: ADMIN_SECRET });
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch {}
   }
 
-  return res.status(401).json({ error: '비밀번호가 일치하지 않습니다.' });
+  const { password } = body || {};
+  if (isValidSecret(password)) {
+    return res.status(200).json({ ok: true, secret: password.trim() });
+  }
+
+  return res.status(401).json({
+    error: '비밀번호가 일치하지 않습니다. (기본 비밀번호: admin)'
+  });
 }
