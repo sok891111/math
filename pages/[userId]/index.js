@@ -1,9 +1,10 @@
 import Head from 'next/head';
 import { useState, useEffect, useRef } from 'react';
-import { getUser } from '../../lib/stateManager';
+import { getUser, getUserBadges } from '../../lib/stateManager';
 import { hasFinalConsonant } from '../../lib/koreanHelper';
+import { BADGE_CATALOG } from '../../lib/badgeCatalog';
 
-export default function UserLobbyPage({ user }) {
+export default function UserLobbyPage({ user, initialBadges }) {
   if (!user) return null;
 
   const childName = user.name;
@@ -19,6 +20,14 @@ export default function UserLobbyPage({ user }) {
   // Touch Swipe tracking for iPad
   const touchStartXRef = useRef(null);
   const touchStartYRef = useRef(null);
+
+  // Badge Modal & Share state
+  const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+  const [badgeFilter, setBadgeFilter] = useState('all');
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState(initialBadges?.earnedIds || []);
+  const [copied, setCopied] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+  const toastTimeoutRef = useRef(null);
 
   const games = [
     {
@@ -45,7 +54,7 @@ export default function UserLobbyPage({ user }) {
     },
   ];
 
-  // Unlock iOS Safari AudioContext on first touch / user interaction
+  // Unlock iOS Safari AudioContext on first touch
   const unlockAudio = () => {
     try {
       if (!audioCtxRef.current) {
@@ -55,9 +64,7 @@ export default function UserLobbyPage({ user }) {
       if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
         audioCtxRef.current.resume();
       }
-    } catch (e) {
-      // Audio autoplay policy fallback
-    }
+    } catch (e) {}
   };
 
   useEffect(() => {
@@ -74,6 +81,77 @@ export default function UserLobbyPage({ user }) {
     };
   }, []);
 
+  // Sync earned badges from localStorage
+  useEffect(() => {
+    try {
+      const runnerRaw = localStorage.getItem(`seonyul-sunshine-progress-v1_${user.id}`);
+      const islandRaw = localStorage.getItem(`seonyul-block-island-v1_${user.id}`);
+      const earnedSet = new Set(earnedBadgeIds);
+
+      if (runnerRaw) {
+        const rData = JSON.parse(runnerRaw);
+        if (rData && rData.earned) {
+          Object.keys(rData.earned).forEach(id => earnedSet.add(id));
+        }
+      }
+
+      if (islandRaw) {
+        const iData = JSON.parse(islandRaw);
+        if (iData && iData.completed > 0) {
+          if (iData.completed >= 1) earnedSet.add('island-fox-bridge');
+          if (iData.completed >= 2) earnedSet.add('island-bear-bridge');
+          if (iData.completed >= 3) earnedSet.add('island-rabbit-bridge');
+          if (iData.completed >= 3) earnedSet.add('island-rainbow-bridge');
+        }
+        if (iData && iData.badges) {
+          const count = Object.keys(iData.badges).length;
+          if (count >= 1) earnedSet.add('island-milestone-1');
+          if (count >= 5) earnedSet.add('island-milestone-5');
+          if (count >= 10) earnedSet.add('island-milestone-10');
+          if (count >= 20) earnedSet.add('island-milestone-20');
+          if (count >= 45) earnedSet.add('island-milestone-45');
+        }
+      }
+
+      const arr = Array.from(earnedSet);
+      if (arr.length > earnedBadgeIds.length) {
+        setEarnedBadgeIds(arr);
+        fetch(`/api/user/${user.id}/badges`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ badges: { earnedIds: arr } }),
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }, [user.id]);
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => setToastMsg(''), 3000);
+  };
+
+  const handleCopyShareUrl = async () => {
+    try {
+      const shareUrl = `${window.location.origin}/${user.id}/badges`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = shareUrl;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+      showToast('🎉 자랑 링크가 복사되었어요! 친구에게 공유해 보세요.');
+      setTimeout(() => setCopied(false), 2500);
+    } catch (e) {
+      showToast('주소창에서 뱃지 링크를 복사해 주세요!');
+    }
+  };
+
   // 8-bit Web Audio Synth SFX
   const playSound = (type) => {
     if (!sfxEnabled || typeof window === 'undefined') return;
@@ -88,7 +166,6 @@ export default function UserLobbyPage({ user }) {
       gain.connect(ctx.destination);
 
       if (type === 'select') {
-        // Crisp 8-bit blip
         osc.type = 'square';
         osc.frequency.setValueAtTime(320, ctx.currentTime);
         osc.frequency.setValueAtTime(480, ctx.currentTime + 0.04);
@@ -97,7 +174,6 @@ export default function UserLobbyPage({ user }) {
         osc.start(ctx.currentTime);
         osc.stop(ctx.currentTime + 0.08);
       } else if (type === 'start') {
-        // Arcade coin fanfare
         osc.type = 'triangle';
         const now = ctx.currentTime;
         osc.frequency.setValueAtTime(440, now);
@@ -109,9 +185,7 @@ export default function UserLobbyPage({ user }) {
         osc.start(now);
         osc.stop(now + 0.3);
       }
-    } catch (e) {
-      // Audio error fallback
-    }
+    } catch (e) {}
   };
 
   const handleLaunch = (path) => {
@@ -127,6 +201,10 @@ export default function UserLobbyPage({ user }) {
   // Keyboard controls for iPad Magic Keyboard / PC
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (isBadgeModalOpen) {
+        if (e.key === 'Escape') setIsBadgeModalOpen(false);
+        return;
+      }
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
         e.preventDefault();
         setSelectedIdx(0);
@@ -143,7 +221,7 @@ export default function UserLobbyPage({ user }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIdx, sfxEnabled]);
+  }, [selectedIdx, sfxEnabled, isBadgeModalOpen]);
 
   // Touch Swipe Handlers for iPad
   const onTouchStart = (e) => {
@@ -155,20 +233,17 @@ export default function UserLobbyPage({ user }) {
   };
 
   const onTouchEnd = (e) => {
-    if (touchStartXRef.current === null) return;
+    if (touchStartXRef.current === null || isBadgeModalOpen) return;
     const endX = e.changedTouches ? e.changedTouches[0].clientX : null;
     const endY = e.changedTouches ? e.changedTouches[0].clientY : null;
     if (endX !== null && endY !== null) {
       const diffX = endX - touchStartXRef.current;
       const diffY = endY - touchStartYRef.current;
-      // Horizontal swipe detected (at least 35px threshold)
       if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
         if (diffX < 0 && selectedIdx === 0) {
-          // Swiped left -> Game 2
           setSelectedIdx(1);
           playSound('select');
         } else if (diffX > 0 && selectedIdx === 1) {
-          // Swiped right -> Game 1
           setSelectedIdx(0);
           playSound('select');
         }
@@ -177,6 +252,17 @@ export default function UserLobbyPage({ user }) {
     touchStartXRef.current = null;
     touchStartYRef.current = null;
   };
+
+  const earnedSet = new Set(earnedBadgeIds);
+  const earnedCount = BADGE_CATALOG.filter(b => earnedSet.has(b.id)).length;
+  const totalBadgeCount = BADGE_CATALOG.length;
+
+  const modalBadges = BADGE_CATALOG.filter(b => {
+    if (badgeFilter === 'earned') return earnedSet.has(b.id);
+    if (badgeFilter === 'runner') return b.game === 'runner';
+    if (badgeFilter === 'island') return b.game === 'island';
+    return true;
+  });
 
   return (
     <>
@@ -194,11 +280,9 @@ export default function UserLobbyPage({ user }) {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* CRT Scanline & Screen Glow Overlay */}
         <div className="crt-scanlines" />
         <div className="crt-glow" />
 
-        {/* Retro Arcade Container */}
         <div className="arcade-screen">
           {/* Top Marquee HUD */}
           <header className="arcade-hud">
@@ -269,14 +353,12 @@ export default function UserLobbyPage({ user }) {
                 <article
                   key={g.id}
                   className={`game-pod ${isSelected ? 'active' : ''} pod-${g.id}`}
-                  onClick={(e) => {
+                  onClick={() => {
                     unlockAudio();
                     if (selectedIdx !== idx) {
-                      // Tap unselected card -> select it
                       setSelectedIdx(idx);
                       playSound('select');
                     } else {
-                      // Already selected -> start game
                       handleLaunch(g.path);
                     }
                   }}
@@ -285,18 +367,15 @@ export default function UserLobbyPage({ user }) {
                     '--border-color': g.themeBorder,
                   }}
                 >
-                  {/* Selected Indicator Arrow */}
                   <div className="pod-indicator">
                     {isSelected ? '👉 READY! [터치하여 플레이]' : 'TAP TO CHOOSE'}
                   </div>
 
-                  {/* Retro Type Tag */}
                   <div className="pod-tag-bar">
                     <span className="pod-type">{g.type}</span>
                     <span className="pod-meta">{g.meta}</span>
                   </div>
 
-                  {/* Pixel Animated Screen Preview Box */}
                   <div className={`preview-screen ${g.sceneClass}`}>
                     {g.id === 'platformer' ? (
                       <div className="pixel-stage runner-stage">
@@ -322,10 +401,8 @@ export default function UserLobbyPage({ user }) {
                     <div className="screen-lines" />
                   </div>
 
-                  {/* Game Title */}
                   <h2 className="game-name">{g.title}</h2>
 
-                  {/* Retro Big Arcade Start Button */}
                   <a
                     href={g.path}
                     className="arcade-btn"
@@ -397,18 +474,153 @@ export default function UserLobbyPage({ user }) {
             </button>
           </div>
 
+          {/* Badge Launcher Button Area (Under game selection) */}
+          <section className="badge-launcher-area">
+            <button
+              type="button"
+              className="badge-launcher-btn"
+              onClick={() => {
+                unlockAudio();
+                playSound('select');
+                setIsBadgeModalOpen(true);
+              }}
+            >
+              <span className="launcher-icon">🏅</span>
+              <span className="launcher-title">지금까지 모은 뱃지 보러가기</span>
+              <span className="launcher-badge-pill">{earnedCount}개 획득!</span>
+              <span className="launcher-arrow">▶</span>
+            </button>
+          </section>
+
           {/* Arcade Cabinet Controller Guide Footer */}
           <footer className="arcade-footer">
             <div className="key-guides">
               <span className="touch-tip">📱 화면을 좌우로 밀거나 탭하세요</span>
               <span className="guide-divider">|</span>
-              <span className="key-cap">◀</span>
-              <span className="key-cap">▶</span>
-              <span className="key-cap enter-cap">ENTER</span>
+              <a href={`/${user.id}/badges`} className="footer-badge-link">
+                🏅 뱃지 명예의 전당 보러가기 ↗
+              </a>
             </div>
             <div className="insert-coin">● INSERT COIN TO PLAY ●</div>
           </footer>
         </div>
+
+        {/* ─── Retro Badge Collection Modal ─── */}
+        {isBadgeModalOpen && (
+          <div className="badge-modal-backdrop" onClick={() => setIsBadgeModalOpen(false)}>
+            <div className="badge-modal-card" onClick={e => e.stopPropagation()}>
+              {/* Modal Header with Title & Top-Right Share Button */}
+              <div className="modal-header">
+                <div className="modal-title-group">
+                  <span className="modal-header-icon">🏆</span>
+                  <div>
+                    <h2 className="modal-title">{childName}이의 뱃지 보관함</h2>
+                    <span className="modal-subtitle">총 {earnedCount} / {totalBadgeCount}개 획득</span>
+                  </div>
+                </div>
+
+                {/* Right Top Action Buttons */}
+                <div className="modal-actions-right">
+                  <button
+                    type="button"
+                    className={`modal-share-btn ${copied ? 'copied' : ''}`}
+                    onClick={handleCopyShareUrl}
+                    title="친구에게 자랑할 수 있는 URL 복사"
+                  >
+                    <span>{copied ? '✅ 복사됨!' : '🔗 공유하기'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="modal-close-x"
+                    onClick={() => setIsBadgeModalOpen(false)}
+                    aria-label="닫기"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Filters */}
+              <div className="modal-filters">
+                <button
+                  type="button"
+                  className={`m-filter ${badgeFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setBadgeFilter('all')}
+                >
+                  전체 ({totalBadgeCount})
+                </button>
+                <button
+                  type="button"
+                  className={`m-filter ${badgeFilter === 'earned' ? 'active' : ''}`}
+                  onClick={() => setBadgeFilter('earned')}
+                >
+                  ✨ 획득 ({earnedCount})
+                </button>
+                <button
+                  type="button"
+                  className={`m-filter ${badgeFilter === 'runner' ? 'active' : ''}`}
+                  onClick={() => setBadgeFilter('runner')}
+                >
+                  🏃 Runner
+                </button>
+                <button
+                  type="button"
+                  className={`m-filter ${badgeFilter === 'island' ? 'active' : ''}`}
+                  onClick={() => setBadgeFilter('island')}
+                >
+                  🏝️ Island
+                </button>
+              </div>
+
+              {/* Badges Grid inside Modal */}
+              <div className="modal-badge-scroll">
+                <div className="modal-badges-grid">
+                  {modalBadges.map(badge => {
+                    const isEarned = earnedSet.has(badge.id);
+                    return (
+                      <div
+                        key={badge.id}
+                        className={`m-badge-card ${isEarned ? 'earned' : 'locked'}`}
+                        style={{ '--rarity': badge.rarityColor }}
+                      >
+                        <div className="m-icon-box">
+                          <span className="m-icon">{badge.icon}</span>
+                          {!isEarned && <span className="m-lock">🔒</span>}
+                        </div>
+                        <h4 className="m-badge-name">{badge.title}</h4>
+                        <p className="m-badge-desc">{badge.desc}</p>
+                        <div className="m-badge-tag">
+                          {isEarned ? '✨ 획득!' : '🔒 도전 중'}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Modal Footer with Direct Page Link */}
+              <div className="modal-footer-bar">
+                <a href={`/${user.id}/badges`} className="modal-hall-link">
+                  <span>🌟 전체화면 명예의 전당 보러가기 ↗</span>
+                </a>
+                <button
+                  type="button"
+                  className="modal-copy-link-btn"
+                  onClick={handleCopyShareUrl}
+                >
+                  <span>{copied ? '✅ 복사됨!' : '📋 친구에게 자랑 링크 복사'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Global Toast */}
+        {toastMsg && (
+          <div className="toast-pop">
+            <span>{toastMsg}</span>
+          </div>
+        )}
       </div>
 
       <style jsx global>{`
@@ -431,7 +643,6 @@ export default function UserLobbyPage({ user }) {
           overflow-x: hidden;
         }
 
-        /* Arcade Cabinet Frame with iPad Safe Area */
         .arcade-cabinet {
           min-height: 100vh;
           background: radial-gradient(circle at center, #111422 0%, #06070a 100%);
@@ -442,7 +653,6 @@ export default function UserLobbyPage({ user }) {
           position: relative;
         }
 
-        /* CRT Scanlines overlay */
         .crt-scanlines {
           position: fixed;
           top: 0; left: 0; width: 100vw; height: 100vh;
@@ -458,7 +668,6 @@ export default function UserLobbyPage({ user }) {
           opacity: 0.6;
         }
 
-        /* CRT Glow */
         .crt-glow {
           position: fixed;
           top: 0; left: 0; width: 100vw; height: 100vh;
@@ -467,7 +676,6 @@ export default function UserLobbyPage({ user }) {
           z-index: 51;
         }
 
-        /* Arcade Main Screen Bezel */
         .arcade-screen {
           width: 100%;
           max-width: 920px;
@@ -483,7 +691,6 @@ export default function UserLobbyPage({ user }) {
           z-index: 10;
         }
 
-        /* Top HUD */
         .arcade-hud {
           display: flex;
           align-items: center;
@@ -540,7 +747,6 @@ export default function UserLobbyPage({ user }) {
           border-color: #00f0ff;
         }
 
-        /* Marquee Banner */
         .marquee-banner {
           text-align: center;
           margin-bottom: 20px;
@@ -565,7 +771,6 @@ export default function UserLobbyPage({ user }) {
             0 0 25px rgba(255, 255, 255, 0.4);
         }
 
-        /* iPad Segmented Touch Tabs */
         .touch-tab-nav {
           display: flex;
           gap: 12px;
@@ -617,7 +822,6 @@ export default function UserLobbyPage({ user }) {
           animation: blink 0.7s infinite;
         }
 
-        /* Game Select Grid */
         .select-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -625,7 +829,6 @@ export default function UserLobbyPage({ user }) {
           margin-bottom: 24px;
         }
 
-        /* Game Pod (Cabinet Card) */
         .game-pod {
           background: #111522;
           border: 4px solid #252e47;
@@ -637,7 +840,6 @@ export default function UserLobbyPage({ user }) {
           position: relative;
           transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
           box-shadow: 0 8px 0 #000, 0 12px 20px rgba(0, 0, 0, 0.5);
-          -webkit-tap-highlight-color: transparent;
         }
 
         .game-pod.active {
@@ -694,7 +896,6 @@ export default function UserLobbyPage({ user }) {
           letter-spacing: 0.5px;
         }
 
-        /* Pixel Screen Preview Box */
         .preview-screen {
           width: 100%;
           height: 150px;
@@ -727,7 +928,6 @@ export default function UserLobbyPage({ user }) {
           pointer-events: none;
         }
 
-        /* Pixel Stage Animations */
         .pixel-stage {
           width: 100%;
           height: 100%;
@@ -834,7 +1034,6 @@ export default function UserLobbyPage({ user }) {
           animation: runBounce 0.6s infinite alternate;
         }
 
-        /* Game Name */
         .game-name {
           font-size: 1.45rem;
           font-weight: 900;
@@ -850,7 +1049,6 @@ export default function UserLobbyPage({ user }) {
           text-shadow: 0 0 12px var(--accent), 2px 2px 0 #000;
         }
 
-        /* Arcade Push Button */
         .arcade-btn {
           display: flex;
           align-items: center;
@@ -881,13 +1079,12 @@ export default function UserLobbyPage({ user }) {
           box-shadow: 0 2px 0 #000;
         }
 
-        /* iPad Big Touch Action Bar */
         .ipad-action-bar {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 14px;
-          margin-bottom: 22px;
+          margin-bottom: 20px;
           padding: 6px 0;
         }
 
@@ -956,6 +1153,71 @@ export default function UserLobbyPage({ user }) {
           font-size: 1.1rem;
         }
 
+        /* Badge Launcher Area */
+        .badge-launcher-area {
+          margin-bottom: 22px;
+          display: flex;
+          justify-content: center;
+        }
+
+        .badge-launcher-btn {
+          width: 100%;
+          max-width: 680px;
+          min-height: 60px;
+          background: linear-gradient(90deg, #1b233a 0%, #18283d 50%, #1a2338 100%);
+          border: 3px solid #facc15;
+          border-radius: 14px;
+          padding: 12px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          cursor: pointer;
+          box-shadow: 0 6px 0 #000, 0 0 20px rgba(250, 204, 21, 0.25);
+          transition: all 0.15s ease;
+          gap: 12px;
+        }
+
+        .badge-launcher-btn:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 9px 0 #000, 0 0 30px rgba(250, 204, 21, 0.4);
+          border-color: #ffe600;
+        }
+
+        .badge-launcher-btn:active {
+          transform: translateY(3px);
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .launcher-icon {
+          font-size: 1.8rem;
+          animation: floatSlow 2s infinite ease-in-out;
+        }
+
+        .launcher-title {
+          font-family: inherit;
+          font-size: 1.1rem;
+          font-weight: 900;
+          color: #fff;
+          letter-spacing: 0.5px;
+          flex: 1;
+          text-align: left;
+        }
+
+        .launcher-badge-pill {
+          background: #facc15;
+          color: #000;
+          font-size: 0.82rem;
+          font-weight: 900;
+          padding: 5px 12px;
+          border-radius: 20px;
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .launcher-arrow {
+          font-size: 1.2rem;
+          color: #facc15;
+        }
+
         /* Footer Controls */
         .arcade-footer {
           border-top: 3px dashed #2a344d;
@@ -967,7 +1229,7 @@ export default function UserLobbyPage({ user }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
+          gap: 10px;
           font-size: 0.8rem;
           color: #94a3b8;
           margin-bottom: 8px;
@@ -979,18 +1241,18 @@ export default function UserLobbyPage({ user }) {
           font-weight: bold;
         }
 
-        .key-cap {
-          background: #1e2638;
-          border: 2px solid #3f4e73;
+        .footer-badge-link {
+          color: #facc15;
+          text-decoration: none;
+          font-weight: 900;
+          padding: 4px 8px;
           border-radius: 4px;
-          padding: 2px 8px;
-          color: #ffe600;
-          font-size: 0.75rem;
-          box-shadow: 0 2px 0 #000;
+          background: rgba(250, 204, 21, 0.1);
+          border: 1px solid rgba(250, 204, 21, 0.4);
         }
 
-        .enter-cap {
-          color: #00f0ff;
+        .footer-badge-link:hover {
+          background: rgba(250, 204, 21, 0.25);
         }
 
         .guide-divider {
@@ -1005,10 +1267,306 @@ export default function UserLobbyPage({ user }) {
           animation: blink 0.9s infinite;
         }
 
-        /* Keyframe Animations */
+        /* ─── Badge Modal Styles ─── */
+        .badge-modal-backdrop {
+          position: fixed;
+          top: 0; left: 0; width: 100vw; height: 100vh;
+          background: rgba(4, 6, 12, 0.82);
+          backdrop-filter: blur(6px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+          z-index: 200;
+        }
+
+        .badge-modal-card {
+          width: 100%;
+          max-width: 780px;
+          max-height: 88vh;
+          background: #0f1524;
+          border: 4px solid #293856;
+          border-radius: 18px;
+          box-shadow: 0 14px 0 #000, 0 0 40px rgba(0, 0, 0, 0.9);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+
+        .modal-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 18px 22px;
+          background: #141d30;
+          border-bottom: 3px solid #23304c;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .modal-title-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .modal-header-icon {
+          font-size: 2.2rem;
+        }
+
+        .modal-title {
+          font-size: 1.35rem;
+          color: #fff;
+          font-weight: 900;
+          letter-spacing: 0.5px;
+        }
+
+        .modal-subtitle {
+          font-size: 0.8rem;
+          color: #facc15;
+          font-weight: 800;
+        }
+
+        .modal-actions-right {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .modal-share-btn {
+          font-family: inherit;
+          font-size: 0.85rem;
+          font-weight: 900;
+          background: #ff0055;
+          border: 2px solid #ff4d88;
+          color: #fff;
+          padding: 8px 14px;
+          border-radius: 8px;
+          cursor: pointer;
+          box-shadow: 0 4px 0 #000, 0 0 12px rgba(255, 0, 85, 0.4);
+          transition: all 0.1s ease;
+        }
+
+        .modal-share-btn:active {
+          transform: translateY(2px);
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .modal-share-btn.copied {
+          background: #10b981;
+          border-color: #34d399;
+          box-shadow: 0 4px 0 #000, 0 0 12px rgba(16, 185, 129, 0.5);
+        }
+
+        .modal-close-x {
+          background: #1c263c;
+          border: 2px solid #3d4f75;
+          color: #fff;
+          font-size: 1.1rem;
+          width: 38px;
+          height: 38px;
+          border-radius: 8px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 3px 0 #000;
+        }
+
+        .modal-close-x:active {
+          transform: translateY(2px);
+          box-shadow: 0 1px 0 #000;
+        }
+
+        .modal-filters {
+          display: flex;
+          gap: 8px;
+          padding: 12px 20px;
+          background: #111728;
+          border-bottom: 2px solid #1c273e;
+          overflow-x: auto;
+        }
+
+        .m-filter {
+          font-family: inherit;
+          font-size: 0.78rem;
+          font-weight: 800;
+          background: #192238;
+          border: 2px solid #2e3d5e;
+          color: #94a3b8;
+          padding: 6px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .m-filter.active {
+          background: #00f0ff;
+          color: #000;
+          border-color: #00f0ff;
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .modal-badge-scroll {
+          flex: 1;
+          overflow-y: auto;
+          padding: 20px;
+          background: #0c111e;
+        }
+
+        .modal-badges-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          gap: 14px;
+        }
+
+        .m-badge-card {
+          background: #121829;
+          border: 3px solid #212c44;
+          border-radius: 12px;
+          padding: 14px 10px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          position: relative;
+          box-shadow: 0 4px 0 #000;
+        }
+
+        .m-badge-card.earned {
+          border-color: var(--rarity);
+          box-shadow: 0 4px 0 #000, 0 0 14px var(--rarity);
+          background: linear-gradient(180deg, #162035 0%, #0e1422 100%);
+        }
+
+        .m-badge-card.locked {
+          opacity: 0.6;
+          filter: grayscale(0.6);
+        }
+
+        .m-icon-box {
+          width: 58px;
+          height: 58px;
+          border-radius: 10px;
+          background: #090c14;
+          border: 2px solid #23304a;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 10px;
+          position: relative;
+        }
+
+        .m-badge-card.earned .m-icon-box {
+          border-color: var(--rarity);
+          box-shadow: inset 0 0 8px var(--rarity);
+        }
+
+        .m-icon {
+          font-size: 1.8rem;
+        }
+
+        .m-lock {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          font-size: 0.85rem;
+        }
+
+        .m-badge-name {
+          font-size: 0.88rem;
+          color: #fff;
+          font-weight: 900;
+          margin-bottom: 4px;
+        }
+
+        .m-badge-desc {
+          font-size: 0.68rem;
+          color: #8fa0be;
+          line-height: 1.3;
+          margin-bottom: 8px;
+          flex: 1;
+        }
+
+        .m-badge-tag {
+          font-size: 0.7rem;
+          font-weight: 800;
+          color: var(--rarity, #64748b);
+        }
+
+        .modal-footer-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 14px 20px;
+          background: #141d30;
+          border-top: 3px solid #23304c;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .modal-hall-link {
+          color: #facc15;
+          text-decoration: none;
+          font-size: 0.85rem;
+          font-weight: 900;
+        }
+
+        .modal-hall-link:hover {
+          text-decoration: underline;
+        }
+
+        .modal-copy-link-btn {
+          font-family: inherit;
+          font-size: 0.85rem;
+          font-weight: 900;
+          background: #ff0055;
+          border: 2px solid #ff4d88;
+          color: #fff;
+          padding: 10px 16px;
+          border-radius: 8px;
+          cursor: pointer;
+          box-shadow: 0 4px 0 #000;
+        }
+
+        .modal-copy-link-btn:active {
+          transform: translateY(2px);
+          box-shadow: 0 2px 0 #000;
+        }
+
+        /* Global Toast */
+        .toast-pop {
+          position: fixed;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #10b981;
+          color: #fff;
+          border: 3px solid #34d399;
+          box-shadow: 0 6px 0 #000, 0 0 20px rgba(16, 185, 129, 0.5);
+          padding: 12px 24px;
+          border-radius: 10px;
+          font-size: 0.9rem;
+          font-weight: 800;
+          z-index: 300;
+          animation: popUp 0.3s ease;
+          text-align: center;
+          max-width: 90vw;
+        }
+
+        @keyframes popUp {
+          from { transform: translate(-50%, 20px); opacity: 0; }
+          to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
         @keyframes blink {
           0%, 49% { opacity: 1; }
           50%, 100% { opacity: 0.15; }
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.85; }
+          50% { transform: scale(1.05); opacity: 1; }
         }
 
         @keyframes runBounce {
@@ -1037,7 +1595,6 @@ export default function UserLobbyPage({ user }) {
           100% { transform: translateX(0); }
         }
 
-        /* iPad & Mobile Responsiveness */
         @media (max-width: 768px) {
           .arcade-screen {
             padding: 16px 12px 14px;
@@ -1068,6 +1625,15 @@ export default function UserLobbyPage({ user }) {
             min-height: 52px;
             font-size: 1.2rem;
           }
+          .launcher-title {
+            font-size: 0.92rem;
+          }
+          .modal-header {
+            padding: 14px 16px;
+          }
+          .modal-badges-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
       `}</style>
     </>
@@ -1085,12 +1651,15 @@ export async function getServerSideProps({ params }) {
     return { notFound: true };
   }
 
+  const initialBadges = await getUserBadges(userId);
+
   return {
     props: {
       user: {
         id: user.id,
         name: user.name,
       },
+      initialBadges: initialBadges || { earnedIds: [] },
     },
   };
 }

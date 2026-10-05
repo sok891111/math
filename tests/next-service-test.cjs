@@ -132,6 +132,26 @@ async function run() {
   assert(islandRes.body.includes('window.__BLOCK_USER__'), 'Should inject __BLOCK_USER__ in island game');
   console.log('✅ Block Island game served successfully.');
 
+  console.log('\n--- 5.1 Testing Badge Showcase Route (/:userId/badges) ---');
+  const badgesRes = await request(`http://localhost:${PORT}/${createdUser.id}/badges`);
+  assert.strictEqual(badgesRes.status, 200, 'User badges route should return 200');
+  assert(badgesRes.body.includes('지우의 뱃지 보관함') || badgesRes.body.includes('지우'), 'Should serve personalized badge showcase page');
+  assert(badgesRes.body.includes('친구에게 자랑하기'), 'Should include share button');
+  console.log('✅ Badge Showcase page served successfully.');
+
+  console.log('\n--- 5.2 Testing Badge Sync API (/api/user/:userId/badges) ---');
+  const syncBadgesRes = await request(`http://localhost:${PORT}/api/user/${createdUser.id}/badges`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  }, { badges: { earnedIds: ['first-light', 'island-fox-bridge'] } });
+  assert.strictEqual(syncBadgesRes.status, 200, 'Badges sync should succeed');
+
+  const getBadgesRes = await request(`http://localhost:${PORT}/api/user/${createdUser.id}/badges`);
+  assert.strictEqual(getBadgesRes.status, 200, 'Get badges API should return 200');
+  const badgesApiData = JSON.parse(getBadgesRes.body);
+  assert(badgesApiData.badges?.earnedIds?.includes('first-light'), 'Should contain synced badge');
+  console.log('✅ Badge Sync API works correctly.');
+
   console.log('\n--- 6. Testing Non-existent User Route ---');
   const notFoundRes = await request(`http://localhost:${PORT}/nonexist123`);
   assert.strictEqual(notFoundRes.status, 404, 'Non-existent user route should return 404');
