@@ -45,8 +45,11 @@ export async function getServerSideProps({ params, res }) {
     html = html.replace(/☀ 햇살 모험/g, '🏃 크래프트 Runner');
     html = html.replace(/☀ 점프하며 좀비를 잡는 햇살 모험 →/g, '🏃 크래프트 Runner 모험하기 →');
 
-    // Brand link back to Lobby
-    html = html.replace(/<a class="brand" href="\.\/"/g, `<a class="brand" href="/${user.id}" title="게임 선택 로비로 가기"`);
+    // Brand link back to Lobby (처음으로 가기)
+    html = html.replace(/<a class="brand" href="\.\/"[^>]*>/g, `<a class="brand" href="/${user.id}" aria-label="처음으로 가기" title="처음으로 가기">`);
+    html = html.replace(/<a class="brand" href="\.\/">/g, `<a class="brand" href="/${user.id}" aria-label="처음으로 가기" title="처음으로 가기">`);
+    html = html.replace(/<span>열칸 블록섬/g, '<span>처음으로 가기');
+    html = html.replace(/<span class="brand-icon">▦<\/span>/g, '<span class="brand-icon">🏠</span>');
     html = html.replace(/href="\.\/"/g, `href="/${user.id}/island"`);
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');

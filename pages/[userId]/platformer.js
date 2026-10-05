@@ -39,9 +39,12 @@ export async function getServerSideProps({ params, res }) {
     html = html.replace(/href="style\.css([^"]*)"/g, 'href="/platformer/style.css$1"');
     html = html.replace(/src="([a-zA-Z0-9_-]+\.js[^"]*)"/g, 'src="/platformer/$1"');
 
-    // Link back to user lobby and island
-    html = html.replace(/<a class="brand" href="\.\.\/">/g, `<a class="brand" href="/${user.id}" title="게임 선택 로비로 가기">`);
-    html = html.replace(/<a href="\.\.\/">원래 블록섬으로 돌아가기 ↗<\/a>/g, `<a href="/${user.id}">🎮 게임 선택 로비로 나가기 ↗</a> <span style="margin: 0 8px; opacity: 0.4">|</span> <a href="/${user.id}/island">🏝️ 완성! block island 로 이동 ↗</a>`);
+    // Link back to user lobby and island (처음으로 가기)
+    html = html.replace(/<a class="brand" href="\.\.\/"[^>]*>/g, `<a class="brand" href="/${user.id}" aria-label="처음으로 가기" title="처음으로 가기">`);
+    html = html.replace(/<a class="brand" href="\.\.\/">/g, `<a class="brand" href="/${user.id}" aria-label="처음으로 가기" title="처음으로 가기">`);
+    html = html.replace(/<span>열칸 블록섬/g, '<span>처음으로 가기');
+    html = html.replace(/<span class="brand-mark">▦<\/span>/g, '<span class="brand-mark">🏠</span>');
+    html = html.replace(/<a href="\.\.\/">원래 블록섬으로 돌아가기 ↗<\/a>/g, `<a href="/${user.id}">🏠 처음으로 가기 ↗</a> <span style="margin: 0 8px; opacity: 0.4">|</span> <a href="/${user.id}/island">🏝️ 완성! block island 로 이동 ↗</a>`);
     html = html.replace(/href="\.\.\/"/g, `href="/${user.id}"`);
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
