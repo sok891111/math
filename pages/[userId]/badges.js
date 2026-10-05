@@ -349,7 +349,7 @@ export default function UserBadgesPage({ user, initialBadges, baseUrl = 'https:/
                       <span className="status-earned">✨ 획득 완료</span>
                     ) : (
                       <span className="status-locked">
-                        {badge.target ? `0 / ${badge.target}` : '🔒 도전 중'}
+                        미획득
                       </span>
                     )}
                   </div>
@@ -385,7 +385,7 @@ export default function UserBadgesPage({ user, initialBadges, baseUrl = 'https:/
         {/* Badge Detail Modal */}
         {selectedBadge && (
           <div className="modal-backdrop" onClick={() => setSelectedBadge(null)}>
-            <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <div className={`modal-box ${earnedSet.has(selectedBadge.id) ? 'earned' : 'locked'}`} role="dialog" aria-modal="true" aria-labelledby="badge-modal-title" onClick={e => e.stopPropagation()}>
               <button
                 type="button"
                 className="modal-close-btn"
@@ -401,18 +401,18 @@ export default function UserBadgesPage({ user, initialBadges, baseUrl = 'https:/
                 <span className="big-icon">{selectedBadge.icon}</span>
               </div>
 
-              <span className="modal-rarity" style={{ color: selectedBadge.rarityColor }}>
+              <span className="modal-rarity" style={{ color: earnedSet.has(selectedBadge.id) ? selectedBadge.rarityColor : '#94a3b8' }}>
                 {selectedBadge.rarityName} 등급 배지
               </span>
 
-              <h2 className="modal-title">{selectedBadge.title}</h2>
+              <h2 id="badge-modal-title" className="modal-title">{selectedBadge.title}</h2>
               <p className="modal-desc">{selectedBadge.desc}</p>
 
               <div className="modal-footer-status">
                 {earnedSet.has(selectedBadge.id) ? (
                   <span className="modal-earned-pill">🏆 멋지게 획득 완료!</span>
                 ) : (
-                  <span className="modal-locked-pill">🔒 게임을 플레이해서 이 배지를 획득해 봐!</span>
+                  <span className="modal-locked-pill">미획득 배지</span>
                 )}
               </div>
             </div>
@@ -916,6 +916,10 @@ export default function UserBadgesPage({ user, initialBadges, baseUrl = 'https:/
           position: relative;
           box-shadow: 0 10px 0 #000, 0 0 30px rgba(0, 0, 0, 0.8);
         }
+
+        .modal-box { max-height: calc(100dvh - 40px); overflow-y: auto; }
+        .modal-box.locked .modal-icon-box { border-color: #64748b; box-shadow: none; }
+        .modal-box.locked .big-icon, .badge-card.locked .badge-icon { filter: grayscale(1); opacity: .55; }
 
         .modal-close-btn {
           position: absolute;

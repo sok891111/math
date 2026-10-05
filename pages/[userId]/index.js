@@ -753,7 +753,7 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
                             <span className="m-earned-text">✨ 획득 완료</span>
                           ) : (
                             <span className="m-locked-text">
-                              {badge.target ? `0 / ${badge.target}` : '🔒 도전 중'}
+                              미획득
                             </span>
                           )}
                         </div>
@@ -787,7 +787,8 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
         {selectedBadge && (
           <div className="badge-detail-backdrop" onClick={() => setSelectedBadge(null)}>
             <div
-              className="badge-detail-card"
+              className={`badge-detail-card ${earnedSet.has(selectedBadge.id) ? 'earned' : 'locked'}`}
+              role="dialog" aria-modal="true" aria-labelledby="badge-detail-title"
               onClick={e => e.stopPropagation()}
               onTouchStart={e => e.stopPropagation()}
               onTouchEnd={e => e.stopPropagation()}
@@ -812,7 +813,7 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
               </div>
 
               <div className="badge-detail-meta-row">
-                <span className="badge-detail-rarity" style={{ color: selectedBadge.rarityColor }}>
+                <span className="badge-detail-rarity" style={{ color: earnedSet.has(selectedBadge.id) ? selectedBadge.rarityColor : '#94a3b8' }}>
                   ★ {selectedBadge.rarityName} 등급 배지 ★
                 </span>
                 <span className="badge-detail-game-tag">
@@ -824,7 +825,7 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
                 </span>
               </div>
 
-              <h3 className="badge-detail-title">{selectedBadge.title}</h3>
+              <h3 id="badge-detail-title" className="badge-detail-title">{selectedBadge.title}</h3>
               <p className="badge-detail-desc">{selectedBadge.desc}</p>
 
               {/* Status section tailored for earned vs locked */}
@@ -838,39 +839,12 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
                     </div>
                   </div>
                 ) : (
-                  <div className="detail-status-locked">
-                    <span className="status-badge-icon">🔒</span>
-                    <div className="status-badge-texts">
-                      <strong className="status-head">도전 진행 중인 배지</strong>
-                      <p className="status-sub">
-                        {selectedBadge.target
-                          ? `목표 달성 조건: ${selectedBadge.target}회 완료 도전!`
-                          : selectedBadge.desc}
-                      </p>
-                    </div>
-                  </div>
+                  <span className="modal-unearned-label">미획득 배지</span>
                 )}
               </div>
 
               {/* Action to launch the relevant game directly if user wants */}
               <div className="badge-detail-actions">
-                {(() => {
-                  const gameTarget = games.find(g => g.id === selectedBadge.game) || games[0];
-                  return (
-                    <button
-                      type="button"
-                      className="badge-detail-play-btn"
-                      onClick={() => {
-                        unlockAudio();
-                        playSound('start');
-                        handleLaunch(gameTarget.path);
-                      }}
-                      style={{ '--btn-color': gameTarget.themeColor }}
-                    >
-                      <span>🎮 {gameTarget.title} 플레이하러 가기 ▶</span>
-                    </button>
-                  );
-                })()}
                 <button
                   type="button"
                   className="badge-detail-back-btn"
@@ -2037,6 +2011,12 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
           position: relative;
           animation: popUp 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
+
+        .badge-detail-card { max-height: calc(100dvh - 32px); overflow-y: auto; }
+        .badge-detail-card.locked .badge-detail-icon-wrap { border-color: #64748b; box-shadow: none; }
+        .badge-detail-card.locked .badge-detail-big-icon { filter: grayscale(1); opacity: .55; }
+        .m-badge-card.locked .m-icon { filter: grayscale(1); opacity: .55; }
+        .modal-unearned-label { color: #94a3b8; font-size: .85rem; }
 
         .badge-detail-close {
           position: absolute;
