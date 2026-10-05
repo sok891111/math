@@ -5,11 +5,19 @@
   "scripts": {
     "start": "python3 -m http.server 4173 --bind 0.0.0.0",
     "test": "node tests/smoke.cjs && node tests/adventure.cjs && node tests/math-link.cjs",
+    "test:platformer-wind": "node tests/platformer-wind-unlock.cjs",
+    "test:platformer-enemies": "node tests/platformer-enemy-combat.cjs",
+    "test:platformer-weapons": "node tests/platformer-weapons.cjs",
+    "test:platformer-climbing": "node tests/platformer-climbing-timer.cjs",
+    "test:platformer-advanced": "node tests/platformer-advanced-math.cjs",
     "test:platformer": "node tests/platformer.cjs && node tests/platformer-ipad-touch.cjs",
     "test:platformer-blocks": "node tests/platformer-blocks.cjs",
     "test:platformer-rewards": "node tests/platformer-progress.cjs && node tests/platformer-rewards.cjs",
     "test:platformer-timer": "node tests/platformer-timer.cjs",
-    "test:platformer-expansion": "node tests/platformer-expansion-unit.cjs && node tests/platformer-expansion.cjs"
+    "test:platformer-expansion": "node tests/platformer-expansion-unit.cjs && node tests/platformer-expansion.cjs",
+    "test:platformer-elite": "node tests/platformer-elite.cjs",
+    "test:platformer-multiply-lesson": "node tests/platformer-multiply-lesson.cjs",
+    "test:platformer-campaign": "node tests/platformer-campaign-unit.cjs && node tests/platformer-campaign.cjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"

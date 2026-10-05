@@ -1,0 +1,42 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const {chromium}=require('playwright');
+const scope={window:{}};vm.runInNewContext(fs.readFileSync('platformer/weapons.js','utf8'),scope);const W=scope.window.SunshineWeapons;
+for(const kind of Object.keys(W.catalog)){
+ const state=W.create(),p={x:100,y:100,w:28,h:46,face:1};W.equip(state,kind);
+ for(let i=0;i<360;i++)W.update(state,1/120,p,[],[]);assert.equal(state.attacks,3);assert.ok(state.arrows.length<=2);
+ W.equip(state,'bow');assert.equal(state.arrows.length,0);assert.equal(state.cooldown,1);
+ const target={x:180,y:100,w:35,h:46};let hit;for(let i=0;i<150;i++)hit=W.update(state,1/120,p,[target],[])||hit;assert.equal(hit,target);
+ W.equip(state,'bow');hit=null;for(let i=0;i<180;i++)hit=W.update(state,1/120,p,[target],[{x:150,y:90,w:24,h:80}])||hit;assert.equal(hit,null);
+}
+assert.equal(W.roll(null,()=>.35),null);
+assert.equal(W.roll(null,()=>.999),null);
+assert.ok(W.catalog[W.roll(null,()=>0)]);
+let drops=0;for(let i=0;i<8000;i++){let first=true;const random=()=>{if(first){first=false;return i/8000;}return .35;};if(W.roll(null,random))drops++;}assert.equal(drops,2800);
+const P=require('../platformer/progress.js');const progress=P.create({getItem:()=>null,setItem(){}});for(const kind of ['shulker','enderknight'])for(let i=0;i<100;i++){const [a,b]=progress.nextQuestion(kind);assert.ok(a>=10&&b>=10&&a+b<=40);}
+(async()=>{const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})});try{
+const page=await browser.newPage({viewport:{width:1200,height:850}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.route('**/game.js*',async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text()).replace('// Read-only state',`window.gearFixture={
+ fresh(){if($('quiz').open)closeQuiz();if($('loot-dialog').open)$('loot-close').click();loadLevel('meadow');mode='play';coins=[];monsters.forEach(z=>z.defeated=true);},
+ win(kind){this.fresh();const z=monsters[0];Object.assign(z,{kind,name:catalog[kind].name,defeated:false});encounter(z);answer=String(z.q[0]+z.q[1]);submit();closeQuiz();return drops[0];},
+ collect(kind){const d=drops[0];d.weapon=kind;collectDrop(d);return weapon.kind;},
+ pickupAgain(){collectDrop(drops[0]);},
+ animate(kind){this.fresh();SunshineWeapons.equip(weapon,kind);for(let i=0;i<121;i++)step(1/120);draw();return {...weapon};},
+ freeze(){const before=JSON.stringify(weapon);mode='pause';for(let i=0;i<180;i++)step(1/120);return before===JSON.stringify(weapon);},
+ attack(kind){this.fresh();SunshineWeapons.equip(weapon,kind);const z=monsters[0];Object.assign(z,{kind:'zombie',name:catalog.zombie.name,x:player.x+player.w+30,y:player.y,w:32,h:44,vx:0,min:0,max:1000,defeated:false,flying:false});for(let i=0;i<180&&mode==='play';i++)step(1/120);return mode;},
+ dragon(){this.fresh();let z;for(let i=0;i<100&&!z;i++){loadLevel('river');z=monsters.find(m=>m.kind==='enderdragon');}if(!z)throw Error('No dragon');monsters.forEach(m=>m.defeated=m!==z);mode='play';player.x=70;coins=[];let min=z.x,max=z.x,top=z.y,bottom=z.y;for(let i=0;i<2400;i++){step(1/120);min=Math.min(min,z.x);max=Math.max(max,z.x);top=Math.min(top,z.y);bottom=Math.max(bottom,z.y);}const range={x:max-min,y:bottom-top,min:z.min,max:z.max};z.x=835;z.y=100;encounter(z);answer=String(z.q[0]+z.q[1]);submit();const d=drops.at(-1);range.safe=!!groundAt(d.x+d.w/2);range.checkpoint=!!groundAt(checkpoint);closeQuiz();return range;},
+ stage(){this.fresh();SunshineWeapons.equip(weapon,'sword');loadLevel('sky');return weapon.kind;},
+ scene(){this.fresh();$('intro').hidden=true;player.x=430;camera=100;SunshineWeapons.equip(weapon,'bow');weapon.cooldown=0;SunshineWeapons.update(weapon,.01,player,[],[]);for(const [i,kind] of ['enderdragon','shulker','enderknight','endermite'].entries()){const m=catalog[kind];Object.assign(monsters[i],{kind,name:m.name,w:m.w,h:m.h,x:kind==='enderdragon'?680:700+(i-1)*110,y:kind==='enderdragon'?75:390-m.h,baseY:390,defeated:false});}mode='pause';draw();}
+};\n// Read-only state`)});});
+await page.goto('http://localhost:4173/platformer/');
+const population=await page.evaluate(()=>{const counts=new Set(),kinds=new Set();for(const m of SunshineMaps.layouts)for(let i=0;i<80;i++){const map=SunshineMaps.build(m.id),list=MonsterArt.populate(map);counts.add(list.length);if(new Set(list.map(z=>z.kind)).size!==list.length)throw Error('Duplicate kinds');for(const z of list){kinds.add(z.kind);if(!map.platforms.some(p=>p.ground&&z.x>=p.x&&z.x<p.x+p.w))throw Error('Unsafe spawn');}}return {counts:[...counts].sort(),kinds:[...kinds]};});assert.deepEqual(population.counts,[5,6,7,8]);for(const k of ['shulker','endermite','enderknight'])assert.ok(population.kinds.includes(k));
+await page.evaluate(()=>gearFixture.animate('sword'));
+await page.evaluate(()=>gearFixture.win('zombie'));await page.evaluate(()=>gearFixture.collect(null));assert.equal(await page.evaluate(()=>sunshine.snapshot().weapon.kind),'sword');assert.doesNotMatch(await page.locator('#loot-title').textContent(),/자동 장착/);
+await page.evaluate(()=>gearFixture.win('enderdragon'));const beforeDragon=await page.evaluate(()=>sunshine.snapshot());await page.evaluate(()=>gearFixture.collect(null));const afterDragon=await page.evaluate(()=>sunshine.snapshot());assert.equal(afterDragon.progress.stats.gems-beforeDragon.progress.stats.gems,30);assert.equal(afterDragon.score-beforeDragon.score,1500);assert.equal(afterDragon.progress.relics.enderdragon-beforeDragon.progress.relics.enderdragon,1);assert.equal(afterDragon.weapon.kind,'sword');assert.equal(await page.locator('#loot-dialog').evaluate(e=>e.classList.contains('dragon-reward')),true);assert.match(await page.locator('#loot-title').textContent(),/드래곤을 이겼다/);assert.match(await page.locator('#loot-values').textContent(),/1,?500/);await page.locator('.dragon-prize').evaluateAll(async els=>{await Promise.all(els.flatMap(el=>el.getAnimations().map(a=>a.finished)));});await page.screenshot({path:'test-artifacts/dragon-reward.png'});await page.evaluate(()=>gearFixture.pickupAgain());assert.equal(await page.evaluate(()=>sunshine.snapshot().progress.stats.gems),afterDragon.progress.stats.gems);
+await page.setViewportSize({width:390,height:844});assert.ok(await page.locator('#loot-dialog').evaluate(e=>e.scrollWidth<=e.clientWidth));await page.locator('#loot-next').scrollIntoViewIfNeeded();assert.equal(await page.locator('#loot-next').isVisible(),true);await page.setViewportSize({width:1200,height:850});
+for(const kind of ['sword','bow','shield']){const d=await page.evaluate(()=>gearFixture.win('shulker'));assert.ok(d.weapon===null||W.catalog[d.weapon]);assert.equal(await page.evaluate(k=>gearFixture.collect(k),kind),kind);assert.match(await page.locator('#loot-title').textContent(),/자동 장착/);const total=await page.evaluate(()=>sunshine.snapshot().progress.stats.chests);await page.evaluate(()=>gearFixture.pickupAgain());assert.equal(await page.evaluate(()=>sunshine.snapshot().progress.stats.chests),total);const state=await page.evaluate(k=>gearFixture.animate(k),kind);assert.ok(state.animation>0);assert.doesNotMatch(await page.locator('#weapon-status').textContent(),/1초|공격|발사|휘두르기|밀치기/);if(kind==='bow')assert.equal(state.arrows.length,1);assert.equal(await page.evaluate(()=>gearFixture.freeze()),true);assert.equal(await page.evaluate(k=>gearFixture.attack(k),kind),'quiz');}
+assert.equal(await page.evaluate(()=>gearFixture.stage()),'sword');
+const dragon=await page.evaluate(()=>gearFixture.dragon());assert.ok(dragon.x>750&&dragon.y>80);assert.ok(dragon.safe&&dragon.checkpoint);
+await page.evaluate(()=>gearFixture.scene());await page.screenshot({path:'test-artifacts/ender-weapons.png'});
+await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.equal(await page.locator('#weapon-status').isVisible(),true);
+assert.deepEqual(errors,[]);console.log('PASS: 35% drop rate, no-drop equipment retention, legendary dragon rewards, exact-once claim, mobile reward layout; 5–8 distinct spawns, 18 species, new hard questions, automatic weapon replacement and once-only loot, 1s attacks, pause, wall collision, ranged/melee encounters, cross-stage equipment, wide dragon flight and safe gap rewards.');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

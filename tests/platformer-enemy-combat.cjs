@@ -1,0 +1,30 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const {chromium}=require('playwright');const scope={window:{}};vm.runInNewContext(fs.readFileSync('platformer/enemy-combat.js','utf8'),scope);const C=scope.window.SunshineEnemyCombat;
+for(const kind of Object.keys(C.attacks)){
+ const state=C.create(),m={id:kind,kind,x:80,y:100,w:40,h:60,attackCooldown:0},player={x:300,y:100,w:28,h:46};
+ C.update(state,.01,player,[m],[]);assert.ok(m.attackCharge>0);assert.equal(state.projectiles.length,0);
+ for(let i=0;i<80;i++)C.update(state,1/120,player,[m],[]);assert.equal(state.projectiles.length,1,kind+' fires after warning');
+ let hit;for(let i=0;i<240&&!hit;i++)hit=C.update(state,1/120,player,[m],[]);assert.ok(hit,kind+' projectile reaches player');assert.equal(hit.direction,1);
+ m.defeated=true;C.update(state,.01,player,[m],[]);assert.equal(state.projectiles.length,0);
+}
+for(const [type,blocked] of [['arrow',true],['sonic',false]]){const s=C.create(),m={id:'a',kind:'zombie',x:0,y:0,w:30,h:40};s.projectiles=[{owner:'a',type,x:95,y:95,w:12,h:12,vx:100,vy:0,gravity:0,life:4,age:0}];C.update(s,.01,{x:300,y:95,w:28,h:46},[m],[{x:100,y:0,w:25,h:200}]);assert.equal(s.projectiles.length,blocked?0:1);}
+(async()=>{const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})});try{
+ const page=await browser.newPage({viewport:{width:1100,height:850}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.route('**/game.js*',async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text()).replace('// Read-only state',`window.enemyFixture={
+ fresh(){if($('quiz').open)closeQuiz();loadLevel('meadow');begin();coins=[];weapon=SunshineWeapons.create();monsters.forEach(z=>z.defeated=true);},
+ platforms(){const results=[];for(const layout of SunshineMaps.layouts){for(let n=0;n<8;n++){loadLevel(layout.id);const upper=monsters.filter(m=>!m.flying&&!platforms[m.supportIndex].ground);if(upper.length!==2)throw Error('Missing upper guards');for(const z of upper){const support=platforms[z.supportIndex];if(z.min<support.x||z.max+z.w>support.x+support.w||z.y+z.h!==support.y)throw Error('Unsafe patrol');}results.push(upper.length);}}return results;},
+ patrol(){for(const layout of SunshineMaps.layouts){loadLevel(layout.id);mode='play';coins=[];weapon=SunshineWeapons.create();const upper=monsters.filter(m=>!m.flying&&!platforms[m.supportIndex].ground);monsters.forEach(m=>{m.defeated=!upper.includes(m);m.attackCooldown=10000;});for(let i=0;i<720;i++){step(1/120);for(const z of upper){const p=platforms[z.supportIndex];if(z.x<p.x||z.x+z.w>p.x+p.w||z.y+z.h!==p.y)throw Error('Patrol escaped '+layout.id);}}}return true;},
+ hit(direction){this.fresh();platforms=platforms.filter(p=>p.ground);Object.assign(player,{x:300,y:344,vx:0,vy:0});const source=monsters[0];Object.assign(source,{kind:'zombie',x:1200,y:346,defeated:false});enemyCombat.projectiles=[{owner:source.id,type:'arrow',color:'#ddd',x:player.x+5,y:player.y+20,w:12,h:12,vx:direction*180,vy:0,gravity:0,age:0,life:4}];step(1/120);const before=player.x;keys.add(direction>0?'left':'right');let top=player.y;for(let i=0;i<42;i++){step(1/120);top=Math.min(top,player.y);}keys.clear();return {distance:player.x-before,rise:344-top,hurt:player.hurtTime,mode,toast:$('toast').textContent};},
+ wall(){this.fresh();Object.assign(player,{x:150,y:344,vx:400,knockback:.35,hurtTime:1});platforms.push({x:player.x+player.w+10,y:300,w:20,h:90});for(let i=0;i<45;i++)step(1/120);return player.x;},
+ freeze(){this.fresh();const m=monsters[0];Object.assign(m,{kind:'skeleton',x:320,y:340,defeated:false,attackCooldown:0});for(let i=0;i<90;i++)step(1/120);mode='pause';const before=JSON.stringify(enemyCombat);for(let i=0;i<120;i++)step(1/120);return before===JSON.stringify(enemyCombat);},
+ upperEncounter(){this.fresh();const z=monsters.find(m=>!platforms[m.supportIndex].ground);z.defeated=false;player.x=z.x;player.y=z.y;step(1/120);const opened=mode==='quiz';if(opened){answer=String(isMultiply()?z.q[0]*z.q[1]:z.q[0]+z.q[1]);submit();}return {opened,won:battleOutcome==='won',safe:!!groundAt(drops[0]?.x+18)};},
+ scene(){this.fresh();const upper=monsters.find(m=>!platforms[m.supportIndex].ground);Object.assign(upper,{kind:'skeleton',name:catalog.skeleton.name,w:30,h:50,y:upper.baseY-50,defeated:false,attackCharge:.4,attackFacing:-1});const ground=monsters.find(m=>platforms[m.supportIndex].ground);Object.assign(ground,{kind:'witch',name:catalog.witch.name,x:600,y:334,w:34,h:56,defeated:false,attackCharge:.3,attackFacing:-1});enemyCombat.projectiles=[{owner:upper.id,type:'arrow',color:'#e5d3a1',x:upper.x-70,y:upper.y+60,w:12,h:12,vx:-180,vy:70,gravity:0,life:3,age:.2}];camera=0;mode='pause';draw();}
+};\n// Read-only state`)});});
+ await page.goto('http://localhost:4173/platformer/');assert.equal((await page.evaluate(()=>enemyFixture.platforms())).length,96);
+ assert.equal(await page.evaluate(()=>enemyFixture.patrol()),true);
+ for(const direction of [-1,1]){const hit=await page.evaluate(d=>enemyFixture.hit(d),direction);assert.ok(hit.distance*direction>=130&&hit.distance*direction<=145,JSON.stringify(hit));assert.ok(hit.hurt>0);assert.ok(hit.rise>30);assert.doesNotMatch(hit.toast,/공격에 맞았어/);assert.equal(hit.mode,'play');}
+ assert.ok(await page.evaluate(()=>enemyFixture.wall())<=160.01);assert.equal(await page.evaluate(()=>enemyFixture.freeze()),true);
+ const upper=await page.evaluate(()=>enemyFixture.upperEncounter());assert.ok(upper.opened&&upper.won&&upper.safe,JSON.stringify(upper));
+ await page.evaluate(()=>enemyFixture.scene());await page.screenshot({path:'test-artifacts/upper-monster-attacks.png'});assert.deepEqual(errors,[]);
+ console.log('PASS: seven ranged attacks with warnings, terrain and sonic behavior, defeated projectile cleanup, 96 elevated populations, left/right exaggerated knockback and hop, input resistance, wall collision, pause and upper-platform quiz/reward.');
+ }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
