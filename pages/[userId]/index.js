@@ -61,6 +61,17 @@ export default function UserLobbyPage({ user, initialBadges }) {
       accentBg: 'linear-gradient(135deg, #2b1f05 0%, #150e02 100%)',
       sceneClass: 'island-scene',
     },
+    {
+      id: 'creative',
+      title: 'Creative 크래프트',
+      path: `/${user.id}/creative`,
+      type: 'CREATIVE PUZZLE',
+      meta: 'BRIDGE & WARDEN · 1P',
+      themeColor: '#10b981',
+      themeBorder: '#34d399',
+      accentBg: 'linear-gradient(135deg, #062b1e 0%, #02140d 100%)',
+      sceneClass: 'creative-scene',
+    },
   ];
 
   // Unlock iOS Safari AudioContext on first touch
@@ -125,6 +136,18 @@ export default function UserLobbyPage({ user, initialBadges }) {
           if (count >= 10) earnedSet.add('island-milestone-10');
           if (count >= 20) earnedSet.add('island-milestone-20');
           if (count >= 45) earnedSet.add('island-milestone-45');
+        }
+      }
+
+      // 3. Creative 크래프트 earned badges
+      const creativeRaw = localStorage.getItem(`block-creative-bridge-v1:${user.id}`);
+      if (creativeRaw) {
+        const cData = JSON.parse(creativeRaw);
+        if (cData && Array.isArray(cData.completed)) {
+          cData.completed.forEach(idx => earnedSet.add(`creative-bridge-${idx}`));
+        }
+        if (cData && cData.warden && Array.isArray(cData.warden.completed)) {
+          cData.warden.completed.forEach(idx => earnedSet.add(`creative-warden-${idx}`));
         }
       }
 
@@ -222,12 +245,18 @@ export default function UserLobbyPage({ user, initialBadges }) {
       }
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
         e.preventDefault();
-        setSelectedIdx(0);
-        playSound('select');
+        setSelectedIdx(prev => {
+          const next = Math.max(0, prev - 1);
+          if (next !== prev) playSound('select');
+          return next;
+        });
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
         e.preventDefault();
-        setSelectedIdx(1);
-        playSound('select');
+        setSelectedIdx(prev => {
+          const next = Math.min(games.length - 1, prev + 1);
+          if (next !== prev) playSound('select');
+          return next;
+        });
       } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         handleLaunch(games[selectedIdx].path);
@@ -236,7 +265,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIdx, sfxEnabled, isBadgeModalOpen]);
+  }, [selectedIdx, sfxEnabled, isBadgeModalOpen, games.length]);
 
   // Touch Swipe Handlers for iPad
   const onTouchStart = (e) => {
@@ -255,11 +284,11 @@ export default function UserLobbyPage({ user, initialBadges }) {
       const diffX = endX - touchStartXRef.current;
       const diffY = endY - touchStartYRef.current;
       if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
-        if (diffX < 0 && selectedIdx === 0) {
-          setSelectedIdx(1);
+        if (diffX < 0 && selectedIdx < games.length - 1) {
+          setSelectedIdx(selectedIdx + 1);
           playSound('select');
-        } else if (diffX > 0 && selectedIdx === 1) {
-          setSelectedIdx(0);
+        } else if (diffX > 0 && selectedIdx > 0) {
+          setSelectedIdx(selectedIdx - 1);
           playSound('select');
         }
       }
@@ -273,11 +302,13 @@ export default function UserLobbyPage({ user, initialBadges }) {
   const totalBadgeCount = BADGE_CATALOG.length;
   const runnerBadgeTotal = BADGE_CATALOG.filter(b => b.game === 'runner').length;
   const islandBadgeTotal = BADGE_CATALOG.filter(b => b.game === 'island').length;
+  const creativeBadgeTotal = BADGE_CATALOG.filter(b => b.game === 'creative').length;
 
   const modalBadges = BADGE_CATALOG.filter(b => {
     if (badgeFilter === 'earned') return earnedSet.has(b.id);
     if (badgeFilter === 'runner') return b.game === 'runner';
     if (badgeFilter === 'island') return b.game === 'island';
+    if (badgeFilter === 'creative') return b.game === 'creative';
     if (badgeFilter === 'monster') return b.category === 'monster';
     if (badgeFilter === 'math') return b.category === 'math';
     if (badgeFilter === 'treasure') return b.category === 'treasure' || b.category === 'adventure' || b.category === 'bridge';
@@ -357,7 +388,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
                     '--tab-color': g.themeColor,
                   }}
                 >
-                  <span className="tab-icon">{idx === 0 ? '🏃‍♂️' : '🏝️'}</span>
+                  <span className="tab-icon">{idx === 0 ? '🏃‍♂️' : idx === 1 ? '🏝️' : '🌿'}</span>
                   <span className="tab-label">{g.title}</span>
                   {isSelected && <span className="tab-pip">●</span>}
                 </button>
@@ -407,7 +438,7 @@ export default function UserLobbyPage({ user, initialBadges }) {
                         <div className="pixel-sprite zombie-sprite">🧟</div>
                         <div className="pixel-ground runner-ground" />
                       </div>
-                    ) : (
+                    ) : g.id === 'island' ? (
                       <div className="pixel-stage island-stage">
                         <div className="pixel-moon">🌙</div>
                         <div className="pixel-stars">✨ 🌟 ✨</div>
@@ -416,6 +447,15 @@ export default function UserLobbyPage({ user, initialBadges }) {
                         <div className="pixel-animals">🦊 🐻 🐰</div>
                         <div className="pixel-blocks">🧊 🍎 🥕</div>
                         <div className="pixel-ground island-ground" />
+                      </div>
+                    ) : (
+                      <div className="pixel-stage creative-stage">
+                        <div className="pixel-sun creative-sun">☀️</div>
+                        <div className="pixel-cloud c1">☁️</div>
+                        <div className="pixel-creeper">🌿</div>
+                        <div className="pixel-bridge-wood">🪵 🟩 🧱 🟩 🪵</div>
+                        <div className="pixel-warden">🩵</div>
+                        <div className="pixel-ground creative-ground" />
                       </div>
                     )}
                     <div className="screen-lines" />
@@ -451,8 +491,10 @@ export default function UserLobbyPage({ user, initialBadges }) {
               onClick={(e) => {
                 e.stopPropagation();
                 unlockAudio();
-                setSelectedIdx(0);
-                playSound('select');
+                if (selectedIdx > 0) {
+                  setSelectedIdx(selectedIdx - 1);
+                  playSound('select');
+                }
               }}
               aria-label="이전 게임 선택"
             >
@@ -481,12 +523,14 @@ export default function UserLobbyPage({ user, initialBadges }) {
             <button
               type="button"
               className="ipad-nav-btn next-btn"
-              disabled={selectedIdx === 1}
+              disabled={selectedIdx === games.length - 1}
               onClick={(e) => {
                 e.stopPropagation();
                 unlockAudio();
-                setSelectedIdx(1);
-                playSound('select');
+                if (selectedIdx < games.length - 1) {
+                  setSelectedIdx(selectedIdx + 1);
+                  playSound('select');
+                }
               }}
               aria-label="다음 게임 선택"
             >
@@ -620,6 +664,13 @@ export default function UserLobbyPage({ user, initialBadges }) {
                   onClick={() => setBadgeFilter('island')}
                 >
                   🏝️ 완성! block island ({islandBadgeTotal})
+                </button>
+                <button
+                  type="button"
+                  className={`tab-filter-btn ${badgeFilter === 'creative' ? 'active' : ''}`}
+                  onClick={() => setBadgeFilter('creative')}
+                >
+                  🌿 Creative 크래프트 ({creativeBadgeTotal})
                 </button>
                 <button
                   type="button"
@@ -998,6 +1049,10 @@ export default function UserLobbyPage({ user, initialBadges }) {
           background: linear-gradient(180deg, #161a38 0%, #0b0f24 65%, #1b3848 65%, #0d202b 100%);
         }
 
+        .creative-scene {
+          background: linear-gradient(180deg, #102a24 0%, #061914 65%, #16402d 65%, #0d281c 100%);
+        }
+
         .screen-lines {
           position: absolute;
           top: 0; left: 0; width: 100%; height: 100%;
@@ -1115,6 +1170,40 @@ export default function UserLobbyPage({ user, initialBadges }) {
           font-size: 1.6rem;
           letter-spacing: 4px;
           animation: runBounce 0.6s infinite alternate;
+        }
+
+        .pixel-creeper {
+          position: absolute;
+          left: 20px;
+          bottom: 22px;
+          font-size: 2.2rem;
+          filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+          animation: runBounce 0.5s infinite alternate ease-in-out;
+        }
+
+        .pixel-bridge-wood {
+          position: absolute;
+          bottom: 24px;
+          left: 70px;
+          right: 70px;
+          display: flex;
+          justify-content: center;
+          gap: 2px;
+          font-size: 1.1rem;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        .pixel-warden {
+          position: absolute;
+          right: 20px;
+          bottom: 20px;
+          font-size: 2.3rem;
+          filter: drop-shadow(0 0 10px #34d399);
+          animation: floatSlow 2.5s infinite ease-in-out;
+        }
+
+        .creative-ground {
+          background: linear-gradient(180deg, #245b48 0%, #153b2f 100%);
         }
 
         .game-name {

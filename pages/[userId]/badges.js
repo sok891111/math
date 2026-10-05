@@ -63,6 +63,18 @@ export default function UserBadgesPage({ user, initialBadges }) {
         }
       }
 
+      // 3. Creative 크래프트 earned badges
+      const creativeRaw = localStorage.getItem(`block-creative-bridge-v1:${user.id}`);
+      if (creativeRaw) {
+        const cData = JSON.parse(creativeRaw);
+        if (cData && Array.isArray(cData.completed)) {
+          cData.completed.forEach(idx => earnedSet.add(`creative-bridge-${idx}`));
+        }
+        if (cData && cData.warden && Array.isArray(cData.warden.completed)) {
+          cData.warden.completed.forEach(idx => earnedSet.add(`creative-warden-${idx}`));
+        }
+      }
+
       const earnedArray = Array.from(earnedSet);
       if (earnedArray.length > (badgesData.earnedIds?.length || 0)) {
         setBadgesData(prev => ({ ...prev, earnedIds: earnedArray }));
@@ -108,14 +120,17 @@ export default function UserBadgesPage({ user, initialBadges }) {
 
   const runnerCount = BADGE_CATALOG.filter(b => b.game === 'runner' && earnedSet.has(b.id)).length;
   const islandCount = BADGE_CATALOG.filter(b => b.game === 'island' && earnedSet.has(b.id)).length;
+  const creativeCount = BADGE_CATALOG.filter(b => b.game === 'creative' && earnedSet.has(b.id)).length;
   const runnerTotal = BADGE_CATALOG.filter(b => b.game === 'runner').length;
   const islandTotal = BADGE_CATALOG.filter(b => b.game === 'island').length;
+  const creativeTotal = BADGE_CATALOG.filter(b => b.game === 'creative').length;
 
   const filteredBadges = BADGE_CATALOG.filter(b => {
     const isEarned = earnedSet.has(b.id);
     if (activeFilter === 'earned') return isEarned;
     if (activeFilter === 'runner') return b.game === 'runner';
     if (activeFilter === 'island') return b.game === 'island';
+    if (activeFilter === 'creative') return b.game === 'creative';
     if (activeFilter === 'monster') return b.category === 'monster';
     if (activeFilter === 'math') return b.category === 'math';
     if (activeFilter === 'treasure') return b.category === 'treasure' || b.category === 'adventure' || b.category === 'bridge';
@@ -214,6 +229,14 @@ export default function UserBadgesPage({ user, initialBadges }) {
                 <strong className="stat-val">{islandCount} <small>/ {islandTotal}</small></strong>
               </div>
             </div>
+
+            <div className="stat-card creative-card">
+              <span className="stat-icon">🌿</span>
+              <div className="stat-info">
+                <span className="stat-label">Creative 크래프트</span>
+                <strong className="stat-val">{creativeCount} <small>/ {creativeTotal}</small></strong>
+              </div>
+            </div>
           </section>
 
           {/* Clean, Non-broken Filter Navigation */}
@@ -245,6 +268,13 @@ export default function UserBadgesPage({ user, initialBadges }) {
               onClick={() => setActiveFilter('island')}
             >
               🏝️ 완성! block island ({islandTotal})
+            </button>
+            <button
+              type="button"
+              className={`filter-btn ${activeFilter === 'creative' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('creative')}
+            >
+              🌿 Creative 크래프트 ({creativeTotal})
             </button>
             <button
               type="button"
@@ -615,7 +645,8 @@ export default function UserBadgesPage({ user, initialBadges }) {
 
         .total-card .stat-val { color: #ffe600; text-shadow: 0 0 8px rgba(255, 230, 0, 0.4); }
         .runner-card .stat-val { color: #00f0ff; }
-        .island-card .stat-val { color: #34d399; }
+        .island-card .stat-val { color: #f59e0b; }
+        .creative-card .stat-val { color: #34d399; }
 
         /* Filter Navigation */
         .filter-nav {

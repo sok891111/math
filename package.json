@@ -23,7 +23,9 @@
     "test:platformer-campaign": "node tests/platformer-campaign-unit.cjs && node tests/platformer-campaign.cjs",
     "test:service": "node tests/next-service-test.cjs",
     "test:creative": "node tests/creative.cjs",
-    "test:creative-routes": "node tests/creative-routes.cjs"
+    "test:creative-routes": "node tests/creative-routes.cjs",
+    "test:creative-ipad": "node tests/creative-ipad.cjs",
+    "test:creative-warden": "node tests/creative-warden.cjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"

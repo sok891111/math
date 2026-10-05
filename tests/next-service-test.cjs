@@ -116,7 +116,9 @@ async function run() {
   assert(lobbyRes.body.includes('수학 모험 기지') || lobbyRes.body.includes('지우'), 'Should serve personalized dot lobby entry page');
   assert(lobbyRes.body.includes(`/${createdUser.id}/platformer`), 'Should have link to sunshine platformer');
   assert(lobbyRes.body.includes(`/${createdUser.id}/island`), 'Should have link to block island');
-  console.log('✅ User Lobby Entry Page served with 2 dot game cards.');
+  assert(lobbyRes.body.includes(`/${createdUser.id}/creative`), 'Should have link to creative craft');
+  assert(lobbyRes.body.includes('Creative 크래프트'), 'Should display Creative 크래프트 title');
+  console.log('✅ User Lobby Entry Page served with 3 dot game cards.');
 
   console.log('\n--- 4. Testing Sunshine Platformer Route (/:userId/platformer) ---');
   const platformerRes = await request(`http://localhost:${PORT}/${createdUser.id}/platformer`);
@@ -132,14 +134,21 @@ async function run() {
   assert(islandRes.body.includes('window.__BLOCK_USER__'), 'Should inject __BLOCK_USER__ in island game');
   console.log('✅ Block Island game served successfully.');
 
-  console.log('\n--- 5.1 Testing Badge Showcase Route (/:userId/badges) ---');
+  console.log('\n--- 5.1 Testing Creative Route (/:userId/creative) ---');
+  const creativeRes = await request(`http://localhost:${PORT}/${createdUser.id}/creative`);
+  assert.strictEqual(creativeRes.status, 200, 'User creative route should return 200');
+  assert(creativeRes.body.includes('지우'), 'Should personalize child name in creative game');
+  assert(creativeRes.body.includes('window.__BLOCK_USER__'), 'Should inject __BLOCK_USER__ in creative game');
+  console.log('✅ Creative game served successfully.');
+
+  console.log('\n--- 5.2 Testing Badge Showcase Route (/:userId/badges) ---');
   const badgesRes = await request(`http://localhost:${PORT}/${createdUser.id}/badges`);
   assert.strictEqual(badgesRes.status, 200, 'User badges route should return 200');
   assert(badgesRes.body.includes('지우의 뱃지 보관함') || badgesRes.body.includes('지우'), 'Should serve personalized badge showcase page');
   assert(badgesRes.body.includes('나의 뱃지 링크'), 'Should include share button');
   console.log('✅ Badge Showcase page served successfully.');
 
-  console.log('\n--- 5.2 Testing Badge Sync API (/api/user/:userId/badges) ---');
+  console.log('\n--- 5.3 Testing Badge Sync API (/api/user/:userId/badges) ---');
   const syncBadgesRes = await request(`http://localhost:${PORT}/api/user/${createdUser.id}/badges`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
