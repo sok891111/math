@@ -42,6 +42,8 @@ export async function getServerSideProps({ params, res }) {
     // Link to platformer game
     html = html.replace(/href="platformer\/"/g, `href="/${user.id}/platformer"`);
     html = html.replace(/href="platformer"/g, `href="/${user.id}/platformer"`);
+    html = html.replace(/☀ 햇살 모험/g, '🏃 크래프트 Runner');
+    html = html.replace(/☀ 점프하며 좀비를 잡는 햇살 모험 →/g, '🏃 크래프트 Runner 모험하기 →');
 
     // Brand link back to Lobby
     html = html.replace(/<a class="brand" href="\.\/"/g, `<a class="brand" href="/${user.id}" title="게임 선택 로비로 가기"`);
