@@ -16,6 +16,10 @@ export default function UserLobbyPage({ user }) {
   const [sfxEnabled, setSfxEnabled] = useState(true);
   const audioCtxRef = useRef(null);
 
+  // Touch Swipe tracking for iPad
+  const touchStartXRef = useRef(null);
+  const touchStartYRef = useRef(null);
+
   const games = [
     {
       id: 'platformer',
@@ -41,19 +45,42 @@ export default function UserLobbyPage({ user }) {
     },
   ];
 
-  // 8-bit Web Audio Synth SFX
-  const playSound = (type) => {
-    if (!sfxEnabled || typeof window === 'undefined') return;
+  // Unlock iOS Safari AudioContext on first touch / user interaction
+  const unlockAudio = () => {
     try {
       if (!audioCtxRef.current) {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (AudioCtx) audioCtxRef.current = new AudioCtx();
       }
+      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+    } catch (e) {
+      // Audio autoplay policy fallback
+    }
+  };
+
+  useEffect(() => {
+    const handleFirstTouch = () => {
+      unlockAudio();
+    };
+    window.addEventListener('touchstart', handleFirstTouch, { once: true, passive: true });
+    window.addEventListener('touchend', handleFirstTouch, { once: true, passive: true });
+    window.addEventListener('click', handleFirstTouch, { once: true, passive: true });
+    return () => {
+      window.removeEventListener('touchstart', handleFirstTouch);
+      window.removeEventListener('touchend', handleFirstTouch);
+      window.removeEventListener('click', handleFirstTouch);
+    };
+  }, []);
+
+  // 8-bit Web Audio Synth SFX
+  const playSound = (type) => {
+    if (!sfxEnabled || typeof window === 'undefined') return;
+    try {
+      unlockAudio();
       const ctx = audioCtxRef.current;
       if (!ctx) return;
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
 
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -65,7 +92,7 @@ export default function UserLobbyPage({ user }) {
         osc.type = 'square';
         osc.frequency.setValueAtTime(320, ctx.currentTime);
         osc.frequency.setValueAtTime(480, ctx.currentTime + 0.04);
-        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.setValueAtTime(0.09, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
         osc.start(ctx.currentTime);
         osc.stop(ctx.currentTime + 0.08);
@@ -77,24 +104,27 @@ export default function UserLobbyPage({ user }) {
         osc.frequency.setValueAtTime(554.37, now + 0.06);
         osc.frequency.setValueAtTime(659.25, now + 0.12);
         osc.frequency.setValueAtTime(880, now + 0.18);
-        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.setValueAtTime(0.16, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.start(now);
         osc.stop(now + 0.3);
       }
     } catch (e) {
-      // Audio autoplay policy fallback
+      // Audio error fallback
     }
   };
 
   const handleLaunch = (path) => {
     playSound('start');
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(30);
+    }
     setTimeout(() => {
       window.location.href = path;
     }, 150);
   };
 
-  // Keyboard controls: Left/Right or A/D to select, Enter/Space to start
+  // Keyboard controls for iPad Magic Keyboard / PC
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
@@ -115,6 +145,39 @@ export default function UserLobbyPage({ user }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedIdx, sfxEnabled]);
 
+  // Touch Swipe Handlers for iPad
+  const onTouchStart = (e) => {
+    unlockAudio();
+    if (e.touches && e.touches[0]) {
+      touchStartXRef.current = e.touches[0].clientX;
+      touchStartYRef.current = e.touches[0].clientY;
+    }
+  };
+
+  const onTouchEnd = (e) => {
+    if (touchStartXRef.current === null) return;
+    const endX = e.changedTouches ? e.changedTouches[0].clientX : null;
+    const endY = e.changedTouches ? e.changedTouches[0].clientY : null;
+    if (endX !== null && endY !== null) {
+      const diffX = endX - touchStartXRef.current;
+      const diffY = endY - touchStartYRef.current;
+      // Horizontal swipe detected (at least 35px threshold)
+      if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX < 0 && selectedIdx === 0) {
+          // Swiped left -> Game 2
+          setSelectedIdx(1);
+          playSound('select');
+        } else if (diffX > 0 && selectedIdx === 1) {
+          // Swiped right -> Game 1
+          setSelectedIdx(0);
+          playSound('select');
+        }
+      }
+    }
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
   return (
     <>
       <Head>
@@ -126,7 +189,11 @@ export default function UserLobbyPage({ user }) {
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css" />
       </Head>
 
-      <div className="arcade-cabinet">
+      <div
+        className="arcade-cabinet"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         {/* CRT Scanline & Screen Glow Overlay */}
         <div className="crt-scanlines" />
         <div className="crt-glow" />
@@ -146,9 +213,12 @@ export default function UserLobbyPage({ user }) {
             <button
               type="button"
               className="hud-btn sfx-btn"
-              onClick={() => {
-                setSfxEnabled(!sfxEnabled);
-                if (!sfxEnabled) playSound('select');
+              onClick={(e) => {
+                e.stopPropagation();
+                unlockAudio();
+                const nextState = !sfxEnabled;
+                setSfxEnabled(nextState);
+                if (nextState) playSound('select');
               }}
               title="사운드 켜기/끄기"
             >
@@ -160,26 +230,56 @@ export default function UserLobbyPage({ user }) {
           <div className="marquee-banner">
             <div className="marquee-sub">★ ARCADE STAGE SELECT ★</div>
             <h1 className="marquee-title">GAME SELECT</h1>
-            <div className="marquee-guide">
-              <span className="pulse-text">▶ SELECT YOUR GAME ◀</span>
-            </div>
           </div>
+
+          {/* iPad Touch Segmented Switcher Tabs */}
+          <nav className="touch-tab-nav" aria-label="게임 선택 탭">
+            {games.map((g, idx) => {
+              const isSelected = selectedIdx === idx;
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  className={`touch-tab ${isSelected ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    unlockAudio();
+                    if (selectedIdx !== idx) {
+                      setSelectedIdx(idx);
+                      playSound('select');
+                    }
+                  }}
+                  style={{
+                    '--tab-color': g.themeColor,
+                  }}
+                >
+                  <span className="tab-icon">{idx === 0 ? '🏃‍♂️' : '🏝️'}</span>
+                  <span className="tab-label">{g.title}</span>
+                  {isSelected && <span className="tab-pip">●</span>}
+                </button>
+              );
+            })}
+          </nav>
 
           {/* Two Retro Game Selection Cards */}
           <main className="select-grid">
             {games.map((g, idx) => {
               const isSelected = selectedIdx === idx;
               return (
-                <div
+                <article
                   key={g.id}
                   className={`game-pod ${isSelected ? 'active' : ''} pod-${g.id}`}
-                  onMouseEnter={() => {
+                  onClick={(e) => {
+                    unlockAudio();
                     if (selectedIdx !== idx) {
+                      // Tap unselected card -> select it
                       setSelectedIdx(idx);
                       playSound('select');
+                    } else {
+                      // Already selected -> start game
+                      handleLaunch(g.path);
                     }
                   }}
-                  onClick={() => handleLaunch(g.path)}
                   style={{
                     '--accent': g.themeColor,
                     '--border-color': g.themeBorder,
@@ -187,7 +287,7 @@ export default function UserLobbyPage({ user }) {
                 >
                   {/* Selected Indicator Arrow */}
                   <div className="pod-indicator">
-                    {isSelected ? '👉 READY!' : 'READY'}
+                    {isSelected ? '👉 READY! [터치하여 플레이]' : 'TAP TO CHOOSE'}
                   </div>
 
                   {/* Retro Type Tag */}
@@ -231,27 +331,82 @@ export default function UserLobbyPage({ user }) {
                     className="arcade-btn"
                     onClick={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
+                      unlockAudio();
                       handleLaunch(g.path);
                     }}
                   >
-                    <span className="btn-label">▶ GAME START ◀</span>
+                    <span className="btn-label">
+                      {isSelected ? '🕹️ 지금 플레이 시작! ▶' : '▶ 게임 시작 ◀'}
+                    </span>
                   </a>
-                </div>
+                </article>
               );
             })}
           </main>
 
+          {/* iPad Big Touch Action Bar */}
+          <div className="ipad-action-bar">
+            <button
+              type="button"
+              className="ipad-nav-btn prev-btn"
+              disabled={selectedIdx === 0}
+              onClick={(e) => {
+                e.stopPropagation();
+                unlockAudio();
+                setSelectedIdx(0);
+                playSound('select');
+              }}
+              aria-label="이전 게임 선택"
+            >
+              ◀
+            </button>
+
+            <button
+              type="button"
+              className="ipad-start-main-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                unlockAudio();
+                handleLaunch(games[selectedIdx].path);
+              }}
+              style={{
+                '--main-color': games[selectedIdx].themeColor,
+              }}
+            >
+              <span className="main-btn-sparkle">★</span>
+              <span className="main-btn-text">
+                {games[selectedIdx].title} 시작하기!
+              </span>
+              <span className="main-btn-arrow">▶</span>
+            </button>
+
+            <button
+              type="button"
+              className="ipad-nav-btn next-btn"
+              disabled={selectedIdx === 1}
+              onClick={(e) => {
+                e.stopPropagation();
+                unlockAudio();
+                setSelectedIdx(1);
+                playSound('select');
+              }}
+              aria-label="다음 게임 선택"
+            >
+              ▶
+            </button>
+          </div>
+
           {/* Arcade Cabinet Controller Guide Footer */}
           <footer className="arcade-footer">
             <div className="key-guides">
+              <span className="touch-tip">📱 화면을 좌우로 밀거나 탭하세요</span>
+              <span className="guide-divider">|</span>
               <span className="key-cap">◀</span>
               <span className="key-cap">▶</span>
-              <span className="key-desc">선택 이동</span>
-              <span className="guide-divider">|</span>
               <span className="key-cap enter-cap">ENTER</span>
-              <span className="key-desc">게임 시작</span>
             </div>
-            <div className="insert-coin">● PRESS BUTTON OR TAP TO PLAY ●</div>
+            <div className="insert-coin">● INSERT COIN TO PLAY ●</div>
           </footer>
         </div>
       </div>
@@ -263,24 +418,27 @@ export default function UserLobbyPage({ user }) {
           box-sizing: border-box;
           user-select: none;
           -webkit-user-select: none;
+          -webkit-touch-callout: none;
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
         }
 
         html, body {
           background: #08090d;
           color: #f1f5f9;
-          font-family: 'NeoDGM', 'Press Start 2P', monospace, sans-serif;
+          font-family: 'NeoDGM', 'Press Start 2P', -apple-system, BlinkMacSystemFont, monospace, sans-serif;
           min-height: 100vh;
           overflow-x: hidden;
         }
 
-        /* Arcade Cabinet Frame */
+        /* Arcade Cabinet Frame with iPad Safe Area */
         .arcade-cabinet {
           min-height: 100vh;
           background: radial-gradient(circle at center, #111422 0%, #06070a 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 24px 16px;
+          padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
           position: relative;
         }
 
@@ -290,21 +448,21 @@ export default function UserLobbyPage({ user }) {
           top: 0; left: 0; width: 100vw; height: 100vh;
           background: repeating-linear-gradient(
             0deg,
-            rgba(0, 0, 0, 0.28) 0px,
-            rgba(0, 0, 0, 0.28) 2px,
+            rgba(0, 0, 0, 0.22) 0px,
+            rgba(0, 0, 0, 0.22) 2px,
             transparent 2px,
             transparent 4px
           );
           pointer-events: none;
           z-index: 50;
-          opacity: 0.65;
+          opacity: 0.6;
         }
 
         /* CRT Glow */
         .crt-glow {
           position: fixed;
           top: 0; left: 0; width: 100vw; height: 100vh;
-          box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.85);
+          box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.8);
           pointer-events: none;
           z-index: 51;
         }
@@ -312,7 +470,7 @@ export default function UserLobbyPage({ user }) {
         /* Arcade Main Screen Bezel */
         .arcade-screen {
           width: 100%;
-          max-width: 900px;
+          max-width: 920px;
           background: #0d101a;
           border: 6px solid #202638;
           box-shadow:
@@ -320,7 +478,7 @@ export default function UserLobbyPage({ user }) {
             0 0 35px rgba(0, 240, 255, 0.15),
             inset 0 0 40px rgba(0, 0, 0, 0.8);
           border-radius: 20px;
-          padding: 28px 24px 20px;
+          padding: 24px 22px 18px;
           position: relative;
           z-index: 10;
         }
@@ -331,8 +489,8 @@ export default function UserLobbyPage({ user }) {
           align-items: center;
           justify-content: space-between;
           border-bottom: 3px dashed #2a344d;
-          padding-bottom: 14px;
-          margin-bottom: 24px;
+          padding-bottom: 12px;
+          margin-bottom: 20px;
           font-size: 0.85rem;
           letter-spacing: 1px;
         }
@@ -364,17 +522,19 @@ export default function UserLobbyPage({ user }) {
 
         .hud-btn {
           font-family: inherit;
-          font-size: 0.75rem;
+          font-size: 0.8rem;
           background: #192033;
           border: 2px solid #3d4f77;
           color: #94a3b8;
-          padding: 6px 12px;
+          padding: 8px 14px;
           border-radius: 6px;
           cursor: pointer;
-          transition: all 0.1s ease;
+          transition: transform 0.1s ease, background 0.1s ease;
+          min-height: 40px;
         }
 
-        .hud-btn:hover {
+        .hud-btn:active {
+          transform: scale(0.95);
           background: #253150;
           color: #fff;
           border-color: #00f0ff;
@@ -383,91 +543,139 @@ export default function UserLobbyPage({ user }) {
         /* Marquee Banner */
         .marquee-banner {
           text-align: center;
-          margin-bottom: 32px;
+          margin-bottom: 20px;
         }
 
         .marquee-sub {
-          font-size: 0.85rem;
+          font-size: 0.8rem;
           color: #00f0ff;
-          letter-spacing: 3px;
+          letter-spacing: 2px;
           text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
-          margin-bottom: 6px;
+          margin-bottom: 4px;
         }
 
         .marquee-title {
-          font-size: 2.6rem;
+          font-size: 2.4rem;
           font-weight: 900;
-          letter-spacing: 4px;
+          letter-spacing: 3px;
           color: #fff;
           text-shadow:
             3px 3px 0 #ff0055,
             -3px -3px 0 #00f0ff,
             0 0 25px rgba(255, 255, 255, 0.4);
-          margin-bottom: 8px;
         }
 
-        .marquee-guide {
-          font-size: 0.9rem;
-          color: #ffe600;
-          letter-spacing: 2px;
+        /* iPad Segmented Touch Tabs */
+        .touch-tab-nav {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 24px;
+          justify-content: center;
         }
 
-        .pulse-text {
-          animation: pulse 1.2s infinite ease-in-out;
+        .touch-tab {
+          flex: 1;
+          max-width: 420px;
+          min-height: 52px;
+          background: #131726;
+          border: 3px solid #28334f;
+          border-radius: 12px;
+          color: #8b9bb4;
+          font-family: inherit;
+          font-size: 1.05rem;
+          font-weight: 900;
+          padding: 10px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          cursor: pointer;
+          box-shadow: 0 5px 0 #000;
+          transition: all 0.15s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .touch-tab.active {
+          background: #1c2338;
+          border-color: var(--tab-color);
+          color: #fff;
+          box-shadow: 0 6px 0 #000, 0 0 20px var(--tab-color);
+          transform: translateY(-2px);
+        }
+
+        .touch-tab:active {
+          transform: translateY(3px) scale(0.98);
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .tab-icon {
+          font-size: 1.4rem;
+        }
+
+        .tab-pip {
+          color: var(--tab-color);
+          font-size: 0.75rem;
+          animation: blink 0.7s infinite;
         }
 
         /* Game Select Grid */
         .select-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-          gap: 28px;
-          margin-bottom: 28px;
+          gap: 22px;
+          margin-bottom: 24px;
         }
 
         /* Game Pod (Cabinet Card) */
         .game-pod {
           background: #111522;
           border: 4px solid #252e47;
-          border-radius: 14px;
-          padding: 20px;
+          border-radius: 16px;
+          padding: 18px 16px;
           display: flex;
           flex-direction: column;
           cursor: pointer;
           position: relative;
           transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
           box-shadow: 0 8px 0 #000, 0 12px 20px rgba(0, 0, 0, 0.5);
+          -webkit-tap-highlight-color: transparent;
         }
 
-        .game-pod:hover,
         .game-pod.active {
-          transform: translateY(-8px) scale(1.02);
           border-color: var(--accent);
+          background: #151a2a;
           box-shadow:
-            0 14px 0 #000,
-            0 0 30px var(--accent),
+            0 12px 0 #000,
+            0 0 28px var(--accent),
             inset 0 0 16px rgba(0, 0, 0, 0.6);
+          transform: translateY(-4px);
+        }
+
+        .game-pod:active {
+          transform: scale(0.98) translateY(2px);
+          box-shadow: 0 4px 0 #000;
         }
 
         .pod-indicator {
-          font-size: 0.8rem;
+          font-size: 0.78rem;
           font-weight: bold;
           letter-spacing: 1px;
           color: #64748b;
           margin-bottom: 8px;
           height: 18px;
+          text-align: center;
         }
 
         .game-pod.active .pod-indicator {
           color: var(--accent);
           text-shadow: 0 0 10px var(--accent);
-          animation: blink 0.6s infinite;
+          animation: blink 0.7s infinite;
         }
 
         .pod-tag-bar {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 14px;
+          margin-bottom: 12px;
         }
 
         .pod-type {
@@ -489,11 +697,11 @@ export default function UserLobbyPage({ user }) {
         /* Pixel Screen Preview Box */
         .preview-screen {
           width: 100%;
-          height: 160px;
-          border-radius: 8px;
+          height: 150px;
+          border-radius: 10px;
           border: 3px solid #000;
           box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.9);
-          margin-bottom: 18px;
+          margin-bottom: 16px;
           overflow: hidden;
           position: relative;
         }
@@ -551,12 +759,12 @@ export default function UserLobbyPage({ user }) {
           font-size: 1.1rem;
           opacity: 0.7;
         }
-        .pixel-cloud.c1 { top: 20px; left: 15px; animation: drift 14s infinite linear; }
-        .pixel-cloud.c2 { top: 40px; left: 90px; animation: drift 18s infinite linear reverse; }
+        .pixel-cloud.c1 { top: 16px; left: 15px; animation: drift 14s infinite linear; }
+        .pixel-cloud.c2 { top: 38px; left: 90px; animation: drift 18s infinite linear reverse; }
 
         .pixel-diamond {
           position: absolute;
-          top: 48px;
+          top: 44px;
           left: 50%;
           transform: translateX(-50%);
           font-size: 1.5rem;
@@ -603,7 +811,7 @@ export default function UserLobbyPage({ user }) {
 
         .pixel-rainbow {
           position: absolute;
-          top: 32px;
+          top: 30px;
           font-size: 1.6rem;
           filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
         }
@@ -632,7 +840,7 @@ export default function UserLobbyPage({ user }) {
           font-weight: 900;
           color: #fff;
           text-align: center;
-          margin-bottom: 18px;
+          margin-bottom: 16px;
           letter-spacing: 1px;
           text-shadow: 2px 2px 0 #000;
         }
@@ -644,17 +852,19 @@ export default function UserLobbyPage({ user }) {
 
         /* Arcade Push Button */
         .arcade-btn {
-          display: block;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           text-decoration: none;
-          text-align: center;
-          padding: 14px 16px;
+          min-height: 52px;
+          padding: 12px 16px;
           background: #1b2336;
           border: 3px solid var(--accent);
-          border-radius: 8px;
+          border-radius: 10px;
           color: #fff;
           font-size: 0.95rem;
           font-weight: 900;
-          letter-spacing: 1.5px;
+          letter-spacing: 1px;
           box-shadow: 0 6px 0 #000;
           transition: all 0.1s ease;
           position: relative;
@@ -671,10 +881,85 @@ export default function UserLobbyPage({ user }) {
           box-shadow: 0 2px 0 #000;
         }
 
+        /* iPad Big Touch Action Bar */
+        .ipad-action-bar {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+          margin-bottom: 22px;
+          padding: 6px 0;
+        }
+
+        .ipad-nav-btn {
+          min-width: 58px;
+          min-height: 58px;
+          border-radius: 12px;
+          background: #161c2e;
+          border: 3px solid #334366;
+          color: #ffe600;
+          font-size: 1.4rem;
+          font-weight: 900;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 6px 0 #000;
+          transition: all 0.1s ease;
+        }
+
+        .ipad-nav-btn:active {
+          transform: translateY(4px);
+          box-shadow: 0 2px 0 #000;
+        }
+
+        .ipad-nav-btn:disabled {
+          opacity: 0.35;
+          cursor: not-allowed;
+          box-shadow: 0 2px 0 #000;
+          transform: none;
+        }
+
+        .ipad-start-main-btn {
+          flex: 1;
+          max-width: 480px;
+          min-height: 58px;
+          border-radius: 14px;
+          background: linear-gradient(180deg, var(--main-color) 0%, #101626 220%);
+          border: 3.5px solid var(--main-color);
+          color: #000;
+          font-family: inherit;
+          font-size: 1.15rem;
+          font-weight: 900;
+          padding: 12px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          cursor: pointer;
+          box-shadow: 0 8px 0 #000, 0 0 25px var(--main-color);
+          transition: all 0.12s ease;
+          letter-spacing: 0.5px;
+        }
+
+        .ipad-start-main-btn:active {
+          transform: translateY(5px);
+          box-shadow: 0 3px 0 #000, 0 0 10px var(--main-color);
+        }
+
+        .main-btn-sparkle {
+          font-size: 1.2rem;
+          animation: blink 0.8s infinite;
+        }
+
+        .main-btn-arrow {
+          font-size: 1.1rem;
+        }
+
         /* Footer Controls */
         .arcade-footer {
           border-top: 3px dashed #2a344d;
-          padding-top: 18px;
+          padding-top: 16px;
           text-align: center;
         }
 
@@ -685,8 +970,13 @@ export default function UserLobbyPage({ user }) {
           gap: 8px;
           font-size: 0.8rem;
           color: #94a3b8;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           flex-wrap: wrap;
+        }
+
+        .touch-tip {
+          color: #38bdf8;
+          font-weight: bold;
         }
 
         .key-cap {
@@ -721,11 +1011,6 @@ export default function UserLobbyPage({ user }) {
           50%, 100% { opacity: 0.15; }
         }
 
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 0.85; }
-          50% { transform: scale(1.05); opacity: 1; }
-        }
-
         @keyframes runBounce {
           0% { transform: translateY(0); }
           100% { transform: translateY(-8px); }
@@ -752,9 +1037,10 @@ export default function UserLobbyPage({ user }) {
           100% { transform: translateX(0); }
         }
 
-        @media (max-width: 640px) {
+        /* iPad & Mobile Responsiveness */
+        @media (max-width: 768px) {
           .arcade-screen {
-            padding: 18px 14px 14px;
+            padding: 16px 12px 14px;
             border-width: 4px;
           }
           .marquee-title {
@@ -762,15 +1048,25 @@ export default function UserLobbyPage({ user }) {
             letter-spacing: 2px;
           }
           .game-name {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
+          }
+          .touch-tab {
+            font-size: 0.9rem;
+            min-height: 48px;
+            padding: 8px 10px;
           }
           .arcade-btn {
-            font-size: 0.85rem;
-            padding: 12px 10px;
+            font-size: 0.88rem;
+            min-height: 48px;
           }
-          .hud-badge {
-            font-size: 0.72rem;
-            padding: 4px 8px;
+          .ipad-start-main-btn {
+            font-size: 1rem;
+            min-height: 52px;
+          }
+          .ipad-nav-btn {
+            min-width: 50px;
+            min-height: 52px;
+            font-size: 1.2rem;
           }
         }
       `}</style>
