@@ -110,27 +110,27 @@ async function run() {
   assert.strictEqual(createdUser.name, '지우');
   console.log(`✅ User created: ${createdUser.name} (${createdUser.id})`);
 
-  console.log('\n--- 3. Testing Default User Route (Platformer) ---');
-  const defaultRes = await request(`http://localhost:${PORT}/${createdUser.id}`);
-  assert.strictEqual(defaultRes.status, 200, 'Default user route should return 200');
-  assert(defaultRes.body.includes('햇살 모험') || defaultRes.body.includes('지우'), 'Should serve platformer as default with personalized name');
-  assert(defaultRes.body.includes(`window.__BLOCK_USER__`), 'Should inject __BLOCK_USER__ script');
-  assert(defaultRes.body.includes(createdUser.id), 'Should include user id in HTML');
-  assert(defaultRes.body.includes(`/${createdUser.id}/island`), 'Should link back to user block island');
-  console.log('✅ Default route serves Sunshine Platformer successfully.');
+  console.log('\n--- 3. Testing User Lobby Entry Page (/:userId) ---');
+  const lobbyRes = await request(`http://localhost:${PORT}/${createdUser.id}`);
+  assert.strictEqual(lobbyRes.status, 200, 'User lobby route should return 200');
+  assert(lobbyRes.body.includes('수학 모험 기지') || lobbyRes.body.includes('지우'), 'Should serve personalized dot lobby entry page');
+  assert(lobbyRes.body.includes(`/${createdUser.id}/platformer`), 'Should have link to sunshine platformer');
+  assert(lobbyRes.body.includes(`/${createdUser.id}/island`), 'Should have link to block island');
+  console.log('✅ User Lobby Entry Page served with 2 dot game cards.');
 
-  console.log('\n--- 4. Testing User Block Island Route (/island) ---');
+  console.log('\n--- 4. Testing Sunshine Platformer Route (/:userId/platformer) ---');
+  const platformerRes = await request(`http://localhost:${PORT}/${createdUser.id}/platformer`);
+  assert.strictEqual(platformerRes.status, 200, 'User platformer route should return 200');
+  assert(platformerRes.body.includes('지우'), 'Should personalize child name in platformer game');
+  assert(platformerRes.body.includes('window.__BLOCK_USER__'), 'Should inject __BLOCK_USER__ in platformer');
+  console.log('✅ Sunshine Platformer game served successfully.');
+
+  console.log('\n--- 5. Testing Block Island Route (/:userId/island) ---');
   const islandRes = await request(`http://localhost:${PORT}/${createdUser.id}/island`);
   assert.strictEqual(islandRes.status, 200, 'User island route should return 200');
-  assert(islandRes.body.includes('지우의 열칸 블록섬') || islandRes.body.includes('반가워, 지우야!'), 'Should personalize Korean name with correct particle in island game');
-  assert(islandRes.body.includes(`window.__BLOCK_USER__`), 'Should inject __BLOCK_USER__ in island game');
-  assert(islandRes.body.includes(`href="/${createdUser.id}"`), 'Should link to default platformer route');
-  console.log('✅ User Block Island (/island) served and personalized successfully.');
-
-  console.log('\n--- 5. Testing Platformer Alias / Redirect ---');
-  const platAliasRes = await request(`http://localhost:${PORT}/${createdUser.id}/platformer`);
-  assert(platAliasRes.status === 200 || platAliasRes.status === 307 || platAliasRes.status === 302, 'Should handle /platformer route');
-  console.log('✅ /platformer route handled correctly.');
+  assert(islandRes.body.includes('지우의 열칸 블록섬') || islandRes.body.includes('반가워, 지우야!'), 'Should personalize Korean name in island game');
+  assert(islandRes.body.includes('window.__BLOCK_USER__'), 'Should inject __BLOCK_USER__ in island game');
+  console.log('✅ Block Island game served successfully.');
 
   console.log('\n--- 6. Testing Non-existent User Route ---');
   const notFoundRes = await request(`http://localhost:${PORT}/nonexist123`);

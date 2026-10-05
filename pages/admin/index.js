@@ -619,7 +619,8 @@ export default function AdminPage() {
               </div>
             ) : (
               users.map(user => {
-                const platformerUrl = `${origin}/${user.id}`;
+                const lobbyUrl = `${origin}/${user.id}`;
+                const platformerUrl = `${origin}/${user.id}/platformer`;
                 const islandUrl = `${origin}/${user.id}/island`;
                 return (
                   <div key={user.id} className="user-row">
@@ -640,9 +641,38 @@ export default function AdminPage() {
                     </div>
 
                     <div className="url-box">
-                      {/* 햇살 플랫포머 모험 (기본 접속) URL */}
+                      {/* 대표 접속 링크 (도트 모험 로비) */}
+                      <div className="url-row" style={{ background: 'rgba(74,222,128,0.1)', padding: '6px 8px', borderRadius: '8px' }}>
+                        <span className="url-label" style={{ color: '#4ade80', fontWeight: 800 }}>🎮 모험 기지 <small style={{ fontSize: '0.68rem', color: '#facc15' }}>(대표)</small></span>
+                        <a
+                          className="url-link"
+                          href={lobbyUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {lobbyUrl}
+                        </a>
+                        <div className="url-actions">
+                          <button
+                            className="btn btn-copy"
+                            onClick={() => copyText(lobbyUrl)}
+                          >
+                            복사
+                          </button>
+                          <a
+                            className="btn-open"
+                            href={lobbyUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            열기 ↗
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* 햇살 플랫포머 직행 링크 */}
                       <div className="url-row">
-                        <span className="url-label" style={{ color: '#facc15' }}>☀️ 햇살 모험 <small style={{ fontSize: '0.68rem', color: '#4ade80' }}>(기본)</small></span>
+                        <span className="url-label">☀️ 햇살 모험</span>
                         <a
                           className="url-link"
                           href={platformerUrl}
@@ -669,7 +699,7 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      {/* 열칸 블록섬 모험 URL */}
+                      {/* 열칸 블록섬 직행 링크 */}
                       <div className="url-row">
                         <span className="url-label">🏝️ 열칸 블록섬</span>
                         <a

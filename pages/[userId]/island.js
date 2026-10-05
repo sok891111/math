@@ -36,11 +36,12 @@ export async function getServerSideProps({ params, res }) {
     html = html.replace(/href="style\.css([^"]*)"/g, 'href="/style.css$1"');
     html = html.replace(/src="game\.js([^"]*)"/g, 'src="/game.js$1"');
 
-    // Link to platformer (default main game at /:userId)
-    html = html.replace(/href="platformer\/"/g, `href="/${user.id}"`);
-    html = html.replace(/href="platformer"/g, `href="/${user.id}"`);
+    // Link to platformer game
+    html = html.replace(/href="platformer\/"/g, `href="/${user.id}/platformer"`);
+    html = html.replace(/href="platformer"/g, `href="/${user.id}/platformer"`);
 
-    // Self links
+    // Brand link back to Lobby
+    html = html.replace(/<a class="brand" href="\.\/"/g, `<a class="brand" href="/${user.id}" title="게임 선택 로비로 가기"`);
     html = html.replace(/href="\.\/"/g, `href="/${user.id}/island"`);
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');

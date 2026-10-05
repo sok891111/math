@@ -21,7 +21,9 @@
     "test:platformer-elite": "node tests/platformer-elite.cjs",
     "test:platformer-multiply-lesson": "node tests/platformer-multiply-lesson.cjs",
     "test:platformer-campaign": "node tests/platformer-campaign-unit.cjs && node tests/platformer-campaign.cjs",
-    "test:service": "node tests/next-service-test.cjs"
+    "test:service": "node tests/next-service-test.cjs",
+    "test:creative": "node tests/creative.cjs",
+    "test:creative-routes": "node tests/creative-routes.cjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"

@@ -235,3 +235,32 @@ npm run test:service # 관리자 인증/유저 추가/삭제/동적 페이지 �
    - `SUPABASE_ANON_KEY`: Supabase anon key (선택, Vercel 서버리스 영구 저장용)
 4. 배포 완료 후 `https://<your-vercel-domain>/admin`에 접속하여 아이들을 등록하고 링크를 공유합니다.
 
+
+## 창의력 수학 — 크리퍼의 고장난 다리
+
+`/creative`에서 계정 없이 체험하고, `/{userId}/creative`에서 등록된 아이의 모험을 진행합니다. 관리자 사용자 목록에 창의력 수학 링크와 복사 버튼이 있습니다. 개인 주소는 기존 사용자 조회를 사용하며 없는 사용자는 404입니다.
+
+```sh
+npm install
+npm run dev
+```
+
+로컬 체험 주소: **http://localhost:3000/creative**. 포트를 바꾸려면 `npm run dev -- -p 4190`을 실행하세요. 정적 서버(`npm run serve`)에서는 **http://localhost:4173/creative/index.html**에서 체험할 수 있습니다. 개인별 주소와 관리자 기능은 Next.js 서버가 필요합니다.
+
+- 팩토 키즈 기본 B의 규칙 학습에서 착안한 자체 제작 퍼즐 6개입니다. AB, AAB, ABC 반복, 중간 빈칸, 다른 재료로 표현한 같은 규칙을 다룹니다.
+- 재료를 선택하고 빈칸을 누릅니다. 숫자 키패드 대신 블록 배치로 답하며, 블록을 바꾸거나 한 번씩 되돌릴 수 있습니다. 색과 기호를 함께 사용합니다.
+- 시간 제한 없이 힌트로 반복 묶음을 확인합니다. 오답은 어긋난 첫 칸을 표시하고, 정답은 다리 건너기 애니메이션과 완주 배지로 연결합니다. 동작 줄이기 설정에서는 즉시 건너갑니다.
+- 완료한 다리, 현재 단계, 시도·힌트 횟수 기록을 브라우저 localStorage에 저장합니다. 키는 `block-creative-bridge-v1:{userId}`이며 체험판은 `guest`입니다. **기기 간 동기화는 없고, 풀던 블록 배치는 새로고침하면 초기화됩니다.** 다시 놀아도 완료 배지가 중복 적립되지 않습니다.
+- 원본 파일은 `creative/`이고 `npm run dev`와 `npm run build`가 `public/creative/`로 동기화합니다. Next.js 파일 추적 설정에 HTML을 포함하여 Vercel 서버에서도 개인 페이지를 제공합니다.
+
+검증:
+
+```sh
+npm run build
+npm run start -- -p 4190
+# 별도 터미널
+npm run test:creative
+npm run test:creative-routes
+```
+
+브라우저 검증은 기본적으로 4190 포트를 사용합니다(`CREATIVE_TEST_URL`로 변경 가능). Playwright Chromium 또는 macOS의 설치된 Chrome을 사용하며 `CHROMIUM_PATH`로 경로를 지정할 수 있습니다. 라우트 검증은 빌드 후 4191 포트에서 임시 저장소를 사용하여 실제 사용자 데이터와 분리됩니다. 데스크톱·모바일 캡처는 `test-artifacts/creative-*.png`에 생성됩니다.

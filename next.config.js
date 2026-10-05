@@ -7,42 +7,41 @@ module.exports = {
     ];
     return [
       { source: '/:userId([A-Za-z0-9]{4,10})', headers: noCache },
-      { source: '/:userId([A-Za-z0-9]{4,10})/index.html', headers: noCache },
+      { source: '/:userId([A-Za-z0-9]{4,10})/platformer', headers: noCache },
       { source: '/:userId([A-Za-z0-9]{4,10})/island', headers: noCache },
-      { source: '/:userId([A-Za-z0-9]{4,10})/island.html', headers: noCache },
     ];
   },
   async rewrites() {
     return [
       {
-        source: '/:userId([A-Za-z0-9]{4,10})/index.html',
-        destination: '/:userId',
-      },
-      {
         source: '/:userId([A-Za-z0-9]{4,10})/platformer',
-        destination: '/:userId',
+        destination: '/:userId/platformer',
       },
       {
         source: '/:userId([A-Za-z0-9]{4,10})/platformer/',
-        destination: '/:userId',
+        destination: '/:userId/platformer',
       },
       {
         source: '/:userId([A-Za-z0-9]{4,10})/platformer/index.html',
-        destination: '/:userId',
+        destination: '/:userId/platformer',
       },
       {
-        source: '/:userId([A-Za-z0-9]{4,10})/island.html',
+        source: '/:userId([A-Za-z0-9]{4,10})/island',
         destination: '/:userId/island',
       },
       {
         source: '/:userId([A-Za-z0-9]{4,10})/island/',
         destination: '/:userId/island',
       },
+      {
+        source: '/:userId([A-Za-z0-9]{4,10})/island.html',
+        destination: '/:userId/island',
+      },
     ];
   },
   experimental: {
     outputFileTracingIncludes: {
-      '/[userId]': ['./public/platformer/index.html'],
+      '/[userId]/platformer': ['./public/platformer/index.html'],
       '/[userId]/island': ['./public/index.html'],
     },
   },

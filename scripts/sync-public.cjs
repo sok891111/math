@@ -36,4 +36,6 @@ if (fs.existsSync(platformerDir)) {
   }
 }
 
+fs.cpSync(path.join(rootDir, 'creative'), path.join(publicDir, 'creative'), { recursive: true });
+
 console.log('✅ Synchronized public assets successfully.');
