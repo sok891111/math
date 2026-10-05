@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { getBaseUrl } from '../lib/config';
 
 export default function HomePage() {
   const [showModal, setShowModal] = useState(true);
+  const [baseUrl, setBaseUrl] = useState('https://www.opyeung.com');
+
+  useEffect(() => {
+    setBaseUrl(getBaseUrl());
+  }, []);
 
   return (
     <>
@@ -201,7 +207,7 @@ export default function HomePage() {
             </p>
 
             <div className="url-example-box">
-              전용 주소 형식: https://도메인/<strong>[개인코드]</strong>
+              전용 주소 형식: {baseUrl}/<strong>[개인코드]</strong>
             </div>
 
             <p className="guide-subtext">

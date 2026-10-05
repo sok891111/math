@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
+import { getBaseUrl, setCustomBaseUrl } from '../../lib/config';
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
@@ -14,10 +15,14 @@ export default function AdminPage() {
   const [addLoading, setAddLoading] = useState(false);
   const [toast, setToast] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [origin, setOrigin] = useState('');
+  const [origin, setOrigin] = useState('https://www.opyeung.com');
+  const [editOrigin, setEditOrigin] = useState('https://www.opyeung.com');
+  const [showDomainSettings, setShowDomainSettings] = useState(false);
 
   useEffect(() => {
-    setOrigin(window.location.origin);
+    const base = getBaseUrl();
+    setOrigin(base);
+    setEditOrigin(base);
     const saved = localStorage.getItem('block_admin_secret');
     if (saved) {
       setSecret(saved);
@@ -92,6 +97,27 @@ export default function AdminPage() {
   function showToast(msg) {
     setToast(msg);
     setTimeout(() => setToast(''), 2500);
+  }
+
+  function handleSaveDomain(e) {
+    if (e) e.preventDefault();
+    let url = editOrigin.trim().replace(/\/+$/, '');
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    setCustomBaseUrl(url);
+    setOrigin(url);
+    setEditOrigin(url);
+    setShowDomainSettings(false);
+    showToast(`🌐 링크 기본 도메인이 ${url} 로 설정되었습니다!`);
+  }
+
+  function handleResetToCurrent() {
+    const current = window.location.origin;
+    setCustomBaseUrl(current);
+    setOrigin(current);
+    setEditOrigin(current);
+    showToast(`🌐 현재 접속 주소(${current})로 설정되었습니다!`);
   }
 
   async function handleAdd(e) {
@@ -525,6 +551,44 @@ export default function AdminPage() {
               <div className="subtitle">사용자별 고유 링크를 만들고 공유하세요</div>
             </div>
             <button className="btn btn-logout" onClick={logout}>로그아웃</button>
+          </div>
+
+          {/* Base URL 설정 바 */}
+          <div className="card" style={{ padding: '16px 20px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.85rem', color: '#4ade80', fontWeight: 700 }}>🌐 링크 기준 도메인 (Base URL):</span>
+                <span style={{ fontFamily: 'monospace', color: '#fff', fontSize: '0.9rem', background: 'rgba(0,0,0,0.3)', padding: '3px 8px', borderRadius: '6px' }}>
+                  {origin}
+                </span>
+              </div>
+              <button
+                className="btn btn-copy"
+                type="button"
+                onClick={() => setShowDomainSettings(!showDomainSettings)}
+                style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+              >
+                {showDomainSettings ? '설정 닫기 ▲' : '도메인 변경 ⚙️'}
+              </button>
+            </div>
+
+            {showDomainSettings && (
+              <form onSubmit={handleSaveDomain} style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(74,222,128,0.2)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  value={editOrigin}
+                  onChange={e => setEditOrigin(e.target.value)}
+                  placeholder="예: https://www.opyeung.com"
+                  style={{ flex: 1, minWidth: '220px', padding: '8px 12px', fontSize: '0.9rem' }}
+                />
+                <button type="submit" className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '0.85rem' }}>
+                  저장
+                </button>
+                <button type="button" className="btn btn-logout" onClick={handleResetToCurrent} style={{ padding: '8px 14px', fontSize: '0.85rem' }}>
+                  현재 창 주소로
+                </button>
+              </form>
+            )}
           </div>
 
           {/* 새 사용자 추가 카드 */}
