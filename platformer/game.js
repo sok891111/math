@@ -432,7 +432,7 @@ function renderExamQuestion(){
   for(let j=0;j<n;j++){const block=document.createElement('span');block.className=i%2?'blue':'orange';grid.append(block);}
   well.append(label,grid);blocks.append(well);
  });
- if(examReviewIndex<0){$('exam-feedback').textContent=`${state.test.correct}개 정답 · 목표는 11개! 한 문제씩 차근차근 풀어 봐.`;$('exam-feedback').className='';}
+ if(examReviewIndex<0){$('exam-feedback').textContent=`${state.test.correct}개 정답 · 목표는 ${SunshineCampaign.PASS_COUNT}개! 한 문제씩 차근차근 풀어 봐.`;$('exam-feedback').className='';}
 }
 function submitExamAnswer(){
  const state=campaign.snapshot();if(mode!=='exam'||state.test?.finished||examReviewIndex>=0){updateLevelTest();return;}
@@ -468,12 +468,12 @@ function finishLevelTest(){
  const state=campaign.snapshot();if(!state.test?.finished)return;
  examResultShown=true;examReviewIndex=-1;examAnswer='';$('exam-question').hidden=true;
  renderExamProgress(state);
- const r=state.test;$('exam-counter').textContent=`${r.correct} / 15 정답`;
+ const r=state.test;$('exam-counter').textContent=`${r.correct} / ${SunshineCampaign.QUESTION_COUNT} 정답`;
  $('exam-result-art').textContent=r.passed?'🏅':'🛠️';
  $('exam-result-title').textContent=r.passed?'숫자 도전 성공!':r.reason==='time'?'TNT가 펑! 다음에는 끝까지 도전해 보자!':'TNT가 펑! 배운 만큼 다시 도전하자!';
  const growth=r.previousCorrect!==null&&r.correct>r.previousCorrect?` 지난번보다 ${r.correct-r.previousCorrect}개 더 맞혔어!`:'';
- $('exam-result-copy').textContent=r.passed?`15문제 중 ${r.correct}개 정답 (${r.percentage.toFixed(1)}%)! ${state.level===3?'레벨 1부터 새로운 모험을 시작하자.':'레벨 '+(state.level+1)+' 모험이 열렸어!'}`:
-  `${r.answered}문제를 풀고 ${r.correct}개를 맞혔어.${growth} ${r.reason==='time'?'다음 목표는 10분 안에 15문제를 끝까지 풀기야.':`통과까지 ${Math.max(0,11-r.correct)}개 더! 놓친 문제 하나를 배우고 다시 해 보자.`}`;
+ $('exam-result-copy').textContent=r.passed?`${SunshineCampaign.QUESTION_COUNT}문제 중 ${r.correct}개 정답 (${r.percentage.toFixed(1)}%)! ${state.level===3?'레벨 1부터 새로운 모험을 시작하자.':'레벨 '+(state.level+1)+' 모험이 열렸어!'}`:
+  `${r.answered}문제를 풀고 ${r.correct}개를 맞혔어.${growth} ${r.reason==='time'?`다음 목표는 10분 안에 ${SunshineCampaign.QUESTION_COUNT}문제를 끝까지 풀기야.`:`통과까지 ${Math.max(0,SunshineCampaign.PASS_COUNT-r.correct)}개 더! 놓친 문제 하나를 배우고 다시 해 보자.`}`;
  $('exam-action').textContent=r.passed?(state.level===3?'보물과 함께 레벨 1로 돌아가기 →':'다음 레벨 모험 시작 →'):'TNT 다시 장전! 10분 재도전 →';
  const review=$('exam-review');review.replaceChildren();warmupQuestion=null;
  state.exam.questions.forEach((q,i)=>{

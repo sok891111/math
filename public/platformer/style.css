@@ -88,7 +88,7 @@ body.game-only main{padding-top:calc(env(safe-area-inset-top) + 18px)}
 #exam-timer{padding:8px 12px;border-radius:10px;background:#e8efdb;white-space:nowrap;font-size:22px;font-variant-numeric:tabular-nums}
 #exam-timer.urgent{background:#ffe3c4;color:#984f24}
 #exam-level{max-width:45%;text-align:left;line-height:1.4}
-#exam-progress{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:4px;margin:12px 0}
+#exam-progress{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;margin:12px 0}
 #exam-progress span{display:grid;place-items:center;aspect-ratio:1;border:1px solid #dce4cf;border-radius:6px;background:#f2f4e9;font-size:12px;font-weight:750;color:#6a7b59}
 #exam-progress .correct{background:#d9ebcc;color:#426c38;border-color:#8daf7d}
 #exam-progress .missed{background:#f7e8d6;color:#9a643b;border-color:#d4b797}

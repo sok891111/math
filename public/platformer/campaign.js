@@ -1,7 +1,7 @@
 'use strict';
 (() => {
  const getKey=()=>'seonyul-sunshine-campaign-v1'+(typeof window!=='undefined'&&window.__BLOCK_USER__?('_'+window.__BLOCK_USER__.id):'');
- const KEY=getKey(),STAGES=6,TEST_MS=600000,QUESTION_COUNT=15,PASS_COUNT=11;
+ const KEY=getKey(),STAGES=6,TEST_MS=600000,QUESTION_COUNT=10,PASS_COUNT=7;
  const levels=[
   {id:1,name:'10 만들기',description:'한 자리 덧셈 · 블록으로 10을 만들어요',monsters:['zombie','creeper','slime','fox','endermite'],sum:[6,18]},
   {id:2,name:'큰 수와 작은 묶음',description:'합 20~40 덧셈 · 2~3단의 작은 묶음',monsters:['skeleton','spider','witch','enderman','magma','ghast','shulker','pig','chicken','rabbit'],sum:[20,40]},
@@ -31,7 +31,7 @@
   if(state.awaitingTest)state.stageCompleted=false;
   const exam=saved?.exam;
   if(state.awaitingTest&&exam?.level===state.level&&Array.isArray(exam.questions)&&exam.questions.length===QUESTION_COUNT&&Array.isArray(exam.answers)&&exam.answers.length<=QUESTION_COUNT&&Number.isFinite(exam.deadline)&&exam.deadline>0){
-   const allowed=new Set([...pool(state.level),...(state.level>1?pool(state.level,'×'):[])].map(qkey));
+   const allowed=new Set(pool(state.level).map(qkey));
    if(exam.questions.every(q=>q&&allowed.has(qkey(q)))&&new Set(exam.questions.map(qkey)).size===QUESTION_COUNT&&exam.answers.every(v=>integer(v,0,99))){
     state.exam={level:state.level,questions:exam.questions.map(q=>({a:q.a,b:q.b,operator:q.operator})),answers:exam.answers.slice(),deadline:exam.deadline,finished:!!exam.finished,reason:exam.reason==='time'?'time':'complete'};
    }
@@ -61,9 +61,7 @@
    if(!state.awaitingTest)return false;
    if(state.exam&&(!state.exam.finished||!retry))return snapshot();
    if(state.exam&&result().passed)return snapshot();
-   let questions;
-   if(state.level===1){const p=pool(1);questions=[...shuffle(p.filter(q=>q.a+q.b>=10),random).slice(0,10),...shuffle(p.filter(q=>q.a+q.b<10),random).slice(0,5)];}
-   else questions=[...shuffle(pool(state.level),random).slice(0,10),...shuffle(pool(state.level,'×'),random).slice(0,5)];
+   const questions=shuffle(pool(state.level),random).slice(0,QUESTION_COUNT);
    state.exam={level:state.level,questions:shuffle(questions,random),answers:[],deadline:now()+TEST_MS,finished:false};save();return snapshot();
   }
   function submitTest(value){
