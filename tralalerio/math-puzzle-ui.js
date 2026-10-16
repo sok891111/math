@@ -1,4 +1,4 @@
-import {MATH_LABELS,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-rival1';
+import {MATH_LABELS,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-touch1';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');

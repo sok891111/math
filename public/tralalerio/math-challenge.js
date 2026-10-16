@@ -9,7 +9,7 @@ export function requestMath(game,index,model,facto,rng=Math.random){
  const b=game.battle,p=b?.player;if(!b||b.s.result||b.s.waitingSwitch||b.s.animationPending||!p.moves[index]||p.moves[index].pp===0&&p.moves.some(m=>m.pp>0))return null;
  let c=b.s.mathChallenge;
  if(!c&&((game.battleData.moves[b.s.playerFields.charge||(p.moves.every(m=>m.pp===0)?'STRUGGLE':p.moves[index].id)].power||0)===0||rng()>=.5)){b.action('move',index);return null;}
- if(!c){const pool=MATH_TYPES.filter(t=>t!==game.state.lastMathType);c={version:1,type:pool[Math.floor(rng()*pool.length)],seed:Math.floor(rng()*4294967296)>>>0,grade:mathGrade(game.state.map,b.enemy.level),moveIndex:index,moveId:p.moves[index].id,playerSpecies:p.species,input:[],attempts:0,hints:0};c.input=emptyInput(questionFor(c,model,facto));b.s.mathChallenge=c;}
+ if(!c){const pool=MATH_TYPES.filter(t=>t!==game.state.lastMathType);const type=pool[Math.floor(rng()*pool.length)],seed=Math.floor(rng()*4294967296)>>>0;c={version:1,type,seed,grade:Math.min(3,mathGrade(game.state.map,b.enemy.level)+(seed>=2147483648?1:0)),moveIndex:index,moveId:p.moves[index].id,playerSpecies:p.species,input:[],attempts:0,hints:0};c.input=emptyInput(questionFor(c,model,facto));b.s.mathChallenge=c;}
  c.moveIndex=index;c.moveId=p.moves[index].id;c.playerSpecies=p.species;return c;
 }
 export function submitMath(game,model,facto){
@@ -21,7 +21,7 @@ export function submitMath(game,model,facto){
 }
 export function validMathChallenge(c,state,data){
  if(c===undefined)return true;const b=state.battle,p=state.party[b?.playerIndex];
- return !!(c&&c.version===1&&MATH_TYPES.includes(c.type)&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=4294967295&&c.grade===mathGrade(state.map,b.enemy.level)&&Number.isInteger(c.moveIndex)&&p?.moves[c.moveIndex]?.id===c.moveId&&c.playerSpecies===p.species&&!b.result&&!b.waitingSwitch&&!b.animationPending&&Array.isArray(c.input)&&c.input.length<=36&&c.input.every(v=>v===null||Number.isInteger(v)&&v>=0&&v<=100)&&Number.isInteger(c.attempts)&&c.attempts>=0&&Number.isInteger(c.hints)&&c.hints>=0&&c.hints<=3);
+ return !!(c&&c.version===1&&MATH_TYPES.includes(c.type)&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=4294967295&&Number.isInteger(c.grade)&&c.grade>=mathGrade(state.map,b.enemy.level)&&c.grade<=Math.min(3,mathGrade(state.map,b.enemy.level)+1)&&Number.isInteger(c.moveIndex)&&p?.moves[c.moveIndex]?.id===c.moveId&&c.playerSpecies===p.species&&!b.result&&!b.waitingSwitch&&!b.animationPending&&Array.isArray(c.input)&&c.input.length<=36&&c.input.every(v=>v===null||Number.isInteger(v)&&v>=0&&v<=100)&&Number.isInteger(c.attempts)&&c.attempts>=0&&Number.isInteger(c.hints)&&c.hints>=0&&c.hints<=3);
 }
 
 export function skipMath(game){const b=game.battle,c=b?.s.mathChallenge;if(!c)return {ok:false,resolved:false};delete b.s.mathChallenge;game.state.lastMathType=c.type;return {ok:false,resolved:b.action('math-pass')};}

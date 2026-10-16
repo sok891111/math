@@ -4,9 +4,9 @@ import {MATH_TYPES,mathGrade,questionFor,emptyInput,requestMath,submitMath,skipM
 const require=createRequire(import.meta.url),model=require('../../creative/battle-model.js'),facto=require('../../creative/facto-puzzles.js');
 const maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.readFileSync('assets/battle-data.json'));
 function game(){const g=new Game(maps,data,{random:()=>.5});g.chooseStarter('리아코');g.startEncounter('mc_zombie',3);g.battle.s.animationPending=false;return g}
-test('all 12 Creative problem types share a seeded random pool and valid beginner solutions',()=>{
+test('all 12 Creative problem types share a seeded random pool and valid grade 1 and 2 solutions',()=>{
  assert.equal(MATH_TYPES.length,12);
- for(const type of MATH_TYPES)for(let seed=0;seed<100;seed++){const c={type,seed,grade:1},q=questionFor(c,model,facto),answer=q.solution||q.answer;assert.equal((facto.types.includes(type)?facto:model).validate(q,answer).ok,true,type+' '+seed);assert.deepEqual(questionFor(c,model,facto),q);assert.ok(Array.isArray(emptyInput(q)))}
+ for(const type of MATH_TYPES)for(const grade of [1,2])for(let seed=0;seed<100;seed++){const c={type,seed,grade},q=questionFor(c,model,facto),answer=q.solution||q.answer;assert.equal((facto.types.includes(type)?facto:model).validate(q,answer).ok,true,type+' '+seed);assert.deepEqual(questionFor(c,model,facto),q);assert.ok(Array.isArray(emptyInput(q)))}
  for(const map of Object.keys(maps))assert.equal(mathGrade(map,80),1,map);
 });
 test('50% boundary gives immediate attack or a critical challenge',()=>{
@@ -35,4 +35,13 @@ test('solved attacks always hit and apply actual Gen II critical damage even wit
  const p=structuredClone(g.battle.player),e=structuredClone(g.battle.enemy),move=data.moves.THUNDERSHOCK,normal=damage(data,p,e,move,{random:g.rng}),critical=damage(data,p,e,move,{critical:true,random:g.rng});assert.ok(critical>normal);
  const c=requestMath(g,0,model,facto,()=>0),q=questionFor(c,model,facto);c.input=q.solution||q.answer;assert.equal(submitMath(g,model,facto).ok,true);const event=g.battle.s.animationEvents.find(e=>e.actor==='player');assert.equal(event.critical,true);assert.equal(event.failed,false);assert.equal(event.before.enemy.hp-event.after.enemy.hp,critical);assert.equal(g.battle.player.moves[0].pp,29);
  g.battle.s.animationPending=false;const hp=g.battle.enemy.hp;g.battle.action('move',0);assert.equal(g.battle.enemy.hp,hp,'the next unsolved attack obeys normal accuracy');
+});
+
+test('random pool mixes beginner and one higher grade, persisting either without reroll',()=>{
+ for(const [seedRoll,grade] of [[0,1],[.499999,1],[.5,2],[.999999,2]]){
+  const g=game(),rolls=[0,.2,seedRoll],c=requestMath(g,0,model,facto,()=>rolls.shift());
+  assert.equal(c.grade,grade);const raw=g.serialize(),h=game();assert.ok(h.restore(raw));
+  const restored=requestMath(h,0,model,facto,()=>{throw Error('must not reroll')});
+  assert.equal(restored.grade,grade);assert.deepEqual(questionFor(restored,model,facto),questionFor(c,model,facto));
+ }
 });
