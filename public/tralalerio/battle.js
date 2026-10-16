@@ -16,7 +16,16 @@ export function pickEncounter(table,hour,rng=Math.random){const roll=Math.floor(
 export function typeEffect(data,type,types,foresight=false){return [...new Set(types)].reduce((n,t)=>n*(foresight&&t==='GHOST'&&['NORMAL','FIGHTING'].includes(type)?1:data.matchups[type+':'+t]??1),1)}
 export function damage(data,attacker,defender,move,options={}){if(!move.power)return 0;const special=SPECIAL_TYPES.has(move.type),ak=special?'specialAttack':'attack',dk=special?'specialDefense':'defense';const stagesA=options.stagesA||{},stagesD=options.stagesD||{};const ignore=options.critical&&(stagesA[ak]||0)<=(stagesD[dk]||0);let a=attacker.stats[ak],d=defender.stats[dk];if(!ignore){a=Math.max(1,Math.floor(a*STAGE[(stagesA[ak]||0)+6]));d=Math.max(1,Math.floor(d*STAGE[(stagesD[dk]||0)+6]));if(!special&&attacker.status==='burn')a=Math.max(1,Math.floor(a/2));if(options.screen)d*=2;}if(a>255||d>255){a=Math.max(1,Math.floor(a/4)%256);d=Math.max(1,Math.floor(d/4)%256)}let base=Math.floor(Math.floor((Math.floor(2*attacker.level/5)+2)*move.power*a/d)/50);base=Math.min(997,base*(options.critical?2:1))+2;if(data.species[attacker.species].types.includes(move.type))base+=Math.floor(base/2);const types=data.species[defender.species].types;for(const t of [...new Set(types)]){const factor=options.foresight&&t==='GHOST'&&['NORMAL','FIGHTING'].includes(move.type)?1:data.matchups[move.type+':'+t]??1;if(!factor)return 0;base=Math.floor(base*factor)}const random=options.roll??(217+Math.floor((options.random||Math.random)()*39));return Math.max(1,Math.floor(base*random/255));}
 export function accuracyByte(move,stagesA={},stagesD={},foresight=false){const base=Math.floor(move.accuracy*255/100);if(foresight&&(stagesD.evasion||0)>=(stagesA.accuracy||0))return base;let n=Math.max(1,Math.floor(base*ACC[(stagesA.accuracy||0)+6]));n=Math.max(1,Math.floor(n*ACC[6-(stagesD.evasion||0)]));return Math.min(255,n)}
-export function catchThreshold(data,mon){let a=Math.max(1,Math.floor((3*mon.stats.hp-2*mon.hp)*data.species[mon.species].catchRate/(3*mon.stats.hp)));if(mon.status==='sleep'||mon.status==='freeze')a+=10;return Math.min(255,a)}
+// PokeBallEffect: preserve Gold's integer shifts, byte truncation and status bug.
+// Only ordinary Poke Balls are currently stocked; no tutorial/master-ball override.
+export function catchThreshold(data,mon){
+ let triple=3*mon.stats.hp,twice=2*mon.hp;
+ if(triple>255){triple>>=2;twice>>=2;if((twice&255)===0)twice=1;}
+ const divisor=triple&255,multiplier=(divisor-(twice&255))&255;
+ let a=Math.max(1,divisor?Math.floor(multiplier*data.species[mon.species].catchRate/divisor)&255:255);
+ if(mon.status==='sleep'||mon.status==='freeze')a+=10;
+ return Math.min(255,a);
+}
 export function validPokemon(data,p){if(!p||!data.species[p.species]||!Number.isInteger(p.level)||p.level<1||p.level>100||!p.dvs||!p.effort||!Array.isArray(p.moves)||p.moves.length<1||p.moves.length>4)return false;
  for(const k of ['attack','defense','speed','special'])if(!Number.isInteger(p.dvs[k])||p.dvs[k]<0||p.dvs[k]>15)return false;
  for(const k of ['hp','attack','defense','speed','specialAttack'])if(!Number.isInteger(p.effort[k])||p.effort[k]<0||p.effort[k]>65535)return false;
