@@ -1,4 +1,5 @@
-import {MATH_LABELS,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-touch1';
+import {renderLearning} from './learning-ui.js?v=20261017-books1';
+import {MATH_LABELS,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-books1';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');
@@ -14,7 +15,8 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
  function complete(){return q.type==='path'?c.input.at(-1)===q.goal:q.subset?c.input.length>0:q.paint||q.type==='mirror'?true:c.input.length===q.answer.length&&c.input.every(n=>n!==null)}
  function render(){
   board.replaceChildren();tools.replaceChildren();board.dataset.type=q.type;dialog.dataset.type=q.type;dialog.dataset.grade=String(c.grade);
-  if(facto.types.includes(q.type))ui.render();
+  if(q.learning)renderLearning({q,c,board,tools,button,render,place:ui.place});
+  else if(facto.types.includes(q.type))ui.render();
   else if(q.type==='pattern'){
    const trace=document.createElement('div');trace.className='math-rhythm';q.shown.forEach(n=>trace.append(rune(n)));board.append(trace,text('p','다음에는 어떤 순서일까요?'));
    const slots=document.createElement('div');slots.className='math-slots';c.input.forEach((n,i)=>{const b=button(n===null?'?':model.runes[n]?.symbol||'?',()=>{c.input[i]=null;cursor=i;render()},'math-slot');b.dataset.drop='pattern';b.dataset.slot=i;b.setAttribute('aria-label',`예측 ${i+1}번째 빈칸`);if(n!==null){b.dataset.drag='pattern-slot';b.dataset.value=n;b.dataset.from=i}slots.append(b)});board.append(slots);
@@ -33,7 +35,7 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
   $('submit').disabled=!complete();persist();
  }
  function pathTo(i){if(q.blocked.includes(i))return;const previous=c.input.indexOf(i);if(previous>=0)c.input=c.input.slice(0,previous+1);else{const last=c.input.at(-1),distance=Math.abs(Math.floor(last/q.size)-Math.floor(i/q.size))+Math.abs(last%q.size-i%q.size);if(distance!==1||c.input.length-1>=q.budget){$('feedback').textContent='막힌 돌을 피해 가로·세로로 한 칸씩 이어 주세요.';return}c.input.push(i)}render()}
- function showHints(){const steps=window.PuzzleHints.steps(q);$('hints').hidden=c.hints===0;$('hints').replaceChildren();steps.slice(0,c.hints).forEach(step=>{const row=document.createElement('div');row.append(text('b',step.title),text('p',step.text));$('hints').append(row)});$('hint').textContent=c.hints===0?'힌트 보기':c.hints<steps.length?'다음 단계 힌트':'힌트 모두 보기'}
+ function showHints(){const steps=q.learning?q.hints:window.PuzzleHints.steps(q);$('hints').hidden=c.hints===0;$('hints').replaceChildren();steps.slice(0,c.hints).forEach(step=>{const row=document.createElement('div');row.append(text('b',step.title),text('p',step.text));$('hints').append(row)});$('hint').textContent=c.hints===0?'힌트 보기':c.hints<steps.length?'다음 단계 힌트':'힌트 모두 보기'}
  function close(){if(drag&&dialog.hasPointerCapture(drag.id))dialog.releasePointerCapture(drag.id);drag?.ghost?.remove();drag=null;if(dialog.open)dialog.close()}
  function cancel(){const result=skipMath(getGame());persist();close();if(result.resolved)onSolved()}
  $('back').onclick=cancel;dialog.addEventListener('cancel',e=>{e.preventDefault();cancel()});

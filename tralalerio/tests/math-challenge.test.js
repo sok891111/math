@@ -1,19 +1,19 @@
 import {createPokemon,damage} from '../battle.js';
 import {test} from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {createRequire} from 'node:module';import {Game} from '../engine.js';
-import {MATH_TYPES,mathGrade,questionFor,emptyInput,requestMath,submitMath,skipMath,seededRandom} from '../math-challenge.js';
+import {MATH_TYPES,mathGrade,questionFor,emptyInput,requestMath,submitMath,skipMath,seededRandom,validateQuestion} from '../math-challenge.js';
 const require=createRequire(import.meta.url),model=require('../../creative/battle-model.js'),facto=require('../../creative/facto-puzzles.js');
 const maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.readFileSync('assets/battle-data.json'));
 function game(){const g=new Game(maps,data,{random:()=>.5});g.chooseStarter('리아코');g.startEncounter('mc_zombie',3);g.battle.s.animationPending=false;return g}
-test('all 12 Creative problem types share a seeded random pool and valid grade 1 and 2 solutions',()=>{
- assert.equal(MATH_TYPES.length,12);
- for(const type of MATH_TYPES)for(const grade of [1,2])for(let seed=0;seed<100;seed++){const c={type,seed,grade},q=questionFor(c,model,facto),answer=q.solution||q.answer;assert.equal((facto.types.includes(type)?facto:model).validate(q,answer).ok,true,type+' '+seed);assert.deepEqual(questionFor(c,model,facto),q);assert.ok(Array.isArray(emptyInput(q)))}
+test('all 24 generated problem types share a seeded random pool and valid grade 1 and 2 solutions',()=>{
+ assert.equal(MATH_TYPES.length,24);
+ for(const type of MATH_TYPES)for(const grade of [1,2])for(let seed=0;seed<100;seed++){const c={type,seed,grade},q=questionFor(c,model,facto),answer=q.solution||q.answer;assert.equal(validateQuestion(q,answer,model,facto).ok,true,type+' '+seed);assert.deepEqual(questionFor(c,model,facto),q);assert.ok(Array.isArray(emptyInput(q)))}
  for(const map of Object.keys(maps))assert.equal(mathGrade(map,80),1,map);
 });
 test('50% boundary gives immediate attack or a critical challenge',()=>{
  for(const roll of [0,.499999,.5,.999999]){const g=game();const seq=[roll,.2,.4];const c=requestMath(g,0,model,facto,()=>seq.shift());assert.equal(!!c,roll<.5);assert.equal(g.battle.s.turn,roll<.5?0:1)}
 });
 test('all correct answers force critical once; wrong answers and skip give only enemy a turn',()=>{
- for(const type of MATH_TYPES){const g=game(),pp=g.battle.player.moves[0].pp;const seq=[0,(MATH_TYPES.indexOf(type)+.1)/12,.4];const c=requestMath(g,0,model,facto,()=>seq.shift());assert.equal(c.type,type);assert.equal(g.battle.action('move',0),false);const q=questionFor(c,model,facto);c.input=q.solution||q.answer;assert.equal(submitMath(g,model,facto).ok,true);assert.equal(g.battle.s.turn,1);assert.equal(g.battle.player.moves[0].pp,pp-1);assert.ok(g.battle.s.animationEvents.some(e=>e.actor==='player'&&e.critical));assert.ok(g.battle.s.logs.indexOf('강력한 공격에 성공했다!')>g.battle.s.animationEvents.find(e=>e.actor==='player').logIndex);assert.equal(submitMath(g,model,facto).ok,false)}
+ for(const type of MATH_TYPES){const g=game(),pp=g.battle.player.moves[0].pp;const seq=[0,(MATH_TYPES.indexOf(type)+.1)/MATH_TYPES.length,.4];const c=requestMath(g,0,model,facto,()=>seq.shift());assert.equal(c.type,type);assert.equal(g.battle.action('move',0),false);const q=questionFor(c,model,facto);c.input=q.solution||q.answer;assert.equal(submitMath(g,model,facto).ok,true);assert.equal(g.battle.s.turn,1);assert.equal(g.battle.player.moves[0].pp,pp-1);assert.ok(g.battle.s.animationEvents.some(e=>e.actor==='player'&&e.critical));assert.ok(g.battle.s.logs.indexOf('강력한 공격에 성공했다!')>g.battle.s.animationEvents.find(e=>e.actor==='player').logIndex);assert.equal(submitMath(g,model,facto).ok,false)}
  for(const skip of [false,true]){const g=game(),pp=g.battle.player.moves[0].pp,enemy=g.battle.enemy.hp;const c=requestMath(g,0,model,facto,()=>0);c.input=[];const r=skip?skipMath(g):submitMath(g,model,facto);assert.equal(r.resolved,true);assert.equal(g.battle.s.turn,1);assert.equal(g.battle.player.moves[0].pp,pp);assert.equal(g.battle.enemy.hp,enemy);assert.ok(g.battle.s.animationEvents.every(e=>e.kind==='math-fail'||e.actor==='enemy'));assert.equal(g.battle.s.mathChallenge,undefined);assert.equal(g.battle.s.animationEvents[0].kind,'math-fail');const restored=game();assert.ok(restored.restore(g.serialize()));assert.equal(restored.battle.s.turn,1)}
 });
 test('partial puzzle, seed and hints survive reload; selecting another move keeps the same question',()=>{

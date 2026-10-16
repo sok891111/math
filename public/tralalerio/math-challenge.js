@@ -1,10 +1,12 @@
-export const MATH_TYPES=['pattern','mirror','path','logic','sequence','classify','analogy','rotate','tower','bond','balance','latin'];
-export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자'};
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-books1';
+export const MATH_TYPES=['pattern','mirror','path','logic','sequence','classify','analogy','rotate','tower','bond','balance','latin',...LEARNING_TYPES];
+export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
 const STARTER_MAPS=new Set(['Route29Route46Gate','Route46','Route30','Route30BerryHouse','MrPokemonsHouse','Route31','Route31VioletGate','VioletCity','VioletMart','VioletGym','EarlsPokemonAcademy','VioletNicknameSpeechHouse','VioletPokecenter1F','VioletKylesHouse','SproutTower1F','SproutTower2F','SproutTower3F','DarkCaveVioletEntrance','PlayersHouse2F','PlayersHouse1F','NewBarkTown','ElmsLab','PlayersNeighborsHouse','ElmsHouse','Route29','CherrygroveCity','CherrygroveMart','CherrygrovePokecenter1F','CherrygroveGymSpeechHouse','GuideGentsHouse','CherrygroveEvolutionSpeechHouse']);
 export function mathGrade(map,level=1){return STARTER_MAPS.has(map)?1:Math.min(3,1+Math.floor(Math.max(0,level-5)/10))}
 export function seededRandom(seed){let n=seed>>>0;return ()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296}}
-export function questionFor(challenge,model,facto){const r=seededRandom(challenge.seed);return facto.types.includes(challenge.type)?facto.generate(challenge.type,challenge.grade,r):model.puzzle(challenge.type,challenge.grade,r)}
-export function emptyInput(q){return q.subset?[]:q.type==='path'?[q.start]:q.answer.map(()=>q.paint||q.type==='mirror'?0:null)}
+export function questionFor(challenge,model,facto){const r=seededRandom(challenge.seed);return LEARNING_TYPES.includes(challenge.type)?learningQuestion(challenge.type,challenge.grade,r):facto.types.includes(challenge.type)?facto.generate(challenge.type,challenge.grade,r):model.puzzle(challenge.type,challenge.grade,r)}
+export function validateQuestion(q,input,model,facto){return q.learning?validateLearning(q,input):(facto.types.includes(q.type)?facto:model).validate(q,input)}
+export function emptyInput(q){return q.given?q.given.slice():q.subset?[]:q.type==='path'?[q.start]:q.answer.map(()=>q.paint||q.type==='mirror'?0:null)}
 export function requestMath(game,index,model,facto,rng=Math.random){
  const b=game.battle,p=b?.player;if(!b||b.s.result||b.s.waitingSwitch||b.s.animationPending||!p.moves[index]||p.moves[index].pp===0&&p.moves.some(m=>m.pp>0))return null;
  let c=b.s.mathChallenge;
@@ -14,7 +16,7 @@ export function requestMath(game,index,model,facto,rng=Math.random){
 }
 export function submitMath(game,model,facto){
  const b=game.battle,c=b?.s.mathChallenge;if(!c||!validMathChallenge(c,game.state,game.battleData))return {ok:false,reason:'기술을 다시 골라 주세요.'};
- const q=questionFor(c,model,facto),result=(facto.types.includes(q.type)?facto:model).validate(q,c.input);c.attempts++;
+ const q=questionFor(c,model,facto),result=validateQuestion(q,c.input,model,facto);c.attempts++;
  if(!result.ok)return skipMath(game);
  const index=c.moveIndex;delete b.s.mathChallenge;game.state.lastMathType=c.type;
  return b.action('move',index,{forceCritical:true})?{ok:true,resolved:true}:{ok:false,reason:'지금은 공격할 수 없어요. 기술을 다시 골라 주세요.'};
