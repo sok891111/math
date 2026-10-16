@@ -63,16 +63,17 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
       sceneClass: 'island-scene',
     },
     {
-      id: 'creative',
-      title: 'Creative 크래프트',
-      path: `/${user.id}/creative`,
-      type: 'CREATIVE PUZZLE',
-      meta: 'BRIDGE & WARDEN · 1P',
-      themeColor: '#10b981',
-      themeBorder: '#34d399',
-      accentBg: 'linear-gradient(135deg, #062b1e 0%, #02140d 100%)',
-      sceneClass: 'creative-scene',
+      id: 'tralalerio',
+      title: '뜨랠레리오',
+      path: `/${user.id}/tralalerio`,
+      type: 'MATH MONSTER ADVENTURE',
+      meta: '피카츄 · 첫 배지 · 사고력 수학 · 1P',
+      themeColor: '#c9e99b',
+      themeBorder: '#8fbd65',
+      accentBg: 'linear-gradient(135deg, #29452c 0%, #101e18 100%)',
+      sceneClass: 'tralalerio-scene',
     },
+
   ];
 
   // Unlock iOS Safari AudioContext on first touch
@@ -472,6 +473,8 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
                         <div className="pixel-blocks">🧊 🍎 🥕</div>
                         <div className="pixel-ground island-ground" />
                       </div>
+                    ) : g.id === 'tralalerio' ? (
+                      <div className="tralalerio-preview" role="img" aria-label="뜨랠레리오 연두마을" />
                     ) : (
                       <div className="pixel-stage creative-stage">
                         <div className="pixel-sun creative-sun">☀️</div>
@@ -1171,6 +1174,11 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
           background: linear-gradient(180deg, #102a24 0%, #061914 65%, #16402d 65%, #0d281c 100%);
         }
 
+        .tralalerio-preview {
+          width: 100%; height: 100%;
+          background: #dbe7ba url('/tralalerio/assets/NewBarkTown.png') center / cover;
+          image-rendering: pixelated;
+        }
         .screen-lines {
           position: absolute;
           top: 0; left: 0; width: 100%; height: 100%;

@@ -1,0 +1,27 @@
+export const MATH_TYPES=['pattern','mirror','path','logic','sequence','classify','analogy','rotate','tower','bond','balance','latin'];
+export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자'};
+const STARTER_MAPS=new Set(['Route29Route46Gate','Route46','Route30','Route30BerryHouse','MrPokemonsHouse','Route31','Route31VioletGate','VioletCity','VioletMart','VioletGym','EarlsPokemonAcademy','VioletNicknameSpeechHouse','VioletPokecenter1F','VioletKylesHouse','SproutTower1F','SproutTower2F','SproutTower3F','DarkCaveVioletEntrance','PlayersHouse2F','PlayersHouse1F','NewBarkTown','ElmsLab','PlayersNeighborsHouse','ElmsHouse','Route29','CherrygroveCity','CherrygroveMart','CherrygrovePokecenter1F','CherrygroveGymSpeechHouse','GuideGentsHouse','CherrygroveEvolutionSpeechHouse']);
+export function mathGrade(map,level=1){return STARTER_MAPS.has(map)?1:Math.min(3,1+Math.floor(Math.max(0,level-5)/10))}
+export function seededRandom(seed){let n=seed>>>0;return ()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296}}
+export function questionFor(challenge,model,facto){const r=seededRandom(challenge.seed);return facto.types.includes(challenge.type)?facto.generate(challenge.type,challenge.grade,r):model.puzzle(challenge.type,challenge.grade,r)}
+export function emptyInput(q){return q.subset?[]:q.type==='path'?[q.start]:q.answer.map(()=>q.paint||q.type==='mirror'?0:null)}
+export function requestMath(game,index,model,facto,rng=Math.random){
+ const b=game.battle,p=b?.player;if(!b||b.s.result||b.s.waitingSwitch||b.s.animationPending||!p.moves[index]||p.moves[index].pp===0&&p.moves.some(m=>m.pp>0))return null;
+ let c=b.s.mathChallenge;
+ if(!c&&((game.battleData.moves[b.s.playerFields.charge||(p.moves.every(m=>m.pp===0)?'STRUGGLE':p.moves[index].id)].power||0)===0||rng()>=.5)){b.action('move',index);return null;}
+ if(!c){const pool=MATH_TYPES.filter(t=>t!==game.state.lastMathType);c={version:1,type:pool[Math.floor(rng()*pool.length)],seed:Math.floor(rng()*4294967296)>>>0,grade:mathGrade(game.state.map,b.enemy.level),moveIndex:index,moveId:p.moves[index].id,playerSpecies:p.species,input:[],attempts:0,hints:0};c.input=emptyInput(questionFor(c,model,facto));b.s.mathChallenge=c;}
+ c.moveIndex=index;c.moveId=p.moves[index].id;c.playerSpecies=p.species;return c;
+}
+export function submitMath(game,model,facto){
+ const b=game.battle,c=b?.s.mathChallenge;if(!c||!validMathChallenge(c,game.state,game.battleData))return {ok:false,reason:'기술을 다시 골라 주세요.'};
+ const q=questionFor(c,model,facto),result=(facto.types.includes(q.type)?facto:model).validate(q,c.input);c.attempts++;
+ if(!result.ok)return skipMath(game);
+ const index=c.moveIndex;delete b.s.mathChallenge;game.state.lastMathType=c.type;
+ return b.action('move',index,{forceCritical:true})?{ok:true,resolved:true}:{ok:false,reason:'지금은 공격할 수 없어요. 기술을 다시 골라 주세요.'};
+}
+export function validMathChallenge(c,state,data){
+ if(c===undefined)return true;const b=state.battle,p=state.party[b?.playerIndex];
+ return !!(c&&c.version===1&&MATH_TYPES.includes(c.type)&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=4294967295&&c.grade===mathGrade(state.map,b.enemy.level)&&Number.isInteger(c.moveIndex)&&p?.moves[c.moveIndex]?.id===c.moveId&&c.playerSpecies===p.species&&!b.result&&!b.waitingSwitch&&!b.animationPending&&Array.isArray(c.input)&&c.input.length<=36&&c.input.every(v=>v===null||Number.isInteger(v)&&v>=0&&v<=100)&&Number.isInteger(c.attempts)&&c.attempts>=0&&Number.isInteger(c.hints)&&c.hints>=0&&c.hints<=3);
+}
+
+export function skipMath(game){const b=game.battle,c=b?.s.mathChallenge;if(!c)return {ok:false,resolved:false};delete b.s.mathChallenge;game.state.lastMathType=c.type;return {ok:false,resolved:b.action('math-pass')};}

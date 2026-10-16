@@ -43,6 +43,8 @@ module.exports = {
     outputFileTracingIncludes: {
       '/[userId]/platformer': ['./public/platformer/index.html'],
       '/[userId]/island': ['./public/index.html'],
+      '/tralalerio': ['./public/tralalerio/index.html'],
+      '/[userId]/tralalerio': ['./public/tralalerio/index.html'],
     },
   },
 };

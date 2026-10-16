@@ -41,4 +41,14 @@ if (fs.existsSync(creativeDir)) {
   fs.cpSync(creativeDir, path.join(publicDir, 'creative'), { recursive: true });
 }
 
+const tralalerioDir = path.join(rootDir, 'tralalerio');
+fs.cpSync(tralalerioDir, path.join(publicDir, 'tralalerio'), {
+  recursive: true,
+  filter: (src) => {
+    const relative = path.relative(tralalerioDir, src);
+    return !relative || relative === 'assets' || relative.startsWith(`assets${path.sep}`) ||
+      (!relative.includes(path.sep) && /\.(html|css|js)$/.test(relative));
+  },
+});
+
 console.log('✅ Synchronized public assets successfully.');

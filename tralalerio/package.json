@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js && node ../tests/tralalerio-minecraft.mjs",
+    "test:browser": "node tools/run-browser-tests.cjs"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "source": "Narishma-gb/pokegold-kr",
+  "commit": "c90f31dadef17f033a8f1bdada701b26cef18241",
+  "emoteFrames": 30,
+  "rival": {
+    "rows": [
+      6,
+      7
+    ],
+    "fromX": 39,
+    "toX": 34,
+    "stepsLeft": 5,
+    "playerShockFrames": 15,
+    "pauseFrames": 15
+  },
+  "files": [
+    "engine/events/trainer_scripts.asm",
+    "engine/overworld/player_object.asm",
+    "gfx/emotes/shock.png",
+    "maps/CherrygroveCity.asm"
+  ]
+}

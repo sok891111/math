@@ -25,7 +25,10 @@
     "test:creative": "node tests/creative.cjs",
     "test:creative-routes": "node tests/creative-routes.cjs",
     "test:creative-ipad": "node tests/creative-ipad.cjs",
-    "test:creative-warden": "node tests/creative-warden.cjs"
+    "test:creative-warden": "node tests/creative-warden.cjs",
+    "test:tralalerio": "npm --prefix tralalerio test",
+    "test:tralalerio-browser": "npm --prefix tralalerio run test:browser",
+    "test:tralalerio-player": "node tests/tralalerio-player.cjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"
