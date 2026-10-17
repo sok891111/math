@@ -16,9 +16,9 @@ for(const engine of [webkit,chromium]){
    const canceled=!el.dispatchEvent(event);el.dispatchEvent(new Event('touchcancel',{bubbles:true}));return canceled;
   }),true);
   const g=new Game(maps,data,{random:()=>.5});g.startAdventure();g.startEncounter('mc_enderknight',3);g.battle.s.animationPending=false;
-  const rolls=[0,.01,.75];requestMath(g,0,model,facto,()=>rolls.shift());assert.equal(g.battle.s.mathChallenge.grade,2);
+  const rolls=[0,.01,.75];requestMath(g,0,model,facto,()=>rolls.shift());assert.equal(g.battle.s.mathChallenge.grade,3);
   await p.evaluate(seed=>localStorage.setItem('tralalerio-save-v1',seed),g.serialize());await p.reload();await p.locator('.math-dialog[open]').waitFor();
-  assert.equal(await p.locator('.math-grade').innerText(),'중급 · 2단계');
+  assert.equal(await p.locator('.math-grade').innerText(),'레벨 3 · 중');
   assert.ok(await p.locator('.math-dialog').evaluate(dialog=>{
    dialog.style.maxHeight='240px';dialog.scrollTop=0;const target=dialog.querySelector('.math-title');
    for(const [type,y] of [['touchstart',300],['touchmove',180]]){
@@ -26,12 +26,12 @@ for(const engine of [webkit,chromium]){
    }
    target.dispatchEvent(new Event('touchcancel',{bubbles:true}));const scrolled=dialog.scrollTop>0;dialog.style.maxHeight='';dialog.scrollTop=0;return scrolled;
   }));await p.locator('.math-hint').tap();
-  await p.reload();await p.locator('.math-dialog[open]').waitFor();assert.equal(await p.locator('.math-grade').innerText(),'중급 · 2단계');
+  await p.reload();await p.locator('.math-dialog[open]').waitFor();assert.equal(await p.locator('.math-grade').innerText(),'레벨 3 · 중');
   const c=await p.evaluate(()=>JSON.parse(localStorage.getItem('tralalerio-save-v1')).battle.mathChallenge),q=questionFor(c,model,facto);
   await p.locator(`.rune-tool[data-value="${q.answer[0]}"]`).tap();
   assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('tralalerio-save-v1')).battle.mathChallenge.input[0]),q.answer[0]);
   await solveMath(p);await p.waitForFunction(()=>!document.querySelector('.math-dialog').open);
   assert.equal(await p.evaluate(()=>getSelection().toString()),'');assert.deepEqual(errors,[]);
-  console.log('PASS: '+engine.name()+' iPad touch guard, movement, single taps, grade 2 puzzle and saved hints.');
+  console.log('PASS: '+engine.name()+' iPad touch guard, movement, single taps, grade 3 puzzle and saved hints.');
  }finally{await browser.close()}
 }

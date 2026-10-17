@@ -20,12 +20,12 @@ for(const engine of [chromium,webkit]){
    if(question.paint)await p.locator('.shape-preview.editable button').first().tap();
    else {await p.getByRole('button',{name:`답 조각 ${question.answer[0]}`,exact:true}).tap();assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('tralalerio-save-v1')).battle.mathChallenge.input[0]),question.answer[0]);}
    await solveMath(p,{submit:false});await reload();await p.locator('.math-dialog[open]').waitFor();
-   assert.equal(await p.locator('.math-dialog').getAttribute('data-grade'),'2');
+   assert.equal(await p.locator('.math-dialog').getAttribute('data-grade'),String(challenge.grade));
    assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('tralalerio-save-v1')).battle.mathChallenge.hints),1);
    await p.locator('.math-submit').tap();await p.waitForFunction(()=>!document.querySelector('.math-dialog').open);
    assert.ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('tralalerio-save-v1')).battle.animationEvents.some(e=>e.actor==='player'&&e.critical)),type);
    assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),type);
   }
-  assert.deepEqual(errors,[]);console.log('PASS: '+engine.name()+' silent boundary; all '+LEARNING_TYPES.length+' learning families, grade 2, hints, placed answers reload, critical attack and iPad layout.');
+  assert.deepEqual(errors,[]);console.log('PASS: '+engine.name()+' silent boundary; all '+LEARNING_TYPES.length+' learning families, level 3+, hints, placed answers reload, critical attack and iPad layout.');
  }finally{await browser.close()}
 }

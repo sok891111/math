@@ -1,4 +1,4 @@
-import {animationAssets,frameAt} from './battle-animation.js?v=20261017-rival1';
+import {animationAssets,frameAt} from './battle-animation.js?v=20261017-azalea8';
 import {SENDOUT_FRAMES as F} from './capture-source.js?v=20261016-capture3';
 export function createSendoutAnimator(){
  let ticket=0,stop=null;

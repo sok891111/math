@@ -1,6 +1,6 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {execFileSync} from 'node:child_process';import {Game,DIRECTIONS} from '../engine.js';import {pickEncounter} from '../battle.js';
 const maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.readFileSync('assets/battle-data.json')),source=JSON.parse(fs.readFileSync('assets/encounter-source.json'));
-const locations=['Route29','Route30','Route31','Route46','DarkCaveVioletEntrance','SproutTower2F','SproutTower3F'];
+const locations=['Route29','Route30','Route31','Route46','DarkCaveVioletEntrance','SproutTower2F','SproutTower3F','Route32','Route33','UnionCave1F','UnionCaveB1F','UnionCaveB2F','SlowpokeWellB1F','SlowpokeWellB2F'];
 export function grassPair(g,id){g.enter(maps[id],0,0);for(const t of Object.keys(data.trainers))g.state.flags['trainer:'+t]=true;g.state.flags.eggDelivered=true;g.state.flags.labCall=true;const tile=data.encounters[id].terrain==='floor'?'FLOOR':'TALL_GRASS';for(let y=1;y<g.map.height-1;y++)for(let x=1;x<g.map.width-1;x++)for(const [dir,[dx,dy]]of Object.entries(DIRECTIONS)){if(g.passable(x,y)&&g.passable(x+dx,y+dy)&&g.map.collision[y][x]===tile&&g.map.collision[y+dy][x+dx]===tile)return{x,y,dir};}throw Error('No safe wild pair: '+id);}
 test('all seven implemented Gold land habitats have original time slots and rates plus 60% Minecraft',()=>{
  assert.deepEqual(Object.keys(data.encounters).sort(),locations.slice().sort());assert.equal(data.encounters.SproutTower1F,undefined);

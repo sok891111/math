@@ -6,6 +6,7 @@ export async function solveMath(page,{submit=true}={}){
  await dialog.locator('.math-reset').click();
  if(q.type==='pattern'){for(const n of q.answer)await dialog.locator(`.rune-tool[data-value="${n}"]`).click()}
  else if(q.type==='mirror'){for(let i=0;i<q.answer.length;i++)if(q.answer[i])await dialog.locator(`.math-light[data-slot="${i}"]`).click()}
+ else if(q.type==='rotate')await dialog.getByRole('button',{name:`회전 후 모습 ${q.answer[0]+1}번 선택`,exact:true}).click();
  else if(q.type==='path'){for(const n of q.solution.slice(1))await dialog.locator(`.math-path-cell[data-cell="${n}"]`).click()}
  else if(q.type==='logic'){for(let i=0;i<q.answer.length;i++){await dialog.locator(`.logic-rune[data-value="${q.answer[i]}"]`).click();await dialog.locator(`.math-slot[data-slot="${i}"]`).click()}}
  else if(q.subset){for(const n of q.answer)await dialog.locator(`.selection-piece[data-value="${n}"]`).click()}

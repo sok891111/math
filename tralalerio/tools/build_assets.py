@@ -8,6 +8,8 @@ R=Path(sys.argv[1] if len(sys.argv)>1 else '/private/tmp/pokemon-gold-kr-researc
 specs=[('PlayersHouse2F','내 방','players_room','PLAYERS_HOUSE_2F'),('PlayersHouse1F','우리 집','players_house','PLAYERS_HOUSE_1F'),('NewBarkTown','연두마을','johto','NEW_BARK_TOWN'),('ElmsLab','공박사 연구소','lab','ELMS_LAB'),('PlayersNeighborsHouse','이웃집','house','PLAYERS_NEIGHBORS_HOUSE'),('ElmsHouse','공박사의 집','house','ELMS_HOUSE'),('Route29','29번 도로','johto','ROUTE_29'),('CherrygroveCity','무궁시티','johto','CHERRYGROVE_CITY'),('CherrygroveMart','무궁 프렌들리숍','mart','CHERRYGROVE_MART'),('CherrygrovePokecenter1F','무궁 포켓몬센터','pokecenter','CHERRYGROVE_POKECENTER_1F'),('CherrygroveGymSpeechHouse','트레이너의 집','house','CHERRYGROVE_GYM_SPEECH_HOUSE'),('GuideGentsHouse','안내 할아버지의 집','house','GUIDE_GENTS_HOUSE'),('CherrygroveEvolutionSpeechHouse','진화를 연구하는 집','house','CHERRYGROVE_EVOLUTION_SPEECH_HOUSE')]
 # First badge chapter: preserve original map blocks, connections and event positions.
 extra={'Route29Route46Gate':'29·46번 도로 게이트','Route46':'46번 도로','Route30':'30번 도로','Route30BerryHouse':'열매 할아버지의 집','MrPokemonsHouse':'포켓몬 할아버지의 집','Route31':'31번 도로','Route31VioletGate':'도라지 게이트','VioletCity':'도라지시티','VioletMart':'도라지 프렌들리숍','VioletGym':'도라지 체육관','EarlsPokemonAcademy':'포켓몬 학원','VioletNicknameSpeechHouse':'별명 이야기의 집','VioletPokecenter1F':'도라지 포켓몬센터','VioletKylesHouse':'교환하는 집','SproutTower1F':'모다피탑 1층','SproutTower2F':'모다피탑 2층','SproutTower3F':'모다피탑 3층','DarkCaveVioletEntrance':'어둠의 동굴 · 도라지 입구'}
+# Second badge main route and its interiors use the original Gold layouts.
+extra.update({'Route32':'32번 도로','Route32Pokecenter1F':'32번 도로 포켓몬센터','UnionCave1F':'연결동굴 1층','UnionCaveB1F':'연결동굴 지하 1층','UnionCaveB2F':'연결동굴 지하 2층','Route33':'33번 도로','AzaleaTown':'고동마을','AzaleaGym':'고동 체육관','AzaleaMart':'고동 프렌들리숍','AzaleaPokecenter1F':'고동 포켓몬센터','KurtsHouse':'강집의 집','CharcoalKiln':'숯 굽는 집','SlowpokeWellB1F':'야돈우물 지하 1층','SlowpokeWellB2F':'야돈우물 지하 2층','IlexForestAzaleaGate':'고동·너도밤나무숲 게이트'})
 mapdefs=(R/'data/maps/maps.asm').read_text();attrs_text=(R/'data/maps/attributes.asm').read_text()
 for name,label in extra.items():
  tileset=re.search(r'map '+name+r', TILESET_(\w+)',mapdefs)[1].lower()
@@ -80,6 +82,8 @@ for name,label,tileset,constant in specs:
   text_match=re.search(r'(?:writetext|jumptextfaceplayer|jumptext)\s+(\w+)',match[2])
   if text_match:script_texts[match[1]]=text_match[1]
  maps[name]={'connections':connections,'scriptTexts':script_texts,'id':name,'name':label,'constant':constant,'width':w,'height':h,'collision':grid,'warps':[{'x':int(a[0]),'y':int(a[1]),'map':a[2],'index':int(a[3])} for a in warps],'signs':[{'x':int(a[0]),'y':int(a[1]),'script':a[3]} for a in signs],'objects':[{'x':int(a[0]),'y':int(a[1]),'sprite':a[2].removeprefix('SPRITE_').lower(),'script':a[11],'flag':a[-1],'direction':a[3].removeprefix('SPRITEMOVEDATA_STANDING_').lower(),'kind':a[9],'range':int(a[10]) if a[10].isdigit() else 0} for a in objects], 'texts':texts}
+for actor in maps.get('AzaleaTown',{}).get('objects',[]):
+ if actor['sprite']=='azalea_rocket':actor['sprite']='rocket'
 sprite_names={'chris'}|{o['sprite'] for m in maps.values() for o in m['objects']}
 sprite_names={n for n in sprite_names if (R/'gfx/sprites'/f'{n}.png').exists()}
 (O/'sprites.json').write_text(json.dumps(sorted(sprite_names)))

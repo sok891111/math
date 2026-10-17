@@ -1,3 +1,4 @@
+import {levelForType} from '../math-levels.js';
 import {test} from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {createRequire} from 'node:module';
 import {Game} from '../engine.js';import {createPokemon} from '../battle.js';import {MATH_TYPES,requestCapture,questionFor,submitMath,skipMath,validMathChallenge} from '../math-challenge.js';import {captureReward} from '../math-rewards.js';
 const require=createRequire(import.meta.url),model=require('../../creative/battle-model.js'),facto=require('../../creative/facto-puzzles.js');
@@ -10,8 +11,8 @@ test('capture always asks math and solving guarantees every species at full or l
  }
 });
 test('all 27 types and both current difficulties work for capture, with wrong answers or skipping costing one ball and an enemy turn',()=>{
- for(const type of MATH_TYPES)for(const grade of [2,3]){
-  const g=game('mc_zombie'),rolls=[(MATH_TYPES.indexOf(type)+.1)/MATH_TYPES.length,grade===2?.2:.9],c=requestCapture(g,model,facto,()=>rolls.shift());assert.equal(c.type,type);assert.equal(c.grade,grade);const q=questionFor(c,model,facto);c.input=q.solution||q.answer;assert.ok(submitMath(g,model,facto).ok);assert.equal(g.battle.s.result,'caught');
+ for(const type of MATH_TYPES)for(const grade of [3,4]){
+  const g=game('mc_zombie'),rolls=[(MATH_TYPES.indexOf(type)+.1)/MATH_TYPES.length,grade===3?.2:.9],c=requestCapture(g,model,facto,()=>rolls.shift());assert.equal(c.type,type);assert.equal(c.grade,levelForType(type,grade));const q=questionFor(c,model,facto);c.input=q.solution||q.answer;assert.ok(submitMath(g,model,facto).ok);assert.equal(g.battle.s.result,'caught');
  }
  for(const skip of [false,true]){const g=game(),hp=g.battle.player.hp,pp=g.battle.player.moves[0].pp,c=requestCapture(g,model,facto,()=>0);c.input=[];assert.ok((skip?skipMath(g):submitMath(g,model,facto)).resolved);assert.equal(g.battle.s.result,null);assert.equal(g.state.party.length,1);assert.equal(g.state.balls,4);assert.equal(g.battle.s.turn,1);assert.ok(g.battle.player.hp<hp);assert.equal(g.battle.player.moves[0].pp,pp);assert.deepEqual(g.battle.s.animationEvents.map(e=>e.kind),['capture',undefined]);assert.equal(g.battle.s.mathChallenge,undefined);}
 });

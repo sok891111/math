@@ -705,6 +705,699 @@
           "species": "dunsparce"
         }
       ]
+    },
+    "Route32": {
+      "constant": "ROUTE_32",
+      "rates": {
+        "morning": 25,
+        "day": 25,
+        "night": 25
+      },
+      "terrain": "grass",
+      "morning": [
+        {
+          "level": 6,
+          "species": "bellsprout"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "mareep"
+        },
+        {
+          "level": 6,
+          "species": "hoppip"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "zubat"
+        }
+      ],
+      "day": [
+        {
+          "level": 6,
+          "species": "bellsprout"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "mareep"
+        },
+        {
+          "level": 6,
+          "species": "hoppip"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 8,
+          "species": "rattata"
+        },
+        {
+          "level": 8,
+          "species": "rattata"
+        }
+      ],
+      "night": [
+        {
+          "level": 6,
+          "species": "wooper"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "bellsprout"
+        },
+        {
+          "level": 6,
+          "species": "mareep"
+        },
+        {
+          "level": 8,
+          "species": "wooper"
+        },
+        {
+          "level": 8,
+          "species": "zubat"
+        },
+        {
+          "level": 8,
+          "species": "zubat"
+        }
+      ]
+    },
+    "UnionCave1F": {
+      "constant": "UNION_CAVE_1F",
+      "rates": {
+        "morning": 15,
+        "day": 15,
+        "night": 15
+      },
+      "terrain": "floor",
+      "morning": [
+        {
+          "level": 6,
+          "species": "geodude"
+        },
+        {
+          "level": 6,
+          "species": "sandshrew"
+        },
+        {
+          "level": 5,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 7,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "onix"
+        },
+        {
+          "level": 6,
+          "species": "onix"
+        }
+      ],
+      "day": [
+        {
+          "level": 6,
+          "species": "geodude"
+        },
+        {
+          "level": 6,
+          "species": "sandshrew"
+        },
+        {
+          "level": 5,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 7,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "onix"
+        },
+        {
+          "level": 6,
+          "species": "onix"
+        }
+      ],
+      "night": [
+        {
+          "level": 6,
+          "species": "geodude"
+        },
+        {
+          "level": 6,
+          "species": "sandshrew"
+        },
+        {
+          "level": 5,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 7,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "onix"
+        },
+        {
+          "level": 6,
+          "species": "onix"
+        }
+      ]
+    },
+    "UnionCaveB1F": {
+      "constant": "UNION_CAVE_B1F",
+      "rates": {
+        "morning": 15,
+        "day": 15,
+        "night": 15
+      },
+      "terrain": "floor",
+      "morning": [
+        {
+          "level": 8,
+          "species": "geodude"
+        },
+        {
+          "level": 8,
+          "species": "sandshrew"
+        },
+        {
+          "level": 7,
+          "species": "zubat"
+        },
+        {
+          "level": 8,
+          "species": "onix"
+        },
+        {
+          "level": 9,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        }
+      ],
+      "day": [
+        {
+          "level": 8,
+          "species": "geodude"
+        },
+        {
+          "level": 8,
+          "species": "sandshrew"
+        },
+        {
+          "level": 7,
+          "species": "zubat"
+        },
+        {
+          "level": 8,
+          "species": "onix"
+        },
+        {
+          "level": 9,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        }
+      ],
+      "night": [
+        {
+          "level": 8,
+          "species": "geodude"
+        },
+        {
+          "level": 8,
+          "species": "sandshrew"
+        },
+        {
+          "level": 7,
+          "species": "zubat"
+        },
+        {
+          "level": 8,
+          "species": "onix"
+        },
+        {
+          "level": 9,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        }
+      ]
+    },
+    "UnionCaveB2F": {
+      "constant": "UNION_CAVE_B2F",
+      "rates": {
+        "morning": 10,
+        "day": 10,
+        "night": 10
+      },
+      "terrain": "floor",
+      "morning": [
+        {
+          "level": 22,
+          "species": "zubat"
+        },
+        {
+          "level": 22,
+          "species": "raticate"
+        },
+        {
+          "level": 22,
+          "species": "golbat"
+        },
+        {
+          "level": 21,
+          "species": "geodude"
+        },
+        {
+          "level": 20,
+          "species": "rattata"
+        },
+        {
+          "level": 23,
+          "species": "onix"
+        },
+        {
+          "level": 23,
+          "species": "onix"
+        }
+      ],
+      "day": [
+        {
+          "level": 22,
+          "species": "zubat"
+        },
+        {
+          "level": 22,
+          "species": "raticate"
+        },
+        {
+          "level": 22,
+          "species": "golbat"
+        },
+        {
+          "level": 21,
+          "species": "geodude"
+        },
+        {
+          "level": 20,
+          "species": "rattata"
+        },
+        {
+          "level": 23,
+          "species": "onix"
+        },
+        {
+          "level": 23,
+          "species": "onix"
+        }
+      ],
+      "night": [
+        {
+          "level": 22,
+          "species": "zubat"
+        },
+        {
+          "level": 22,
+          "species": "raticate"
+        },
+        {
+          "level": 22,
+          "species": "golbat"
+        },
+        {
+          "level": 21,
+          "species": "geodude"
+        },
+        {
+          "level": 20,
+          "species": "rattata"
+        },
+        {
+          "level": 23,
+          "species": "onix"
+        },
+        {
+          "level": 23,
+          "species": "onix"
+        }
+      ]
+    },
+    "Route33": {
+      "constant": "ROUTE_33",
+      "rates": {
+        "morning": 25,
+        "day": 25,
+        "night": 25
+      },
+      "terrain": "grass",
+      "morning": [
+        {
+          "level": 6,
+          "species": "hoppip"
+        },
+        {
+          "level": 7,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "spearow"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 8,
+          "species": "hoppip"
+        },
+        {
+          "level": 4,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "zubat"
+        }
+      ],
+      "day": [
+        {
+          "level": 6,
+          "species": "hoppip"
+        },
+        {
+          "level": 7,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "spearow"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 8,
+          "species": "hoppip"
+        },
+        {
+          "level": 8,
+          "species": "rattata"
+        },
+        {
+          "level": 8,
+          "species": "rattata"
+        }
+      ],
+      "night": [
+        {
+          "level": 6,
+          "species": "zubat"
+        },
+        {
+          "level": 7,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 8,
+          "species": "zubat"
+        },
+        {
+          "level": 8,
+          "species": "zubat"
+        },
+        {
+          "level": 8,
+          "species": "zubat"
+        }
+      ]
+    },
+    "SlowpokeWellB1F": {
+      "constant": "SLOWPOKE_WELL_B1F",
+      "rates": {
+        "morning": 5,
+        "day": 5,
+        "night": 5
+      },
+      "terrain": "floor",
+      "morning": [
+        {
+          "level": 5,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "zubat"
+        },
+        {
+          "level": 7,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "slowpoke"
+        },
+        {
+          "level": 8,
+          "species": "zubat"
+        },
+        {
+          "level": 8,
+          "species": "slowpoke"
+        },
+        {
+          "level": 8,
+          "species": "slowpoke"
+        }
+      ],
+      "day": [
+        {
+          "level": 5,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "zubat"
+        },
+        {
+          "level": 7,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "slowpoke"
+        },
+        {
+          "level": 8,
+          "species": "zubat"
+        },
+        {
+          "level": 8,
+          "species": "slowpoke"
+        },
+        {
+          "level": 8,
+          "species": "slowpoke"
+        }
+      ],
+      "night": [
+        {
+          "level": 5,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "zubat"
+        },
+        {
+          "level": 7,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "slowpoke"
+        },
+        {
+          "level": 8,
+          "species": "zubat"
+        },
+        {
+          "level": 8,
+          "species": "slowpoke"
+        },
+        {
+          "level": 8,
+          "species": "slowpoke"
+        }
+      ]
+    },
+    "SlowpokeWellB2F": {
+      "constant": "SLOWPOKE_WELL_B2F",
+      "rates": {
+        "morning": 5,
+        "day": 5,
+        "night": 5
+      },
+      "terrain": "floor",
+      "morning": [
+        {
+          "level": 21,
+          "species": "zubat"
+        },
+        {
+          "level": 23,
+          "species": "zubat"
+        },
+        {
+          "level": 19,
+          "species": "zubat"
+        },
+        {
+          "level": 21,
+          "species": "slowpoke"
+        },
+        {
+          "level": 23,
+          "species": "golbat"
+        },
+        {
+          "level": 23,
+          "species": "slowpoke"
+        },
+        {
+          "level": 23,
+          "species": "slowpoke"
+        }
+      ],
+      "day": [
+        {
+          "level": 21,
+          "species": "zubat"
+        },
+        {
+          "level": 23,
+          "species": "zubat"
+        },
+        {
+          "level": 19,
+          "species": "zubat"
+        },
+        {
+          "level": 21,
+          "species": "slowpoke"
+        },
+        {
+          "level": 23,
+          "species": "golbat"
+        },
+        {
+          "level": 23,
+          "species": "slowpoke"
+        },
+        {
+          "level": 23,
+          "species": "slowpoke"
+        }
+      ],
+      "night": [
+        {
+          "level": 21,
+          "species": "zubat"
+        },
+        {
+          "level": 23,
+          "species": "zubat"
+        },
+        {
+          "level": 19,
+          "species": "zubat"
+        },
+        {
+          "level": 21,
+          "species": "slowpoke"
+        },
+        {
+          "level": 23,
+          "species": "golbat"
+        },
+        {
+          "level": 23,
+          "species": "slowpoke"
+        },
+        {
+          "level": 23,
+          "species": "slowpoke"
+        }
+      ]
     }
   }
 }

@@ -34,7 +34,7 @@ test('legacy pending easy/retired questions upgrade without spending turn, PP or
   const g=new Game(maps,data,{random:()=>.5});g.startAdventure();g.startEncounter('pidgey',3);g.battle.s.animationPending=false;requestMath(g,0,model,facto,()=>0);
   Object.assign(g.battle.s.mathChallenge,{type,grade:1,input:[36],hints:3,attempts:2});delete g.battle.s.mathChallenge.analogyVersion;delete g.battle.s.mathChallenge.difficultyVersion;
   const h=new Game(maps,data);assert.ok(h.restore(g.serialize()));const before=[h.state.balls,h.battle.s.turn,h.battle.player.moves[0].pp];assert.equal(upgradeChallenge(h,model,facto),true);
-  const c=h.battle.s.mathChallenge;assert.equal(c.type,type==='place_value'?'add_carry_single':'analogy');if(type!=='place_value')assert.equal(c.grade,2);assert.equal(c.hints,0);assert.deepEqual(c.input,[null]);assert.equal(upgradeChallenge(h,model,facto),false);assert.deepEqual([h.state.balls,h.battle.s.turn,h.battle.player.moves[0].pp],before);assert.ok(g.restore(h.serialize()));
+  const c=h.battle.s.mathChallenge;assert.equal(c.type,type==='place_value'?'add_carry_single':'analogy');if(type!=='place_value')assert.equal(c.grade,3);assert.equal(c.hints,0);assert.deepEqual(c.input,[null]);assert.equal(upgradeChallenge(h,model,facto),false);assert.deepEqual([h.state.balls,h.battle.s.turn,h.battle.player.moves[0].pp],before);assert.ok(g.restore(h.serialize()));
  }
 });
 
@@ -51,6 +51,6 @@ test('identical shape matching is retired; saved attack and capture puzzles migr
  for(const capture of [false,true]){
   const g=new Game(maps,data,{random:()=>.5});g.startAdventure();g.startEncounter('pidgey',3);g.battle.s.animationPending=false;requestMath(g,0,model,facto,()=>0);
   const c=g.battle.s.mathChallenge;delete c.difficultyVersion;Object.assign(c,{type:'shape_match',grade:2,input:[0],hints:3,attempts:2});if(capture){c.kind='capture';c.targetSpecies='pidgey';delete c.moveIndex;delete c.moveId;}
-  const h=new Game(maps,data);assert.ok(h.restore(g.serialize()));const before=[h.state.balls,h.battle.s.turn,h.battle.player.moves[0].pp];assert.equal(upgradeChallenge(h,model,facto),true);assert.equal(h.battle.s.mathChallenge.type,'shape_complete');assert.equal(h.battle.s.mathChallenge.hints,0);assert.equal(h.battle.s.mathChallenge.attempts,0);assert.deepEqual([h.state.balls,h.battle.s.turn,h.battle.player.moves[0].pp],before);assert.equal(upgradeChallenge(h,model,facto),false);assert.ok(g.restore(h.serialize()));
+  const h=new Game(maps,data);assert.ok(h.restore(g.serialize()));const before=[h.state.balls,h.battle.s.turn,h.battle.player.moves[0].pp];assert.equal(upgradeChallenge(h,model,facto),true);assert.equal(h.battle.s.mathChallenge.type,'array_rule');assert.equal(h.battle.s.mathChallenge.hints,0);assert.equal(h.battle.s.mathChallenge.attempts,0);assert.deepEqual([h.state.balls,h.battle.s.turn,h.battle.player.moves[0].pp],before);assert.equal(upgradeChallenge(h,model,facto),false);assert.ok(g.restore(h.serialize()));
  }
 });

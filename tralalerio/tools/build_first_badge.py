@@ -13,7 +13,7 @@ for line in (R/'constants/trainer_constants.asm').read_text().splitlines():
  if m:index+=1;constants[(group,m[1])]=index
 parties=(R/'data/trainers/parties.asm').read_text()
 def team(group,key):
- start=parties.index(''.join(x.title() for x in group.split('_'))+'Group:');section=parties[start:].split('\n\n',1)[0] if False else parties[start:]
+ label=next(label for label in re.findall(r'^(\w+)Group:',parties,re.M) if label.upper()==group.replace('_',''));start=parties.index(label+'Group:');section=parties[start:].split('\n\n',1)[0] if False else parties[start:]
  chunk=re.search(r'; '+group+r' \('+str(constants[(group,key)])+r'\)(.*?)(?:db -1)',section,re.S)[1]
  name=re.search(r'db "([^@]+)@", (\w+)',chunk)[1];result=[]
  for level,sp,rest in re.findall(r'db\s+(\d+),\s+(\w+)([^\n]*)',chunk):
@@ -35,10 +35,15 @@ for id,m in maps.items():
   name,party=team(group,key);tid=id+':'+o['script'];o['trainer']=tid
   trainers[tid]={'id':tid,'name':name,'group':group,'party':party,'reward':party[-1]['level']*({'FALKNER':100,'SAGE':32,'BIRD_KEEPER':24,'YOUNGSTER':16,'BUG_CATCHER':16}.get(group,20))}
   seen=re.search(r'trainer \w+, \w+, \w+, (\w+)',block)
-  intro=seen[1] if seen else {'FALKNER':'FalknerIntroText','SAGE':'SageLiSeenText'}.get(group)
+  intro=seen[1] if seen else {'FALKNER':'FalknerIntroText','BUGSY':'BugsyText_INeverLose','SAGE':'SageLiSeenText'}.get(group)
   if intro and intro in m['texts']:trainers[tid]['introPages']=m['texts'][intro]
-  if group=='FALKNER':trainers[tid]['badge']='zephyr'
+  if group in ['FALKNER','BUGSY']:
+   trainers[tid]['badge']='zephyr' if group=='FALKNER' else 'hive'
+   trainers[tid]['badgeName']='윙배지' if group=='FALKNER' else '인섹트배지'
+   trainers[tid]['tm']='TM31' if group=='FALKNER' else 'TM49'
+   trainers[tid]['tmName']='진흙뿌리기' if group=='FALKNER' else '연속자르기'
   if group=='SAGE' and key=='LI':trainers[tid]['gift']='FLASH'
+name,party=team('RIVAL1','RIVAL1_2_CYNDAQUIL');trainers['AzaleaRival']={'id':'AzaleaRival','name':'빨간 머리 친구','group':'RIVAL1','party':party,'reward':1080,'introPages':maps['AzaleaTown']['texts'].get('AzaleaTownRivalBeforeText',['또 만났군! 승부다!'])}
 name,party=team('RIVAL1','RIVAL1_1_CHIKORITA');trainers['CherrygroveRival']={'id':'CherrygroveRival','name':'빨간 머리 친구','group':'RIVAL1','party':party,'reward':300}
 wild=(R/'data/wild/johto_grass.asm').read_text()
 map_attributes=(R/'data/maps/maps.asm').read_text()
@@ -61,13 +66,16 @@ for id,m in maps.items():
 (O/'encounter-source.json').write_text(json.dumps({'repository':'https://github.com/Narishma-gb/pokegold-kr','commit':'c90f31dadef17f033a8f1bdada701b26cef18241','file':'data/wild/johto_grass.asm','version':'Gold','originalWeights':[30,30,20,10,5,4,1],'tables':source_tables},ensure_ascii=False,indent=2)+'\n')
 learntext=(R/'data/pokemon/evos_attacks.asm').read_text()
 labels={'onix':'롱스톤','mankey':'망키','ponyta':'포니타','pikachu':'피카츄','pidgeotto':'피죤','caterpie':'캐터피','metapod':'단데기','weedle':'뿔충이','kakuna':'딱충이','bellsprout':'모다피','spinarak':'페이검','ledyba':'레디바','pol iwag':'발챙이','poliwag':'발챙이','spearow':'깨비참','geodude':'꼬마돌','zubat':'주뱃','gastly':'고오스','dunsparce':'노고치','phanpy':'코코리','jigglypuff':'푸린'}
+ids=re.findall(r'^\s*const (\w+)',(R/'constants/pokemon_constants.asm').read_text(),re.M)[:251]
+names=re.findall(r'dname "([^"]+)"',(R/'data/pokemon/names.asm').read_text())[:251]
+labels.update(dict(zip([id.lower() for id in ids],names)))
 for id,label in labels.items():
  if id in data['species']:data['species'][id]['name']=label
 moveids=set()
 for id in sorted(needed):
  if id in data['species']:continue
  s=(R/'data/pokemon/base_stats'/f'{id}.asm').read_text();raw=list(map(int,re.search(r'db\s+(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)',s).groups()))
- label=id[0].upper()+id[1:];learn=learntext.split(label+'EvosAttacks:')[1].split('\n\n')[0];learnset=[{'level':int(l),'move':m} for l,m in re.findall(r'db (\d+), (\w+)',learn)]
+ label=next(label for label in re.findall(r'^(\w+)EvosAttacks:',learntext,re.M) if label.lower()==id.replace('_',''));learn=learntext.split(label+'EvosAttacks:')[1].split('\n\n')[0];learnset=[{'level':int(l),'move':m} for l,m in re.findall(r'db (\d+), (\w+)',learn)]
  data['species'][id]={'name':labels.get(id,id),'base':dict(zip(['hp','attack','defense','speed','specialAttack','specialDefense'],raw)),'types':list(dict.fromkeys(re.search(r'db (\w+), (\w+) ; type',s).groups())),'catchRate':int(re.search(r'db (\d+) ; catch rate',s)[1]),'baseExp':int(re.search(r'db (\d+) ; base exp',s)[1]),'growth':re.search(r'db GROWTH_(\w+)',s)[1],'learnset':learnset}
  for side in ['front','back']:
   folder=R/'gfx/pokemon'/id;file=folder/(('front_gold.png' if (folder/'front_gold.png').exists() else 'front.png') if side=='front' else 'back.png');src=Image.open(file).convert('RGBA');bg=src.getpixel((0,0));src.putdata([(0,0,0,0) if p==bg else p for p in src.getdata()]);src.save(O/'battle'/f'{id}-{side}.png')
@@ -96,6 +104,6 @@ for trainer in trainers.values():
  trainer['dvs']=dvs[trainer['group']]
  key=trainer['group'].replace('_','')
  if key in rewards:trainer['reward']=rewards[key]*4*trainer['party'][-1]['level']
-data['trainers']=trainers;data['scope']='First badge maps and source trainer teams; original Gold base stats and wild slots with 60% Minecraft encounters.'
+data['trainers']=trainers;data['scope']='Second badge maps and source trainer teams; original Gold base stats and wild slots with 60% Minecraft encounters.'
 (O/'battle-data.json').write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')));(O/'maps.json').write_text(json.dumps(maps,ensure_ascii=False,separators=(',',':')))
 print('First badge:',len(maps),'maps,',len(trainers),'trainers,',len(needed),'original species referenced')
