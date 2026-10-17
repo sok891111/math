@@ -23,7 +23,7 @@ traits=dict(zip(['wither','elderguardian','evoker','ravager','piglinbrute','bree
 for id,s in data['species'].items():
  if not id.startswith('mc_'):continue
  move=data['moves'][s['signatureMove']]['name'];n=sum(e['kind']=='minecraft' for e in entries)+1
- entries.append({'id':id,'number':n,'name':s['name'],'kind':'minecraft','category':'마인크래프트 몬스터','types':s['types'],'description':traits[id.removeprefix('mc_')],'skill':move,'image':f'assets/battle/{id}-front.png'})
-assert len(entries)==276
+ entries.append({'id':id,'number':n,'name':s['name'],'kind':'minecraft','category':'마인크래프트 몬스터','types':s['types'],'description':traits.get(id.removeprefix('mc_'),s.get('description','마인크래프트 세계에서 찾아온 친구.')),'skill':move,'image':f'assets/battle/{id}-front.png'})
+assert len(entries)==252+sum(id.startswith('mc_') for id in data['species'])
 (out/'monster-dex.json').write_text(json.dumps({'version':1,'source':{'repository':'https://github.com/Narishma-gb/pokegold-kr','commit':'c90f31dadef17f033a8f1bdada701b26cef18241','files':['data/pokemon/dex_order_new.asm','data/pokemon/names.asm','data/pokemon/dex_entries/gold/','gfx/pokemon/']},'entries':entries},ensure_ascii=False,separators=(',',':')))
-print('Built Gold 251 + Koraidon + Minecraft 24 dex entries and 251 front sprites.')
+print('Built Gold 251 + Koraidon + Minecraft companions dex entries and 251 front sprites.')

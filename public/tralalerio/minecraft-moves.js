@@ -4,6 +4,10 @@ const skill=(kind,name,type,profile,power=35,effect='NORMAL_HIT',chance=0,color=
  id:'MC_'+kind.toUpperCase(),kind,name,type,profile,power,effect,chance,color,accuracy:100,pp:25,
 });
 export const MINECRAFT_MOVES={
+ blaze:skill('blaze','블레이즈 화염구','FIRE','fireball',30,'BURN_HIT',10,'#ffc34e'),
+ irongolem:skill('irongolem','철 골렘 강타','STEEL','punch',35,'NORMAL_HIT',0,'#d2d6bd'),
+ snowgolem:skill('snowgolem','눈덩이 던지기','ICE','bullet',30,'NORMAL_HIT',0,'#dceef5'),
+ wolf:skill('wolf','늑대 덮치기','NORMAL','pounce',35,'NORMAL_HIT',0,'#cbd0c3'),
  wither:skill('wither','위더 해골탄','DARK','skull',35,'NORMAL_HIT',0,'#788296'),
  elderguardian:skill('elderguardian','가디언 레이저','WATER','beam',35,'NORMAL_HIT',0,'#70d7cd'),
  evoker:skill('evoker','송곳니 소환','PSYCHIC_TYPE','fangs',35,'NORMAL_HIT',0,'#c3a86c'),

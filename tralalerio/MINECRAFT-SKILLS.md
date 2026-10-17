@@ -36,3 +36,9 @@
 이미 포획한 구형 몬스터는 몸통박치기를 전용 기술로 바꾸며 남은 PP 비율을 내림하여 보존합니다. PP가 0이면 그대로 0입니다. 진행 중 전투의 저장된 기술·턴·연출은 수정하지 않고 전투가 끝난 뒤 업그레이드합니다. 업그레이드 후 의도적으로 잊은 기술은 다시 주입하지 않습니다. 기존 포켓몬은 변경하지 않습니다.
 
 데이터 정의: `minecraft-moves.js`, 연출: `minecraft-animation.js`, 자산 재생성: `node tralalerio/tools/build-minecraft.cjs`. 재생성 후 `node scripts/sync-public.cjs`로 로컬 서버에 반영합니다. 테스트: `npm run test:tralalerio`, `npm run test:tralalerio-browser`. 테스트 이미지: `test-artifacts/tralalerio/minecraft-skills-contact.png`, `skill-*.png`.
+
+## 추가 4종
+
+블레이즈: FIRE 화염구30·화상10%, fireball 연출. 철 골렘: STEEL 강타35, punch 연출. 눈 골렘: ICE 눈덩이30, bullet 연출. 늑대: NORMAL 덮치기35, pounce 연출. 모두 정확도100·PP25이며 기존 초반 몬스터의 능력치와 성장 구조를 사용한다. 속성·위력은 이 게임의 전투 밸런스용 설정이다. 자체 Canvas 블록 그림을 생성하며 외부 그림을 복제하지 않는다.
+
+특징 참고: [Minecraft 철 골렘](https://www.minecraft.net/en-us/article/iron-golem), [Minecraft 블레이즈](https://www.minecraft.net/pt-br/article/blaze), [공식 엔티티 목록](https://learn.microsoft.com/en-us/minecraft/creator/documents/introductiontoentityfamilies?view=minecraft-bedrock-stable).
