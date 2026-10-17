@@ -1,9 +1,9 @@
-import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-types9';
-import {initializePC,validPC} from './pc.js?v=20261018-types9';
-import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-types9';
-import {validPhoneCall} from './phone-call.js?v=20261018-types9';
-import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-types9';
-import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-types9';
+import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-facto10';
+import {initializePC,validPC} from './pc.js?v=20261018-facto10';
+import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-facto10';
+import {validPhoneCall} from './phone-call.js?v=20261018-facto10';
+import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-facto10';
+import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-facto10';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {
