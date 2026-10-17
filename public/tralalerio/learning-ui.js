@@ -1,9 +1,10 @@
-import {renderReference,referenceDiagram} from './facto-reference-puzzles.js?v=20261018-rules12';
+import {renderReference,referenceDiagram} from './facto-reference-puzzles.js?v=20261018-photos13';
 export function renderLearning({q,c,board,tools,button,render,place}){
  const node=(tag,text,cls)=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;return el;};
  const grid=shape=>{const el=node('div','','shape-preview');shape.forEach(v=>el.append(node('span','',v?'on':'')));return el;};
  board.append(node('p',q.prompt,'learning-prompt'));
  if(q.reference)renderReference(q,board);
+ if(q.numberCards){const row=node('div','','number-card-row');q.numberCards.forEach(value=>row.append(node('span',String(value),'number-reasoning-card')));board.append(row);}
  if(q.source){
   const row=node('div','','learning-shapes');row.append(grid(q.source));
   if(q.paint){row.append(node('span','→'));const editable=node('div','','shape-preview editable');c.input.forEach((v,i)=>{const b=button('',()=>{c.input[i]=1-c.input[i];render()},v?'on':'');b.dataset.drop='facto';b.dataset.slot=i;b.setAttribute('aria-label',`모양 ${i+1}번째 칸`);b.setAttribute('aria-pressed',String(!!v));editable.append(b)});row.append(editable)}board.append(row);
