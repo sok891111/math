@@ -1,8 +1,10 @@
+import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './minecraft-stories.js?v=20261017-stories1';
 // Original generated questions based on public learning objectives, not workbook pages.
-export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:'모양 완성',array_rule:'배열 규칙',table_count:'표 읽기',place_value:'십 묶음과 낱개',add_single:'두 자리와 한 자리 덧셈',add_tens:'몇십 더하기',add_two:'두 자리 덧셈',add_carry_single:'받아올림 한 자리 덧셈',add_carry_two:'받아올림 두 자리 덧셈',add_story:'이야기 덧셈',calc_puzzle:'계산 탐험'};
+export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:'모양 완성',array_rule:'배열 규칙',table_count:'표 읽기',place_value:'십 묶음과 낱개',add_single:'두 자리와 한 자리 덧셈',add_tens:'몇십 더하기',add_two:'두 자리 덧셈',add_carry_single:'받아올림 한 자리 덧셈',add_carry_two:'받아올림 두 자리 덧셈',add_story:'이야기 덧셈',calc_puzzle:'계산 탐험',...STORY_LABELS};
 export const LEARNING_TYPES=Object.keys(LEARNING_LABELS);
 const shuffle=(a,r)=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 export function learningQuestion(type,grade,r){
+ if(STORY_TYPES.includes(type))return minecraftStory(type,grade,r);
  const pick=n=>Math.floor(r()*n),q={type,grade,learning:true,label:LEARNING_LABELS[type],title:'조각을 모아 공격의 힘을 완성해!',instruction:'답 조각을 누르거나 빈칸으로 끌어 놓아 줘.',answer:[],hints:[]};
  const limit=grade===1?4:8;
  let a,b,result;
@@ -42,7 +44,7 @@ export function learningQuestion(type,grade,r){
      q.prompt=`화살표를 지날 때마다 ${b}만큼 늘어나.`;q.models=[];
     }
     if(mode===2){q.equation=`${a} + ${b} = ${result+1}`;q.prompt='친구의 계산에 실수가 있어! 바른 답 조각으로 고쳐 줘.';}
-    if(mode===3){q.prompt=`숲에서 보석 ${a}개, 동굴에서 ${b}개를 모았어. 모두 몇 개일까?`;q.equation=null;}
+    if(mode===3){q.prompt=minecraftCombineText(a,b);q.story=true;q.equation=null;q.models=[];}
    }
    const [left,right]=q.operands,onesTotal=left%10+right%10;
    q.carry=onesTotal>=10?{onesTotal,ones:onesTotal%10,tens:1}:null;

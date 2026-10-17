@@ -1,6 +1,6 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {LEARNING_TYPES,learningQuestion,validateLearning} from '../learning-puzzles.js';import {seededRandom} from '../math-challenge.js';
-test('12 new families generate varied unique-answer questions at both difficulties',()=>{
+test('18 learning families generate varied unique-answer questions at both difficulties',()=>{
  for(const type of LEARNING_TYPES)for(const grade of [1,2]){
   const signatures=new Set();
   for(let seed=0;seed<300;seed++){

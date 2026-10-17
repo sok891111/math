@@ -1,8 +1,9 @@
-import {requestMath} from './math-challenge.js?v=20261017-books1';
-import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261017-books1';
-import {createSendoutAnimator} from './sendout-animation.js?v=20261017-books1';
+import {isMathReward} from './math-rewards.js?v=20261017-stories1';
+import {requestMath} from './math-challenge.js?v=20261017-stories1';
+import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261017-stories1';
+import {createSendoutAnimator} from './sendout-animation.js?v=20261017-stories1';
 import {createCaptureAnimator,showCaughtBall} from './capture-animation.js?v=20261016-capture3';
-import {createBattleAnimator,animationAssets} from './battle-animation.js?v=20261017-books1';
+import {createBattleAnimator,animationAssets} from './battle-animation.js?v=20261017-stories1';
 const typeNames={NORMAL:'노말',FIRE:'불꽃',WATER:'물',GRASS:'풀',FLYING:'비행',DARK:'악',PSYCHIC_TYPE:'에스퍼',POISON:'독',BUG:'벌레',ELECTRIC:'전기',GROUND:'땅',ROCK:'바위',FIGHTING:'격투',ICE:'얼음',DRAGON:'드래곤',GHOST:'고스트',STEEL:'강철'};
 const statusNames={burn:'화상',poison:'독',paralysis:'마비',sleep:'잠듦',freeze:'얼음'};
 export function createBattleView(getGame,onChange,onSave,onFinish){
@@ -44,7 +45,7 @@ export function createBattleView(getGame,onChange,onSave,onFinish){
  if(token!==generation)return;visual=structuredClone(event.after);syncHealth();i=event.endIndex-1;root.dispatchEvent(new CustomEvent('sendout-animation-end',{bubbles:true,detail:{recall:event.recall,species:event.after.player.species}}));
  }else if(event.kind==='capture'){
  root.dispatchEvent(new CustomEvent('capture-animation-start',{bubbles:true,detail:{caught:event.caught,shakes:event.shakes}}));await captureAnimator.play(scene,event);if(token!==generation)return;captureResolved=event.caught;visual=structuredClone(event.after);syncHealth();root.dispatchEvent(new CustomEvent('capture-animation-end',{bubbles:true,detail:{caught:event.caught,shakes:event.shakes}}));
- }else{root.dispatchEvent(new CustomEvent('battle-animation-start',{bubbles:true,detail:{actor:event.actor,move:event.move}}));await animator.play(scene,event,()=>{if(token!==generation)return;visual=structuredClone(event.after);syncHealth()});if(token!==generation)return;root.dispatchEvent(new CustomEvent('battle-animation-end',{bubbles:true,detail:{actor:event.actor,move:event.move}}));}}else{render();await wait(/^(강력한 공격에 성공했다!|공격에 실패했다\. 다음문제는 꼭 풀어보자!)$/.test(b.s.logs[i])?2400:matchMedia('(prefers-reduced-motion: reduce)').matches?100:280);}}
+ }else{root.dispatchEvent(new CustomEvent('battle-animation-start',{bubbles:true,detail:{actor:event.actor,move:event.move}}));await animator.play(scene,event,()=>{if(token!==generation)return;visual=structuredClone(event.after);syncHealth()});if(token!==generation)return;root.dispatchEvent(new CustomEvent('battle-animation-end',{bubbles:true,detail:{actor:event.actor,move:event.move}}));}}else{render();await wait((isMathReward(b.s.logs[i])||b.s.logs[i]==='공격에 실패했다. 다음문제는 꼭 풀어보자!')?2400:matchMedia('(prefers-reduced-motion: reduce)').matches?100:280);}}
  }finally{if(token===generation){busy=false;visual=null;b.s.animationPending=false;root.setAttribute('aria-busy','false');messageIndex=Math.max(0,b.s.logs.length-1);phase='logs';onChange();onSave();render();}}}
  function advance(){if(busy)return;const b=battle();if(!b)return;if(++messageIndex>=b.s.logs.length){phase='root';messageIndex=0;}render()}
  function show(defer=false){partyOnly=false;if(battle()?.s.mathChallenge){phase='math';render();mathUI.open();return;}if(defer&&battle()?.s.animationPending){phase='playback';visual=structuredClone(battle().s.visualBefore);render();root.querySelector('.player-mon').style.visibility='hidden';return;}if(battle()?.s.animationPending){playTurn();return}phase='logs';messageIndex=0;render();animationAssets().catch(()=>{})}

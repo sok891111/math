@@ -1,4 +1,4 @@
-import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-books1';
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-stories1';
 export const MATH_TYPES=['pattern','mirror','path','logic','sequence','classify','analogy','rotate','tower','bond','balance','latin',...LEARNING_TYPES];
 export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
 const STARTER_MAPS=new Set(['Route29Route46Gate','Route46','Route30','Route30BerryHouse','MrPokemonsHouse','Route31','Route31VioletGate','VioletCity','VioletMart','VioletGym','EarlsPokemonAcademy','VioletNicknameSpeechHouse','VioletPokecenter1F','VioletKylesHouse','SproutTower1F','SproutTower2F','SproutTower3F','DarkCaveVioletEntrance','PlayersHouse2F','PlayersHouse1F','NewBarkTown','ElmsLab','PlayersNeighborsHouse','ElmsHouse','Route29','CherrygroveCity','CherrygroveMart','CherrygrovePokecenter1F','CherrygroveGymSpeechHouse','GuideGentsHouse','CherrygroveEvolutionSpeechHouse']);
@@ -19,7 +19,7 @@ export function submitMath(game,model,facto){
  const q=questionFor(c,model,facto),result=validateQuestion(q,c.input,model,facto);c.attempts++;
  if(!result.ok)return skipMath(game);
  const index=c.moveIndex;delete b.s.mathChallenge;game.state.lastMathType=c.type;
- return b.action('move',index,{forceCritical:true})?{ok:true,resolved:true}:{ok:false,reason:'지금은 공격할 수 없어요. 기술을 다시 골라 주세요.'};
+ return b.action('move',index,{forceCritical:true,mathRewardSeed:c.seed})?{ok:true,resolved:true}:{ok:false,reason:'지금은 공격할 수 없어요. 기술을 다시 골라 주세요.'};
 }
 export function validMathChallenge(c,state,data){
  if(c===undefined)return true;const b=state.battle,p=state.party[b?.playerIndex];
