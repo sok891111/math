@@ -19,3 +19,5 @@
 html,body{touch-action:manipulation}*,*::before,*::after{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}img,canvas{-webkit-user-drag:none}button,a{touch-action:manipulation}
 
 [data-move],[data-drag]{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+#phone-caller,.phone-ending{position:absolute;left:0;right:0;z-index:14;background:#fffef0;color:#304332;border:4px double #304332;padding:2.5% 4%;font-size:clamp(16px,3.2vw,36px);font-weight:bold;pointer-events:none;min-height:14%;box-sizing:border-box}#phone-caller{top:0}.phone-ending{bottom:3%;min-height:22%}#phone-caller[hidden],.phone-ending[hidden]{display:none}

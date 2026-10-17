@@ -26,6 +26,6 @@ for(const engine of [chromium,webkit]){
    assert.ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('tralalerio-save-v1')).battle.animationEvents.some(e=>e.actor==='player'&&e.critical)),type);
    assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),type);
   }
-  assert.deepEqual(errors,[]);console.log('PASS: '+engine.name()+' silent boundary; all 18 learning families, grade 2, hints, placed answers reload, critical attack and iPad layout.');
+  assert.deepEqual(errors,[]);console.log('PASS: '+engine.name()+' silent boundary; all 17 learning families, grade 2, hints, placed answers reload, critical attack and iPad layout.');
  }finally{await browser.close()}
 }

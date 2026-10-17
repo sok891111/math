@@ -1,5 +1,6 @@
-import {renderLearning} from './learning-ui.js?v=20261017-hp1';
-import {MATH_LABELS,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-hp1';
+import {puzzleHintSteps} from './learning-hints.js?v=20261017-learning4';
+import {renderLearning} from './learning-ui.js?v=20261017-learning4';
+import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-learning4';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');
@@ -35,7 +36,7 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
   $('submit').disabled=!complete();persist();
  }
  function pathTo(i){if(q.blocked.includes(i))return;const previous=c.input.indexOf(i);if(previous>=0)c.input=c.input.slice(0,previous+1);else{const last=c.input.at(-1),distance=Math.abs(Math.floor(last/q.size)-Math.floor(i/q.size))+Math.abs(last%q.size-i%q.size);if(distance!==1||c.input.length-1>=q.budget){$('feedback').textContent='막힌 돌을 피해 가로·세로로 한 칸씩 이어 주세요.';return}c.input.push(i)}render()}
- function showHints(){const steps=q.learning?q.hints:window.PuzzleHints.steps(q);$('hints').hidden=c.hints===0;$('hints').replaceChildren();steps.slice(0,c.hints).forEach(step=>{const row=document.createElement('div');row.append(text('b',step.title),text('p',step.text));$('hints').append(row)});$('hint').textContent=c.hints===0?'힌트 보기':c.hints<steps.length?'다음 단계 힌트':'힌트 모두 보기'}
+ function showHints(){const steps=puzzleHintSteps(q,window.PuzzleHints);$('hints').hidden=c.hints===0;$('hints').replaceChildren();steps.slice(0,c.hints).forEach(step=>{const row=document.createElement('div');row.append(text('b',step.title),text('p',step.text));$('hints').append(row)});$('hint').textContent=c.hints===0?'힌트 보기':c.hints<steps.length?'다음 단계 힌트':'힌트 모두 보기'}
  function close(){if(drag&&dialog.hasPointerCapture(drag.id))dialog.releasePointerCapture(drag.id);drag?.ghost?.remove();drag=null;if(dialog.open)dialog.close()}
  function cancel(){const result=skipMath(getGame());persist();close();if(result.resolved)onSolved()}
  $('back').onclick=cancel;dialog.addEventListener('cancel',e=>{e.preventDefault();cancel()});
@@ -54,5 +55,5 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
   else if(d.type.startsWith('logic')&&target.dataset.drop==='logic'){const existing=c.input.indexOf(d.value);if(existing>=0)c.input[existing]=c.input[slot];c.input[slot]=d.value;selected=q.cards.find(n=>!c.input.includes(n))??null}else return;render();
  }
  dialog.addEventListener('pointerup',drop);dialog.addEventListener('pointercancel',()=>{drag?.ghost?.remove();drag=null});
- return {open(){c=getGame().battle?.s.mathChallenge;if(!c)return;q=questionFor(c,model,facto);selected=q.type==='logic'?q.cards.find(n=>!c.input.includes(n))??null:null;cursor=c.input.indexOf(null);$('title').textContent=q.title;$('move').textContent=MATH_LABELS[q.type]+' · '+getGame().battleData.moves[getGame().battle.s.playerFields.charge||(getGame().battle.player.moves.every(m=>m.pp===0)?'STRUGGLE':c.moveId)].name+' 준비';$('grade').textContent=c.grade===1?'초급 · ★':c.grade+'단계';$('instruction').textContent=q.instruction;$('feedback').textContent='맞히면 선택한 기술로 강력한 공격! 힌트를 보고 천천히 풀어도 좋아요.';render();showHints();if(!dialog.open)dialog.showModal();dialog.querySelector('#math-title').focus()},close,isOpen:()=>dialog.open};
+ return {open(){if(upgradeChallenge(getGame(),model,facto))onSave();c=getGame().battle?.s.mathChallenge;if(!c)return;const capture=c.kind==='capture',target=getGame().battleData.species[getGame().battle.enemy.species].name;dialog.dataset.challengeKind=capture?'capture':'attack';$('eyebrow').textContent=capture?'수학 포획 도전!':'강력한 공격 도전!';$('submit').textContent=capture?'정답 확인하고 몬스터 잡기!':'정답 확인하고 강력한 공격!';$('back').textContent=capture?'이번 포획 넘기기':'공격 넘기기';$('note').textContent=capture?'정답을 풀면 반드시 잡아요! 틀리거나 넘기면 볼 1개를 쓰고 상대 차례가 돼요. 시간 제한은 없어요.':'맞히면 강력한 공격! 틀리거나 넘기면 내 공격 없이 상대 차례가 돼요. 시간 제한은 없어요.';q=questionFor(c,model,facto);selected=q.type==='logic'?q.cards.find(n=>!c.input.includes(n))??null:null;cursor=c.input.indexOf(null);$('title').textContent=capture?'문제를 풀고 '+target+'와 친구가 되어 보자!':q.title;$('move').textContent=capture?MATH_LABELS[q.type]+' · '+target+'와 친구 되기':MATH_LABELS[q.type]+' · '+getGame().battleData.moves[getGame().battle.s.playerFields.charge||(getGame().battle.player.moves.every(m=>m.pp===0)?'STRUGGLE':c.moveId)].name+' 준비';$('grade').textContent=c.grade===1?'초급 · ★':c.grade+'단계';$('instruction').textContent=q.instruction;$('feedback').textContent=capture?'문제를 풀어서 '+target+'와 친구가 되어 보자! 힌트를 보고 천천히 풀어도 좋아요.':'맞히면 선택한 기술로 강력한 공격! 힌트를 보고 천천히 풀어도 좋아요.';render();showHints();if(!dialog.open)dialog.showModal();dialog.querySelector('#math-title').focus()},close,isOpen:()=>dialog.open};
 }

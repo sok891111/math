@@ -1,5 +1,6 @@
+import {validPhoneCall} from './phone-call.js?v=20261017-learning4';
 import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261017-rival1';
-import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte} from './battle.js?v=20261017-hp1';
+import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261017-learning4';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {
@@ -29,7 +30,7 @@ export class Game {
  if(this.map.warps.some(w=>w.x===x&&w.y===y))return true;
  return WALKABLE.test(this.map.collision[y]?.[x]||'WALL');}
  enter(map,x,y){this.state.map=map.id;this.state.x=x;this.state.y=y;this.lock=`${map.id}:${x}:${y}`;if(map.id==='NewBarkTown')this.state.flags.town=true;if(map.id==='Route29')this.state.flags.route=true;if(map.id==='CherrygroveCity')this.state.flags.city=true;if(map.id==='VioletCity')this.state.flags.violet=true;return {type:'warp',map:map.id};}
- move(direction){if(this.state.trainerEncounter)return {type:'trainer-encounter-active'};if(this.state.healing)return {type:'healing'};if(this.state.battle)return {type:'battle-active'};const d=DIRECTIONS[direction];if(!d)return {type:'invalid'};this.state.facing=direction;
+ move(direction){if(this.state.phoneCall)return {type:'phone-call-active'};if(this.state.trainerEncounter)return {type:'trainer-encounter-active'};if(this.state.healing)return {type:'healing'};if(this.state.battle)return {type:'battle-active'};const d=DIRECTIONS[direction];if(!d)return {type:'invalid'};this.state.facing=direction;
  let x=this.state.x+d[0],y=this.state.y+d[1];const edge=x<0?'west':x>=this.map.width?'east':y<0?'north':y>=this.map.height?'south':null;
  if(edge){const c=this.map.connections?.find(c=>c.direction===edge),dest=c&&this.maps[c.map];if(!dest)return {type:'boundary'};
  if(this.state.map==='NewBarkTown'&&dest.id==='Route29'&&!this.state.starter)return {type:'partner-required'};
@@ -39,7 +40,7 @@ export class Game {
  const warp=this.map.warps.find(w=>w.x===x&&w.y===y);if(warp&&!Object.values(this.maps).some(m=>m.constant===warp.map))return {type:'boundary'};
  this.state.x=x;this.state.y=y;this.state.steps++;let result={type:'step'};
  if(this.lock!==`${this.state.map}:${x}:${y}`&&warp){const destination=Object.values(this.maps).find(m=>m.constant===warp.map);const target=destination?.warps[warp.index-1];if(target)result=this.enter(destination,target.x,target.y);
- }else if(!warp)this.lock=null;if(result.type==='step'){const trainer=this.trainerInSight();if(trainer){this.state.trainerEncounter=trainerEncounterPlan(this,trainer);return {type:'trainer-spotted',trainer:trainer.trainer};}}if(result.type==='step'&&this.battleData&&(this.map.collision[this.state.y]?.[this.state.x]==='TALL_GRASS'||['DarkCaveVioletEntrance','SproutTower2F','SproutTower3F'].includes(this.state.map))){const table=this.battleData.encounters[this.state.map];if(this.state.grassGrace>0)this.state.grassGrace--;else if(table&&this.state.party.some(p=>p.hp>0)&&byte(this.rng)<table.rateByte){const wild=pickEncounter(table,this.now().getHours(),this.rng);this.startEncounter(wild.species,wild.level);result={type:'encounter'};}}this.lastEvent=result;return result;}
+ }else if(!warp)this.lock=null;if(result.type==='step'){const trainer=this.trainerInSight();if(trainer){this.state.trainerEncounter=trainerEncounterPlan(this,trainer);return {type:'trainer-spotted',trainer:trainer.trainer};}}if(result.type==='step'&&this.battleData){const table=this.battleData.encounters[this.state.map],tile=this.map.collision[this.state.y]?.[this.state.x],hour=this.now().getHours();if(table&&(tile==='TALL_GRASS'||table.terrain==='floor'&&tile==='FLOOR')){if(this.state.grassGrace>0)this.state.grassGrace--;else if(this.state.party.some(p=>p.hp>0)&&byte(this.rng)<(table.rates?.[periodFor(hour)]??table.rateByte)){const wild=pickEncounter(table,hour,this.rng);this.startEncounter(wild.species,wild.level);result={type:'encounter'};}}}this.lastEvent=result;return result;}
  target(){const d=DIRECTIONS[this.state.facing];const x=this.state.x+d[0],y=this.state.y+d[1];const find=(x,y)=>this.objects().find(o=>o.x===x&&o.y===y)||this.map.signs.find(o=>o.x===x&&o.y===y);return find(x,y)||(this.map.collision[y]?.[x]==='COUNTER'?find(x+d[0],y+d[1]):null);}
  chooseStarter(name){if(this.state.starter||!['치코리타','브케인','리아코','피카츄'].includes(name))return false;this.state.starter=name;this.state.flags.starter=true;if(this.battleData)this.initializeParty();return true;}
  tradeOnix(){if(this.state.battle||this.state.flags.onixTrade||!this.battleData?.species.onix)return false;const index=this.state.party.findIndex(p=>p.species==='bellsprout');if(index<0)return false;this.state.party[index]=createPokemon(this.battleData,'onix',this.state.party[index].level,this.rng);this.state.flags.onixTrade=true;return true;}
@@ -72,6 +73,7 @@ export class Game {
  serialize(){return JSON.stringify(this.state)}
  restore(raw){const previous=this.state;try{const s=JSON.parse(raw);if(!s||s.version!==1||!this.maps[s.map]||!Number.isInteger(s.x)||!Number.isInteger(s.y)||!DIRECTIONS[s.facing]||!s.flags||Array.isArray(s.flags)||typeof s.flags!=='object'||!Number.isInteger(s.steps)||s.steps<0||!(s.starter===null||['치코리타','브케인','리아코','피카츄'].includes(s.starter)))return false;
  s.money??=3000;s.potions??=0;if(!Number.isSafeInteger(s.money)||s.money<0||!Number.isSafeInteger(s.potions)||s.potions<0)return false;
+ if(!validPhoneCall(s))return false;
  if(s.healing&&(!s.healing||s.healing.version!==1||!['CherrygrovePokecenter1F','VioletPokecenter1F'].includes(s.healing.map)||s.map!==s.healing.map||s.battle||!Number.isInteger(s.healing.count)||s.healing.count<1||s.healing.count>6||s.healing.count!==s.party?.length))return false;
  if(s.lastCenter&&!['CherrygrovePokecenter1F','VioletPokecenter1F'].includes(s.lastCenter))return false;
  const map=this.maps[s.map];if(s.x<0||s.y<0||s.x>=map.width||s.y>=map.height)return false;

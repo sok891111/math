@@ -1,3 +1,4 @@
+import {learningHints} from './learning-hints.js?v=20261017-learning4';
 // New story problems using additive structures; no copied workbook wording.
 export const STORY_LABELS={story_compare:'친구보다 더 모으기',story_combine:'친구들과 함께 모으기',story_receive:'선물 받고 더 모으기',story_three:'세 곳에서 모으기',story_chain:'친구들의 단서 잇기',story_distance:'모험 길 이어 걷기'};
 export const STORY_TYPES=Object.keys(STORY_LABELS);
@@ -36,11 +37,9 @@ export function minecraftStory(type,grade,r){
   prompt=`${topic(first)} ${subject(second)} 있는 마을로 가고 있어요.\n출발점에서 다리까지 ${a}칸, 다리에서 마을까지 ${b}칸을 걸어야 해요.\n출발점에서 마을까지 모두 몇 칸을 걸어야 할까요?`;
   focus='처음 길과 다음 길을 이어 걸은 거리를 구해 봐.';reason=`다리까지 ${a}칸, 그다음 ${b}칸을 더 걸어.`;
  }
- const answer=terms.reduce((sum,n)=>sum+n,0),expression=terms.join(' + ');
- q.prompt=prompt;q.storyModel={kind:type,actors:[first,second,third],item,unit:type==='story_distance'?'칸':'개',terms,answer};q.answer=[answer];
- const ones=terms.reduce((sum,n)=>sum+n%10,0);
- q.hints=[{title:'무엇을 묻는지 읽어요',text:focus},{title:'주어진 수를 연결해요',text:reason},
-  {title:ones>=10?'낱개 10개를 묶어요':'덧셈으로 확인해요',text:`${expression}으로 생각해 봐. `+(ones>=10?`일의 자리끼리 모으면 ${ones}개야. 낱개 10개마다 십 묶음 하나로 바꾸고 함께 더해 줘.`:'십의 자리끼리, 일의 자리끼리 더해서 확인해 봐.')}];q.hint=q.hints[0].text;
+ const answer=terms.reduce((sum,n)=>sum+n,0);
+ q.prompt=prompt;q.storyModel={kind:type,actors:[first,second,third],item,unit:type==='story_distance'?'칸':'개',terms,answer,focus,reason};q.answer=[answer];
+ q.hints=learningHints(q);q.hint=q.hints[0].text;
  const candidates=new Set([answer]);
  // Include the reference quantity and the difference as meaningful distractors.
  for(const n of [a,b,2*a+b,answer-1,answer+1])if(n>=0&&n<=99&&candidates.size<4)candidates.add(n);

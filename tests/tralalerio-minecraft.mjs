@@ -24,14 +24,14 @@ for(const id of ids){
  const hit=damage(data,wild,defender,data.moves.TACKLE,{roll:255});
  assert.ok(hit>=2&&hit<=6,`${id} damage ${hit}`);
  const balls=g.state.balls;
- g.battle.action('ball');assert.equal(g.battle.s.result,'caught');assert.equal(g.state.balls,balls-1);
+ g.battle.action('ball',0,{captureAnswer:true});assert.equal(g.battle.s.result,'caught');assert.equal(g.state.balls,balls-1);
  assert.equal(g.state.party[1].species,id);assert.ok(g.finishBattle());
  const restored=game();assert.ok(restored.restore(g.serialize()));assert.equal(restored.state.party[1].species,id);
  restored.state.party.reverse();assert.ok(restored.startEncounter('pidgey',3));assert.equal(restored.battle.player.species,id);
  assert.ok(restored.battle.action('move',0));
  restored.healParty();assert.equal(restored.state.party[0].hp,restored.state.party[0].stats.hp);
 }
-const full=game();while(full.state.party.length<6)full.state.party.push(createPokemon(data,'pidgey',3,()=>0));full.startEncounter(ids[0],3);full.battle.action('ball');assert.equal(full.state.storage[0].species,ids[0]);
+const full=game();while(full.state.party.length<6)full.state.party.push(createPokemon(data,'pidgey',3,()=>0));full.startEncounter(ids[0],3);full.battle.action('ball',0,{captureAnswer:true});assert.equal(full.state.storage[0].species,ids[0]);
 // Force an encounter through actual grass movement, using a Minecraft-weight roll.
 const grass=game();grass.state.map='Route29';let spot;
 for(let y=1;y<grass.map.height&&!spot;y++)for(let x=1;x<grass.map.width&&!spot;x++)for(const [dir,[dx,dy]] of Object.entries(DIRECTIONS)){grass.state.x=x;grass.state.y=y;if(grass.passable(x,y)&&grass.passable(x+dx,y+dy)&&grass.map.collision[y+dy]?.[x+dx]==='TALL_GRASS'){spot={x,y,dir};break}}

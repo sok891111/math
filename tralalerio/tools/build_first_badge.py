@@ -2,6 +2,7 @@
 from pathlib import Path
 from PIL import Image
 import json,re,sys
+from gold_wild import grass_table
 R=Path(sys.argv[1] if len(sys.argv)>1 else '/private/tmp/pokemon-gold-kr-research');O=Path(__file__).resolve().parent.parent/'assets'
 data=json.loads((O/'battle-data.json').read_text());maps=json.loads((O/'maps.json').read_text());trainers={};needed={'pikachu','pidgeotto','onix'}
 constants={};group=None;index=0
@@ -40,16 +41,24 @@ for id,m in maps.items():
   if group=='SAGE' and key=='LI':trainers[tid]['gift']='FLASH'
 name,party=team('RIVAL1','RIVAL1_1_CHIKORITA');trainers['CherrygroveRival']={'id':'CherrygroveRival','name':'빨간 머리 친구','group':'RIVAL1','party':party,'reward':300}
 wild=(R/'data/wild/johto_grass.asm').read_text()
+map_attributes=(R/'data/maps/maps.asm').read_text()
+mc=[s for s in data['encounters']['Route29']['day'] if s['species'].startswith('mc_')]
+source_tables={}
 for id,m in maps.items():
- if id=='Route29':continue
- match=re.search(r'def_grass_wildmons '+m['constant']+r'\s*\n(.*?)end_grass_wildmons',wild,re.S)
- if not match:continue
- slots=[{'level':int(l),'species':sp.lower()} for l,sp in re.findall(r'db\s+(\d+),\s+(\w+)',match[1])]
- if len(slots)!=21:continue
- needed.update(s['species'] for s in slots)
- mc=[s for s in data['encounters']['Route29']['day'] if s['species'].startswith('mc_')]
- rates=re.search(r'db\s+(\d+) percent',match[1]);rate=int(rates[1]) if rates else 10
- data['encounters'][id]={'rateByte':int(rate*255/100),'weights':[12,12,8,4,2,1,1]+[3]*12+[2]*12,**{p:slots[n*7:n*7+7]+mc for n,p in enumerate(['morning','day','night'])}}
+ table=grass_table(wild,m['constant'])
+ if not table:continue
+ slots,rates=table['slots'],table['rates'];needed.update(s['species'] for s in slots)
+ attribute=re.search(r'\bmap '+re.escape(id)+r', \w+, (\w+),',map_attributes)
+ terrain='floor' if attribute and attribute[1] in ['CAVE','DUNGEON'] else 'grass'
+ # Integer weights preserve Gold's exact 30/30/20/10/5/4/1 relative rates within the 40% Pokemon pool.
+ data['encounters'][id]={'rateByte':rates['day'],'rates':rates,'terrain':terrain,'weights':[60,60,40,20,10,8,2]+[15]*12+[10]*12}
+ source_tables[id]={'constant':m['constant'],'rates':rates,'terrain':terrain}
+ for n,period in enumerate(['morning','day','night']):
+  original=slots[n*7:n*7+7]
+  companions=[{**mon,'level':mon['level'] if id=='Route29' else original[i%7]['level']} for i,mon in enumerate(mc)]
+  data['encounters'][id][period]=original+companions
+  source_tables[id][period]=original
+(O/'encounter-source.json').write_text(json.dumps({'repository':'https://github.com/Narishma-gb/pokegold-kr','commit':'c90f31dadef17f033a8f1bdada701b26cef18241','file':'data/wild/johto_grass.asm','version':'Gold','originalWeights':[30,30,20,10,5,4,1],'tables':source_tables},ensure_ascii=False,indent=2)+'\n')
 learntext=(R/'data/pokemon/evos_attacks.asm').read_text()
 labels={'onix':'롱스톤','mankey':'망키','ponyta':'포니타','pikachu':'피카츄','pidgeotto':'피죤','caterpie':'캐터피','metapod':'단데기','weedle':'뿔충이','kakuna':'딱충이','bellsprout':'모다피','spinarak':'페이검','ledyba':'레디바','pol iwag':'발챙이','poliwag':'발챙이','spearow':'깨비참','geodude':'꼬마돌','zubat':'주뱃','gastly':'고오스','dunsparce':'노고치','phanpy':'코코리','jigglypuff':'푸린'}
 for id,label in labels.items():

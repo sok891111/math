@@ -1,0 +1,710 @@
+{
+  "repository": "https://github.com/Narishma-gb/pokegold-kr",
+  "commit": "c90f31dadef17f033a8f1bdada701b26cef18241",
+  "file": "data/wild/johto_grass.asm",
+  "version": "Gold",
+  "originalWeights": [
+    30,
+    30,
+    20,
+    10,
+    5,
+    4,
+    1
+  ],
+  "tables": {
+    "Route29": {
+      "constant": "ROUTE_29",
+      "rates": {
+        "morning": 25,
+        "day": 25,
+        "night": 25
+      },
+      "terrain": "grass",
+      "morning": [
+        {
+          "level": 2,
+          "species": "pidgey"
+        },
+        {
+          "level": 3,
+          "species": "sentret"
+        },
+        {
+          "level": 3,
+          "species": "pidgey"
+        },
+        {
+          "level": 2,
+          "species": "sentret"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "pidgey"
+        },
+        {
+          "level": 4,
+          "species": "pidgey"
+        }
+      ],
+      "day": [
+        {
+          "level": 2,
+          "species": "pidgey"
+        },
+        {
+          "level": 3,
+          "species": "sentret"
+        },
+        {
+          "level": 3,
+          "species": "pidgey"
+        },
+        {
+          "level": 2,
+          "species": "sentret"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "pidgey"
+        },
+        {
+          "level": 4,
+          "species": "pidgey"
+        }
+      ],
+      "night": [
+        {
+          "level": 2,
+          "species": "hoothoot"
+        },
+        {
+          "level": 3,
+          "species": "hoothoot"
+        },
+        {
+          "level": 3,
+          "species": "hoothoot"
+        },
+        {
+          "level": 2,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "hoothoot"
+        },
+        {
+          "level": 4,
+          "species": "hoothoot"
+        }
+      ]
+    },
+    "Route46": {
+      "constant": "ROUTE_46",
+      "rates": {
+        "morning": 25,
+        "day": 25,
+        "night": 25
+      },
+      "terrain": "grass",
+      "morning": [
+        {
+          "level": 3,
+          "species": "geodude"
+        },
+        {
+          "level": 2,
+          "species": "spearow"
+        },
+        {
+          "level": 2,
+          "species": "rattata"
+        },
+        {
+          "level": 2,
+          "species": "geodude"
+        },
+        {
+          "level": 3,
+          "species": "spearow"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        }
+      ],
+      "day": [
+        {
+          "level": 3,
+          "species": "geodude"
+        },
+        {
+          "level": 2,
+          "species": "spearow"
+        },
+        {
+          "level": 2,
+          "species": "rattata"
+        },
+        {
+          "level": 2,
+          "species": "geodude"
+        },
+        {
+          "level": 3,
+          "species": "spearow"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        }
+      ],
+      "night": [
+        {
+          "level": 3,
+          "species": "geodude"
+        },
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 2,
+          "species": "rattata"
+        },
+        {
+          "level": 2,
+          "species": "geodude"
+        },
+        {
+          "level": 4,
+          "species": "geodude"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        }
+      ]
+    },
+    "Route30": {
+      "constant": "ROUTE_30",
+      "rates": {
+        "morning": 25,
+        "day": 25,
+        "night": 25
+      },
+      "terrain": "grass",
+      "morning": [
+        {
+          "level": 2,
+          "species": "pidgey"
+        },
+        {
+          "level": 3,
+          "species": "caterpie"
+        },
+        {
+          "level": 4,
+          "species": "caterpie"
+        },
+        {
+          "level": 4,
+          "species": "metapod"
+        },
+        {
+          "level": 4,
+          "species": "pidgey"
+        },
+        {
+          "level": 4,
+          "species": "pidgey"
+        },
+        {
+          "level": 4,
+          "species": "pidgey"
+        }
+      ],
+      "day": [
+        {
+          "level": 2,
+          "species": "pidgey"
+        },
+        {
+          "level": 3,
+          "species": "caterpie"
+        },
+        {
+          "level": 4,
+          "species": "pidgey"
+        },
+        {
+          "level": 4,
+          "species": "metapod"
+        },
+        {
+          "level": 4,
+          "species": "caterpie"
+        },
+        {
+          "level": 5,
+          "species": "metapod"
+        },
+        {
+          "level": 5,
+          "species": "metapod"
+        }
+      ],
+      "night": [
+        {
+          "level": 3,
+          "species": "spinarak"
+        },
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "hoothoot"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "hoothoot"
+        },
+        {
+          "level": 4,
+          "species": "hoothoot"
+        },
+        {
+          "level": 4,
+          "species": "hoothoot"
+        }
+      ]
+    },
+    "Route31": {
+      "constant": "ROUTE_31",
+      "rates": {
+        "morning": 25,
+        "day": 25,
+        "night": 25
+      },
+      "terrain": "grass",
+      "morning": [
+        {
+          "level": 3,
+          "species": "pidgey"
+        },
+        {
+          "level": 4,
+          "species": "caterpie"
+        },
+        {
+          "level": 3,
+          "species": "bellsprout"
+        },
+        {
+          "level": 5,
+          "species": "metapod"
+        },
+        {
+          "level": 5,
+          "species": "caterpie"
+        },
+        {
+          "level": 5,
+          "species": "metapod"
+        },
+        {
+          "level": 5,
+          "species": "metapod"
+        }
+      ],
+      "day": [
+        {
+          "level": 3,
+          "species": "pidgey"
+        },
+        {
+          "level": 4,
+          "species": "caterpie"
+        },
+        {
+          "level": 3,
+          "species": "bellsprout"
+        },
+        {
+          "level": 5,
+          "species": "metapod"
+        },
+        {
+          "level": 5,
+          "species": "caterpie"
+        },
+        {
+          "level": 6,
+          "species": "metapod"
+        },
+        {
+          "level": 6,
+          "species": "metapod"
+        }
+      ],
+      "night": [
+        {
+          "level": 4,
+          "species": "spinarak"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 3,
+          "species": "bellsprout"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "hoothoot"
+        },
+        {
+          "level": 5,
+          "species": "hoothoot"
+        },
+        {
+          "level": 5,
+          "species": "hoothoot"
+        }
+      ]
+    },
+    "SproutTower2F": {
+      "constant": "SPROUT_TOWER_2F",
+      "rates": {
+        "morning": 5,
+        "day": 5,
+        "night": 5
+      },
+      "terrain": "floor",
+      "morning": [
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        }
+      ],
+      "day": [
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        }
+      ],
+      "night": [
+        {
+          "level": 3,
+          "species": "gastly"
+        },
+        {
+          "level": 4,
+          "species": "gastly"
+        },
+        {
+          "level": 5,
+          "species": "gastly"
+        },
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "gastly"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        }
+      ]
+    },
+    "SproutTower3F": {
+      "constant": "SPROUT_TOWER_3F",
+      "rates": {
+        "morning": 5,
+        "day": 5,
+        "night": 5
+      },
+      "terrain": "floor",
+      "morning": [
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        }
+      ],
+      "day": [
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 4,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        }
+      ],
+      "night": [
+        {
+          "level": 3,
+          "species": "gastly"
+        },
+        {
+          "level": 4,
+          "species": "gastly"
+        },
+        {
+          "level": 5,
+          "species": "gastly"
+        },
+        {
+          "level": 3,
+          "species": "rattata"
+        },
+        {
+          "level": 6,
+          "species": "gastly"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        },
+        {
+          "level": 5,
+          "species": "rattata"
+        }
+      ]
+    },
+    "DarkCaveVioletEntrance": {
+      "constant": "DARK_CAVE_VIOLET_ENTRANCE",
+      "rates": {
+        "morning": 10,
+        "day": 10,
+        "night": 10
+      },
+      "terrain": "floor",
+      "morning": [
+        {
+          "level": 3,
+          "species": "geodude"
+        },
+        {
+          "level": 2,
+          "species": "zubat"
+        },
+        {
+          "level": 2,
+          "species": "geodude"
+        },
+        {
+          "level": 4,
+          "species": "geodude"
+        },
+        {
+          "level": 3,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "dunsparce"
+        }
+      ],
+      "day": [
+        {
+          "level": 3,
+          "species": "geodude"
+        },
+        {
+          "level": 2,
+          "species": "zubat"
+        },
+        {
+          "level": 2,
+          "species": "geodude"
+        },
+        {
+          "level": 4,
+          "species": "geodude"
+        },
+        {
+          "level": 3,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "dunsparce"
+        }
+      ],
+      "night": [
+        {
+          "level": 3,
+          "species": "geodude"
+        },
+        {
+          "level": 2,
+          "species": "zubat"
+        },
+        {
+          "level": 2,
+          "species": "geodude"
+        },
+        {
+          "level": 4,
+          "species": "geodude"
+        },
+        {
+          "level": 3,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "zubat"
+        },
+        {
+          "level": 4,
+          "species": "dunsparce"
+        }
+      ]
+    }
+  }
+}

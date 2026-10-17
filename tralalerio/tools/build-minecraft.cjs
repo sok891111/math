@@ -45,8 +45,8 @@ const root = path.resolve(__dirname, '../..');
   }
   const table=data.encounters.Route29;
   // Preserve original Pokemon at 40%, and share 60% among all 24 Minecraft species.
-  const originalWeights=[12,12,8,4,2,1,1];
-  table.weights=[...originalWeights,...Object.keys(catalog).map((_,i)=>i<12?3:2)];
+  const originalWeights=[60,60,40,20,10,8,2];
+  table.weights=[...originalWeights,...Object.keys(catalog).map((_,i)=>i<12?15:10)];
   for(const period of ['morning','day','night'])table[period]=[...table[period].filter(s=>!s.species.startsWith('mc_')), ...Object.keys(catalog).map((kind,i)=>({species:'mc_'+kind,level:2+i%3}))];
   data.scope='Original starters and Route29 wild Pokemon, plus 24 platformer Minecraft companions.';
   fs.writeFileSync(dataPath,JSON.stringify(data,null,2)+'\n');

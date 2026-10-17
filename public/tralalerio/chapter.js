@@ -1,3 +1,4 @@
+import {beginLabCall,LAB_CALL_PAGES} from './phone-call.js?v=20261017-learning4';
 import {functionalInteraction} from './functional-npc.js?v=20261017-rival1';
 // First badge chapter: original Gold locations, with short directions for young players.
 export function chapterGoal(state){
@@ -36,7 +37,7 @@ export function storyEntry(game){
  const s=game.state;if(s.battle||s.healing||s.trainerEncounter)return null;
  if(s.map==='MrPokemonsHouse'&&s.flags.mysteryEgg&&!s.flags.pokedex)return functionalInteraction(game,game.objects().find(o=>o.sprite==='oak'));
  if(s.map==='MrPokemonsHouse'&&!s.flags.mysteryEgg&&!s.flags.eggDelivered)return storyInteraction(game,game.objects().find(o=>o.sprite==='gentleman'));
- if(s.map==='Route30'&&s.flags.mysteryEgg&&!s.flags.eggDelivered&&!s.flags.labCall){s.flags.labCall=true;s.flags.labTheft=true;return {speaker:'공박사의 전화',pages:['큰일이야! 연구소의 포켓몬이 사라졌어!','포켓몬 할아버지에게서 받은 알을 가지고 연구실로 돌아와 주렴.']};}
+ if(s.phoneCall||beginLabCall(s))return {phone:true,speaker:'공박사의 전화',pages:LAB_CALL_PAGES};
  if(s.map==='ElmsLab'&&s.flags.mysteryEgg&&!s.flags.eggDelivered&&!s.flags.policeReport){s.flags.labTheft=true;s.flags.policeReport=true;return {speaker:'경찰관',pages:['포켓몬을 훔쳐 간 빨간 머리 아이를 보았다고? 알려 줘서 고맙다.','공박사님이 기다리고 계셔. 연구소 안쪽 박사님께 말을 걸어 알을 전해 드리렴.']};}
  return null;
 }

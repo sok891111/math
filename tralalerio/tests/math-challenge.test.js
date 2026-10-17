@@ -5,8 +5,8 @@ import {MATH_TYPES,mathGrade,questionFor,emptyInput,requestMath,submitMath,skipM
 const require=createRequire(import.meta.url),model=require('../../creative/battle-model.js'),facto=require('../../creative/facto-puzzles.js');
 const maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.readFileSync('assets/battle-data.json'));
 function game(){const g=new Game(maps,data,{random:()=>.5});g.chooseStarter('리아코');g.startEncounter('mc_zombie',3);g.battle.s.animationPending=false;return g}
-test('all 30 generated problem types share a seeded random pool and valid grade 1 and 2 solutions',()=>{
- assert.equal(MATH_TYPES.length,30);
+test('all 28 generated problem types share a seeded random pool and valid grade 1 and 2 solutions',()=>{
+ assert.equal(MATH_TYPES.length,28);
  for(const type of MATH_TYPES)for(const grade of [1,2])for(let seed=0;seed<100;seed++){const c={type,seed,grade},q=questionFor(c,model,facto),answer=q.solution||q.answer;assert.equal(validateQuestion(q,answer,model,facto).ok,true,type+' '+seed);assert.deepEqual(questionFor(c,model,facto),q);assert.ok(Array.isArray(emptyInput(q)))}
  for(const map of Object.keys(maps))assert.equal(mathGrade(map,80),1,map);
 });
@@ -23,7 +23,7 @@ test('partial puzzle, seed and hints survive reload; selecting another move keep
 });
 test('bag or switch cancels the pending problem while corrupted saves are rejected',()=>{
  const g=game();requestMath(g,0,model,facto,seededRandom(1));const raw=g.serialize();for(const mutate of [c=>c.type='bad',c=>c.grade=3,c=>c.seed=-1,c=>c.moveIndex=99,c=>c.input=['bad'],c=>c.hints=10]){const bad=JSON.parse(raw);mutate(bad.battle.mathChallenge);assert.equal(g.restore(JSON.stringify(bad)),false);assert.equal(g.serialize(),raw)}
- g.battle.action('ball');assert.equal(g.battle.s.mathChallenge,undefined);
+ g.state.potions=1;g.battle.player.hp--;g.battle.action('potion');assert.equal(g.battle.s.mathChallenge,undefined);
 });
 
 test('support moves bypass puzzles and a solved critical does not leak into later attacks',()=>{
@@ -40,7 +40,7 @@ test('solved attacks always hit and apply actual Gen II critical damage even wit
 
 test('random pool mixes beginner and one higher grade, persisting either without reroll',()=>{
  for(const [seedRoll,grade] of [[0,1],[.499999,1],[.5,2],[.999999,2]]){
-  const g=game(),rolls=[0,.2,seedRoll],c=requestMath(g,0,model,facto,()=>rolls.shift());
+  const g=game(),rolls=[0,.1,seedRoll],c=requestMath(g,0,model,facto,()=>rolls.shift());
   assert.equal(c.grade,grade);const raw=g.serialize(),h=game();assert.ok(h.restore(raw));
   const restored=requestMath(h,0,model,facto,()=>{throw Error('must not reroll')});
   assert.equal(restored.grade,grade);assert.deepEqual(questionFor(restored,model,facto),questionFor(c,model,facto));
