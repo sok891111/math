@@ -1,7 +1,7 @@
-import {LEVEL_LABELS} from './math-levels.js?v=20261017-gym6';
-import {puzzleHintSteps} from './learning-hints.js?v=20261017-gym6';
-import {renderLearning} from './learning-ui.js?v=20261017-gym6';
-import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-gym6';
+import {LEVEL_LABELS} from './math-levels.js?v=20261017-balance7';
+import {puzzleHintSteps} from './learning-hints.js?v=20261017-balance7';
+import {renderLearning} from './learning-ui.js?v=20261017-balance7';
+import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-balance7';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');
@@ -19,7 +19,7 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
   board.replaceChildren();tools.replaceChildren();board.dataset.type=q.type;dialog.dataset.type=q.type;dialog.dataset.grade=String(c.grade);
   if(q.type==='rotate')renderRotation();
   else if(q.learning)renderLearning({q,c,board,tools,button,render,place:ui.place});
-  else if(facto.types.includes(q.type))ui.render();
+  else if(facto.types.includes(q.type)){ui.render();if(q.type==='balance')renderBalance();}
   else if(q.type==='pattern'){
    const trace=document.createElement('div');trace.className='math-rhythm';q.shown.forEach(n=>trace.append(rune(n)));board.append(trace,text('p','다음에는 어떤 순서일까요?'));
    const slots=document.createElement('div');slots.className='math-slots';c.input.forEach((n,i)=>{const b=button(n===null?'?':model.runes[n]?.symbol||'?',()=>{c.input[i]=null;cursor=i;render()},'math-slot');b.dataset.drop='pattern';b.dataset.slot=i;b.setAttribute('aria-label',`예측 ${i+1}번째 빈칸`);if(n!==null){b.dataset.drag='pattern-slot';b.dataset.value=n;b.dataset.from=i}slots.append(b)});board.append(slots);
@@ -36,6 +36,13 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
    q.cards.forEach(n=>{const b=button(String(n),()=>{selected=n;render()},'logic-rune');b.dataset.drag='logic';b.dataset.value=n;b.disabled=c.input.includes(n);b.setAttribute('aria-pressed',String(selected===n));b.setAttribute('aria-label',n+' 룬 선택');tools.append(b)});
   }
   $('submit').disabled=!complete();persist();
+ }
+ function renderBalance(){
+  const scale=board.querySelector('.balance-scale');scale.replaceChildren();
+  function weights(n){const group=text('div','','balance-weights');const dots=text('div','','weight-dots');dots.setAttribute('aria-hidden','true');for(let i=0;i<n;i++)dots.append(document.createElement('i'));group.append(dots,text('small',`추 ${n}개`));return group}
+  const left=text('div','','balance-pan'),right=text('div','','balance-pan');
+  const objects=text('div','','balance-objects'),gem=text('div','','balance-gem');gem.append(text('span','◆'),text('small','보석 1개'));objects.append(gem);if(q.extra)objects.append(weights(q.extra));
+  left.append(text('small','왼쪽 저울판'),objects);right.append(text('small','오른쪽 저울판'),weights(q.total));scale.append(left,text('b','=','balance-equal'),right);
  }
  function rotationGuide(){
   const half=q.turns===2,left=q.turns===3,end=half?[130,124]:left?[86,80]:[174,80],sweep=left?0:1;

@@ -1,8 +1,8 @@
-import {TYPE_LEVELS,levelForType,planGymAttack} from './math-levels.js?v=20261017-gym6';
-import {rotationQuestion} from './rotation-puzzles.js?v=20261017-gym6';
-import {canStoreCapture} from './pc.js?v=20261017-gym6';
-import {advancedAnalogy} from './analogy-puzzles.js?v=20261017-gym6';
-import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-gym6';
+import {TYPE_LEVELS,levelForType,planGymAttack} from './math-levels.js?v=20261017-balance7';
+import {rotationQuestion} from './rotation-puzzles.js?v=20261017-balance7';
+import {canStoreCapture} from './pc.js?v=20261017-balance7';
+import {advancedAnalogy} from './analogy-puzzles.js?v=20261017-balance7';
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-balance7';
 export const MATH_TYPES=['pattern','mirror','logic','sequence','analogy','rotate','bond','balance','latin',...LEARNING_TYPES.filter(type=>type!=='shape_complete')];
 export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
 export const DIFFICULTY_VERSION=3;
@@ -71,6 +71,7 @@ export function upgradeChallenge(game,model,facto){
 
 function gradedFacto(type,grade,r,facto){
  const q=facto.generate(type,grade<=2?1:grade===3?2:3,r);q.grade=grade;
+ if(type==='balance')q.instruction=`왼쪽 저울판에는 보석 1개${q.extra?'와 추 '+q.extra+'개':''}가 있고, 오른쪽에는 추 ${q.total}개가 있어요. 양쪽 무게는 같아요. 보석 1개만 놓으면 추 몇 개와 같은 무게일까요?`;
  if(grade===5&&type==='sequence'){let n=1+Math.floor(r()*5);const increments=[2,3,4],values=[n];for(let i=0;i<8;i++){n+=increments[i%3];values.push(n);}q.shown=values.slice(0,7);q.answer=values.slice(7);}
  if(grade===5&&type==='latin'){q.n=4;const offset=Math.floor(r()*4);q.grid=Array.from({length:16},(_,i)=>(Math.floor(i/4)+i%4+offset)%4+1);q.holes=[0,1,5,6,10,15];q.answer=q.holes.map(i=>q.grid[i]);q.choices=[1,2,3,4].map(value=>({value,label:String(value)}));q.instruction='가로줄과 세로줄에 1~4가 한 번씩만 나타나도록 빈칸을 채워요.';}
  return q;

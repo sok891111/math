@@ -1,5 +1,5 @@
-import {learningHints} from './learning-hints.js?v=20261017-gym6';
-import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './minecraft-stories.js?v=20261017-gym6';
+import {learningHints} from './learning-hints.js?v=20261017-balance7';
+import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './minecraft-stories.js?v=20261017-balance7';
 // Original generated questions based on public learning objectives, not workbook pages.
 export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:'모양 완성',array_rule:'배열 규칙',table_count:'표 읽기',place_value:'십 묶음과 낱개',add_single:'두 자리와 한 자리 덧셈',add_tens:'몇십 더하기',add_two:'두 자리 덧셈',add_carry_single:'받아올림 한 자리 덧셈',add_carry_two:'받아올림 두 자리 덧셈',add_story:'이야기 덧셈',subtract_single:'한 자리 뺄셈',subtract_story:'한 자리 이야기 뺄셈',times_table:'구구단 · 2~6단',calc_puzzle:'계산 탐험',...STORY_LABELS};
 export const LEARNING_TYPES=Object.keys(LEARNING_LABELS).filter(type=>!['place_value','shape_match'].includes(type));
