@@ -1,6 +1,6 @@
-import {puzzleHintSteps} from './learning-hints.js?v=20261017-pokemon2';
-import {renderLearning} from './learning-ui.js?v=20261017-pokemon2';
-import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-pokemon2';
+import {puzzleHintSteps} from './learning-hints.js?v=20261017-puzzles3';
+import {renderLearning} from './learning-ui.js?v=20261017-puzzles3';
+import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-puzzles3';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');
@@ -16,7 +16,8 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
  function complete(){return q.type==='path'?c.input.at(-1)===q.goal:q.subset?c.input.length>0:q.paint||q.type==='mirror'?true:c.input.length===q.answer.length&&c.input.every(n=>n!==null)}
  function render(){
   board.replaceChildren();tools.replaceChildren();board.dataset.type=q.type;dialog.dataset.type=q.type;dialog.dataset.grade=String(c.grade);
-  if(q.learning)renderLearning({q,c,board,tools,button,render,place:ui.place});
+  if(q.type==='rotate')renderRotation();
+  else if(q.learning)renderLearning({q,c,board,tools,button,render,place:ui.place});
   else if(facto.types.includes(q.type))ui.render();
   else if(q.type==='pattern'){
    const trace=document.createElement('div');trace.className='math-rhythm';q.shown.forEach(n=>trace.append(rune(n)));board.append(trace,text('p','다음에는 어떤 순서일까요?'));
@@ -34,6 +35,11 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
    q.cards.forEach(n=>{const b=button(String(n),()=>{selected=n;render()},'logic-rune');b.dataset.drag='logic';b.dataset.value=n;b.disabled=c.input.includes(n);b.setAttribute('aria-pressed',String(selected===n));b.setAttribute('aria-label',n+' 룬 선택');tools.append(b)});
   }
   $('submit').disabled=!complete();persist();
+ }
+ function renderRotation(){
+  function picture(values){const grid=document.createElement('div');grid.className='shape-preview';grid.setAttribute('aria-hidden','true');values.forEach(v=>{const cell=document.createElement('span');cell.className=v?'on':'';grid.append(cell)});return grid}
+  const source=document.createElement('div');source.className='rotation-prediction-source';source.append(text('p','돌리기 전 그림'));source.append(picture(q.source),text('p',q.direction+' 돌린 뒤의 모습을 생각해 봐요.'));board.append(source);
+  const choices=document.createElement('div');choices.className='rotation-prediction-choices';q.options.forEach((values,i)=>{const b=button('',()=>{c.input=[i];render()},'facto-choice');b.setAttribute('aria-label',`회전 후 모습 ${i+1}번 선택`);b.setAttribute('aria-pressed',String(c.input[0]===i));b.append(text('span',`${i+1}번`),picture(values));choices.append(b)});board.append(choices);
  }
  function pathTo(i){if(q.blocked.includes(i))return;const previous=c.input.indexOf(i);if(previous>=0)c.input=c.input.slice(0,previous+1);else{const last=c.input.at(-1),distance=Math.abs(Math.floor(last/q.size)-Math.floor(i/q.size))+Math.abs(last%q.size-i%q.size);if(distance!==1||c.input.length-1>=q.budget){$('feedback').textContent='막힌 돌을 피해 가로·세로로 한 칸씩 이어 주세요.';return}c.input.push(i)}render()}
  function showHints(){const steps=puzzleHintSteps(q,window.PuzzleHints);$('hints').hidden=c.hints===0;$('hints').replaceChildren();steps.slice(0,c.hints).forEach(step=>{const row=document.createElement('div');row.append(text('b',step.title),text('p',step.text));$('hints').append(row)});$('hint').textContent=c.hints===0?'힌트 보기':c.hints<steps.length?'다음 단계 힌트':'힌트 모두 보기'}
