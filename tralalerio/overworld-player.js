@@ -1,3 +1,4 @@
+export const MOVEMENT_TIMING=Object.freeze({step:260,holdDelay:450,repeat:300});
 export function trainerName(user){return typeof user?.name==='string'&&user.name.trim()?user.name.trim():'모험가'}
 export function personalize(text,name){return String(text).replace(/골드|<PLAYER>/g,()=>name)}
 const FRAMES={down:0,up:1,left:2,right:2};
@@ -9,7 +10,7 @@ export function walkingPose(direction,walking,foot=0,progress=0){
  return {frame:FRAMES[direction]+(stride?3:0),flip:direction==='right'||(stride&&foot%2===1&&['up','down'].includes(direction)),mirrorLegs:stride&&foot%2===1&&['left','right'].includes(direction)};
 }
 export class PlayerWalk {
- constructor(duration=130){this.duration=duration;this.reset()}
+ constructor(duration=MOVEMENT_TIMING.step){this.duration=duration;this.reset()}
  reset(){this.step=null;this.foot=0}
  begin(before,after,now){
   const distance=Math.abs(before.x-after.x)+Math.abs(before.y-after.y);

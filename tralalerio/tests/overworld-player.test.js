@@ -15,10 +15,10 @@ test('walking alternates both feet while preserving facing and returns to standi
 });
 test('movement interpolates only successful adjacent steps, alternating feet across taps',()=>{
  const w=new PlayerWalk(),a={map:'room',x:2,y:2},b={map:'room',x:3,y:2},c={map:'room',x:4,y:2};w.begin(a,b,100);
- const half=w.sample(b,165);assert.equal(half.x,2.5);assert.equal(half.walking,true);assert.equal(half.foot,0);
- assert.equal(w.sample(b,230).walking,false);w.begin(b,c,300);assert.equal(w.sample(c,365).foot,1);
- w.begin(c,{map:'town',x:10,y:5},400);assert.equal(w.sample({map:'town',x:10,y:5},400).walking,false);
- w.reset();assert.equal(w.sample(c,500).x,4);
+ const half=w.sample(b,230);assert.equal(half.x,2.5);assert.equal(half.walking,true);assert.equal(half.foot,0);
+ assert.equal(w.sample(b,360).walking,false);w.begin(b,c,400);assert.equal(w.sample(c,530).foot,1);
+ w.begin(c,{map:'town',x:10,y:5},600);assert.equal(w.sample({map:'town',x:10,y:5},600).walking,false);
+ w.reset();assert.equal(w.sample(c,700).x,4);
 });
 test('ledge hops follow a continuous jump arc and land exactly on the logical destination',()=>{
  const w=new PlayerWalk(),before={map:'Route29',x:12,y:6},after={map:'Route29',x:12,y:9};w.begin(before,after,100);
