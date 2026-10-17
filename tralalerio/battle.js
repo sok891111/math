@@ -1,7 +1,8 @@
-import {recordSeen,recordCaught} from './monster-dex.js?v=20261017-pool2';
-import {hpLossMessage} from './hp-messages.js?v=20261017-pool2';
-import {MATH_REWARDS,mathRewardIndex,captureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261017-pool2';
-import {validMathChallenge} from './math-challenge.js?v=20261017-pool2';
+import {canStoreCapture,storeCapture} from './pc.js?v=20261017-pc1';
+import {recordSeen,recordCaught} from './monster-dex.js?v=20261017-pc1';
+import {hpLossMessage} from './hp-messages.js?v=20261017-pc1';
+import {MATH_REWARDS,mathRewardIndex,captureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261017-pc1';
+import {validMathChallenge} from './math-challenge.js?v=20261017-pc1';
 import {ESCAPE_TEXT} from './capture-rules.js?v=20261016-capture3';
 // Gen II rules with Minecraft signature attacks. Hardware timing and unrelated
 // systems (held items, weather, evolution and trainer/link battles) are excluded.
@@ -73,6 +74,7 @@ export class Battle {
  if(type==='move'&&(!Number.isInteger(value)||value<0||value>=this.player.moves.length||this.player.moves[value].pp===0&&this.player.moves.some(m=>m.pp>0))){this.s.logs.push('이 기술은 사용할 수 없다!');return false}
  if(type==='potion'&&(this.world.potions<1||this.player.hp===this.player.stats.hp)){this.s.logs.push(this.world.potions<1?'상처약이 없다!':'체력이 이미 가득하다!');return false}
  if(type==='ball'&&this.world.balls<1){this.s.logs.push('몬스터볼이 없다!');return false}
+ if(type==='ball'&&!canStoreCapture(this.world)){this.s.logs.push('현재 박스가 가득 찼다! PC에서 다른 박스로 바꾸어 주세요.');return false}
  if(type==='switch'&&(!this.world.party[value]||this.world.party[value].hp<=0||value===this.s.playerIndex)){this.s.logs.push('이 포켓몬으로 교대할 수 없다!');return false}
  if(!['move','potion','ball','switch','run','math-pass'].includes(type))return false;
  if(type==='math-pass'){const before=this.visual();this.s.logs.push(`${this.name(this.player)}는 제자리에서 뛰었다!`);this.s.animationEvents.push({kind:'math-fail',actor:'player',before,after:this.visual(),logIndex:0,endIndex:1,failed:true});this.s.logs.push('공격에 실패했다. 다음문제는 꼭 풀어보자!');}
@@ -83,7 +85,7 @@ export class Battle {
   this.world.balls--;this.s.logs.push('몬스터볼을 던졌다!');
   const caught=this.captureSolved,shakes=caught?3:0;
   this.s.animationEvents.push({kind:'capture',actor:'player',before,after:this.visual(),logIndex:0,endIndex:1,caught,shakes,mathCapture:true,failed:false});
-  if(caught){if(recordCaught(this.world,this.enemy.species))this.world.dexIntro={version:1,species:this.enemy.species,level:this.enemy.level,stats:structuredClone(this.enemy.stats)};const companion=structuredClone(this.enemy);if(this.world.party.length<6){this.world.party.push(companion);this.s.logs.push('새로운 친구가 손에 있는 포켓몬에 합류했다!')}else{this.world.storage.push(companion);this.s.logs.push('손에 있는 포켓몬이 가득 차 보관함으로 보냈다!')}this.end('caught',captureReward(this.name(this.enemy)));return true}
+  if(caught){if(recordCaught(this.world,this.enemy.species))this.world.dexIntro={version:1,species:this.enemy.species,level:this.enemy.level,stats:structuredClone(this.enemy.stats)};const companion=structuredClone(this.enemy);if(this.world.party.length<6){this.world.party.push(companion);this.s.logs.push('새로운 친구가 손에 있는 포켓몬에 합류했다!')}else{storeCapture(this.world,companion);this.s.logs.push('손에 있는 포켓몬이 가득 차 보관함으로 보냈다!')}this.end('caught',captureReward(this.name(this.enemy)));return true}
   this.s.logs.push(ESCAPE_TEXT[shakes]);this.s.logs.push(CAPTURE_MATH_FAILURE);
  }
 

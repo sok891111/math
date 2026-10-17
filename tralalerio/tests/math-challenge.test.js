@@ -46,3 +46,9 @@ test('random pool mixes beginner and one higher grade, persisting either without
   assert.equal(restored.grade,grade);assert.deepEqual(questionFor(restored,model,facto),questionFor(c,model,facto));
  }
 });
+
+test('developer lab grade 3 has valid solutions and production-compatible input sizes for every active type',()=>{
+ for(const type of MATH_TYPES)for(let seed=0;seed<100;seed++){
+  const q=questionFor({type,seed,grade:3},model,facto);assert.equal(validateQuestion(q,q.solution||q.answer,model,facto).ok,true,type);assert.ok(emptyInput(q).length<=36,type);
+ }
+});

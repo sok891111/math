@@ -1,5 +1,6 @@
-import {advancedAnalogy} from './analogy-puzzles.js?v=20261017-pool2';
-import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-pool2';
+import {canStoreCapture} from './pc.js?v=20261017-pc1';
+import {advancedAnalogy} from './analogy-puzzles.js?v=20261017-pc1';
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-pc1';
 export const MATH_TYPES=['pattern','mirror','path','logic','sequence','analogy','rotate','tower','bond','balance','latin',...LEARNING_TYPES];
 export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
 const STARTER_MAPS=new Set(['Route29Route46Gate','Route46','Route30','Route30BerryHouse','MrPokemonsHouse','Route31','Route31VioletGate','VioletCity','VioletMart','VioletGym','EarlsPokemonAcademy','VioletNicknameSpeechHouse','VioletPokecenter1F','VioletKylesHouse','SproutTower1F','SproutTower2F','SproutTower3F','DarkCaveVioletEntrance','PlayersHouse2F','PlayersHouse1F','NewBarkTown','ElmsLab','PlayersNeighborsHouse','ElmsHouse','Route29','CherrygroveCity','CherrygroveMart','CherrygrovePokecenter1F','CherrygroveGymSpeechHouse','GuideGentsHouse','CherrygroveEvolutionSpeechHouse']);
@@ -10,6 +11,7 @@ export function validateQuestion(q,input,model,facto){return q.learning?validate
 export function emptyInput(q){return q.given?q.given.slice():q.subset?[]:q.type==='path'?[q.start]:q.answer.map(()=>q.paint||q.type==='mirror'?0:null)}
 export function requestCapture(game,model,facto,rng=Math.random){
  const b=game.battle,p=b?.player;if(!b||b.s.result||b.s.trainer||b.s.waitingSwitch||b.s.animationPending||game.state.balls<1)return null;
+ if(!canStoreCapture(game.state)){b.s.logs=['현재 박스가 가득 찼다! PC에서 다른 박스로 바꾸어 주세요.'];b.s.animationEvents=[];return null;}
  if(b.s.mathChallenge)return b.s.mathChallenge.kind==='capture'?b.s.mathChallenge:null;
  const pool=MATH_TYPES.filter(t=>t!==game.state.lastMathType),type=pool[Math.floor(rng()*pool.length)],seed=Math.floor(rng()*4294967296)>>>0;
  const c={version:1,kind:'capture',type,seed,grade:Math.min(3,mathGrade(game.state.map,b.enemy.level)+(seed>=2147483648?1:0)),targetSpecies:b.enemy.species,playerSpecies:p.species,input:[],attempts:0,hints:0};
