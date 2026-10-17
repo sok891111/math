@@ -1,0 +1,319 @@
+{
+  "species": {
+    "mew": {
+      "name": "뮤",
+      "base": {
+        "hp": 100,
+        "attack": 100,
+        "defense": 100,
+        "speed": 100,
+        "specialAttack": 100,
+        "specialDefense": 100
+      },
+      "types": [
+        "PSYCHIC_TYPE"
+      ],
+      "catchRate": 45,
+      "baseExp": 64,
+      "growth": "MEDIUM_SLOW",
+      "learnset": [
+        {
+          "level": 1,
+          "move": "POUND"
+        },
+        {
+          "level": 20,
+          "move": "MEGA_PUNCH"
+        },
+        {
+          "level": 40,
+          "move": "PSYCHIC_M"
+        },
+        {
+          "level": 50,
+          "move": "ANCIENTPOWER"
+        }
+      ]
+    },
+    "koraidon": {
+      "name": "코라이돈",
+      "base": {
+        "hp": 100,
+        "attack": 135,
+        "defense": 115,
+        "speed": 135,
+        "specialAttack": 85,
+        "specialDefense": 100
+      },
+      "types": [
+        "FIGHTING",
+        "DRAGON"
+      ],
+      "catchRate": 3,
+      "baseExp": 335,
+      "growth": "SLOW",
+      "learnset": [
+        {
+          "level": 1,
+          "move": "ROCK_SMASH"
+        },
+        {
+          "level": 1,
+          "move": "ANCIENTPOWER"
+        },
+        {
+          "level": 7,
+          "move": "DRAIN_PUNCH"
+        },
+        {
+          "level": 14,
+          "move": "BREAKING_SWIPE"
+        },
+        {
+          "level": 21,
+          "move": "FLAME_CHARGE"
+        },
+        {
+          "level": 28,
+          "move": "AGILITY"
+        },
+        {
+          "level": 35,
+          "move": "DRAGON_CLAW"
+        },
+        {
+          "level": 42,
+          "move": "FLAMETHROWER"
+        },
+        {
+          "level": 49,
+          "move": "COLLISION_COURSE"
+        },
+        {
+          "level": 56,
+          "move": "SCREECH"
+        },
+        {
+          "level": 63,
+          "move": "COUNTER"
+        },
+        {
+          "level": 70,
+          "move": "OUTRAGE"
+        },
+        {
+          "level": 77,
+          "move": "CLOSE_COMBAT"
+        },
+        {
+          "level": 84,
+          "move": "FLARE_BLITZ"
+        },
+        {
+          "level": 91,
+          "move": "GIGA_IMPACT"
+        }
+      ]
+    }
+  },
+  "moves": {
+    "SCREECH": {
+      "name": "싫은소리",
+      "effect": "EFFECT_DEFENSE_DOWN_2",
+      "power": 0,
+      "type": "NORMAL",
+      "accuracy": 85,
+      "pp": 40,
+      "chance": 0
+    },
+    "BREAKING_SWIPE": {
+      "name": "와이드브레이커",
+      "power": 60,
+      "type": "DRAGON",
+      "effect": "NORMAL_HIT",
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 100
+    },
+    "AGILITY": {
+      "name": "고속이동",
+      "effect": "EFFECT_SPEED_UP_2",
+      "power": 0,
+      "type": "PSYCHIC_TYPE",
+      "accuracy": 100,
+      "pp": 30,
+      "chance": 0
+    },
+    "ROCK_SMASH": {
+      "name": "바위깨기",
+      "effect": "EFFECT_DEFENSE_DOWN_HIT",
+      "power": 20,
+      "type": "FIGHTING",
+      "accuracy": 100,
+      "pp": 15,
+      "chance": 50
+    },
+    "METRONOME": {
+      "name": "손가락흔들기",
+      "effect": "EFFECT_METRONOME",
+      "power": 0,
+      "type": "NORMAL",
+      "accuracy": 100,
+      "pp": 10,
+      "chance": 0
+    },
+    "COLLISION_COURSE": {
+      "name": "액셀브레이크",
+      "power": 100,
+      "type": "FIGHTING",
+      "effect": "NORMAL_HIT",
+      "pp": 5,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "CLOSE_COMBAT": {
+      "name": "인파이트",
+      "power": 120,
+      "type": "FIGHTING",
+      "effect": "NORMAL_HIT",
+      "pp": 5,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "DRAIN_PUNCH": {
+      "name": "드레인펀치",
+      "power": 75,
+      "type": "FIGHTING",
+      "effect": "NORMAL_HIT",
+      "pp": 10,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "TRANSFORM": {
+      "name": "변신",
+      "effect": "EFFECT_TRANSFORM",
+      "power": 0,
+      "type": "NORMAL",
+      "accuracy": 100,
+      "pp": 10,
+      "chance": 0
+    },
+    "DRAGON_CLAW": {
+      "name": "드래곤클로",
+      "power": 80,
+      "type": "DRAGON",
+      "effect": "NORMAL_HIT",
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "COUNTER": {
+      "name": "카운터",
+      "effect": "EFFECT_COUNTER",
+      "power": 1,
+      "type": "FIGHTING",
+      "accuracy": 100,
+      "pp": 20,
+      "chance": 0
+    },
+    "OUTRAGE": {
+      "name": "역린",
+      "effect": "EFFECT_RAMPAGE",
+      "power": 90,
+      "type": "DRAGON",
+      "accuracy": 100,
+      "pp": 15,
+      "chance": 0
+    },
+    "FLARE_BLITZ": {
+      "name": "플레어드라이브",
+      "power": 120,
+      "type": "FIRE",
+      "effect": "RECOIL_HIT",
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "ANCIENTPOWER": {
+      "name": "원시의 힘",
+      "effect": "EFFECT_ALL_UP_HIT",
+      "power": 60,
+      "type": "ROCK",
+      "accuracy": 100,
+      "pp": 5,
+      "chance": 10
+    },
+    "PSYCHIC_M": {
+      "name": "사이코키네시스",
+      "effect": "EFFECT_SP_DEF_DOWN_HIT",
+      "power": 90,
+      "type": "PSYCHIC_TYPE",
+      "accuracy": 100,
+      "pp": 10,
+      "chance": 10
+    },
+    "FLAME_CHARGE": {
+      "name": "니트로차지",
+      "power": 50,
+      "type": "FIRE",
+      "effect": "NORMAL_HIT",
+      "pp": 20,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "MEGA_PUNCH": {
+      "name": "메가톤펀치",
+      "effect": "EFFECT_NORMAL_HIT",
+      "power": 80,
+      "type": "NORMAL",
+      "accuracy": 85,
+      "pp": 20,
+      "chance": 0
+    },
+    "FLAMETHROWER": {
+      "name": "화염방사",
+      "effect": "EFFECT_BURN_HIT",
+      "power": 95,
+      "type": "FIRE",
+      "accuracy": 100,
+      "pp": 15,
+      "chance": 10
+    },
+    "POUND": {
+      "name": "막치기",
+      "effect": "EFFECT_NORMAL_HIT",
+      "power": 40,
+      "type": "NORMAL",
+      "accuracy": 100,
+      "pp": 35,
+      "chance": 0
+    },
+    "GIGA_IMPACT": {
+      "name": "기가임팩트",
+      "power": 150,
+      "type": "NORMAL",
+      "effect": "NORMAL_HIT",
+      "pp": 5,
+      "accuracy": 100,
+      "chance": 0
+    }
+  },
+  "dex": [
+    {
+      "id": "koraidon",
+      "number": 252,
+      "national": 1007,
+      "name": "코라이돈",
+      "kind": "pokemon",
+      "category": "패러독스포켓몬",
+      "height": 2.5,
+      "weight": 303,
+      "types": [
+        "FIGHTING",
+        "DRAGON"
+      ],
+      "description": "힘찬 다리로 대지를 박차고 달린다. 강인한 몸으로 상대에게 힘껏 돌진하는 고대의 포켓몬이다.",
+      "image": "assets/battle/koraidon-front.png"
+    }
+  ]
+}

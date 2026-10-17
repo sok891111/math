@@ -4,9 +4,9 @@ const locations=['Route29','Route30','Route31','Route46','DarkCaveVioletEntrance
 export function grassPair(g,id){g.enter(maps[id],0,0);for(const t of Object.keys(data.trainers))g.state.flags['trainer:'+t]=true;g.state.flags.eggDelivered=true;g.state.flags.labCall=true;const tile=data.encounters[id].terrain==='floor'?'FLOOR':'TALL_GRASS';for(let y=1;y<g.map.height-1;y++)for(let x=1;x<g.map.width-1;x++)for(const [dir,[dx,dy]]of Object.entries(DIRECTIONS)){if(g.passable(x,y)&&g.passable(x+dx,y+dy)&&g.map.collision[y][x]===tile&&g.map.collision[y+dy][x+dx]===tile)return{x,y,dir};}throw Error('No safe wild pair: '+id);}
 test('all seven implemented Gold land habitats have original time slots and rates plus 60% Minecraft',()=>{
  assert.deepEqual(Object.keys(data.encounters).sort(),locations.slice().sort());assert.equal(data.encounters.SproutTower1F,undefined);
- for(const id of locations){const table=data.encounters[id],gold=source.tables[id];assert.deepEqual(table.rates,gold.rates);assert.equal(table.terrain,gold.terrain);assert.deepEqual(table.weights.slice(0,7).map(w=>w/2),source.originalWeights);
+ for(const id of locations){const table=data.encounters[id],gold=source.tables[id];assert.deepEqual(table.rates,gold.rates);assert.equal(table.terrain,gold.terrain);assert.deepEqual(table.weights.slice(0,7).map(w=>w/19),source.originalWeights);
   for(const [period,hour]of [['morning',7],['day',12],['night',22]]){
-   assert.deepEqual(table[period].slice(0,7),gold[period]);assert.equal(table[period].length,31);assert.equal(table[period].filter(x=>x.species.startsWith('mc_')).length,24);
+   assert.deepEqual(table[period].slice(0,7),gold[period]);assert.equal(table[period].length,33);assert.equal(table[period].filter(x=>x.species.startsWith('mc_')).length,24);
    const sampled=Array.from({length:500},(_,i)=>pickEncounter(table,hour,()=>(i+.5)/500));assert.equal(sampled.filter(x=>x.species.startsWith('mc_')).length,300);
    assert.ok(table[period].every(x=>data.species[x.species]));
   }

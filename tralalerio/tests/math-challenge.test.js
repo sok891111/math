@@ -8,7 +8,7 @@ function game(){const g=new Game(maps,data,{random:()=>.5});g.chooseStarter('리
 test('all 27 generated problem types share a seeded random pool and valid grade 1 and 2 solutions',()=>{
  assert.equal(MATH_TYPES.length,27);
  for(const type of MATH_TYPES)for(const grade of [1,2])for(let seed=0;seed<100;seed++){const c={type,seed,grade},q=questionFor(c,model,facto),answer=q.solution||q.answer;assert.equal(validateQuestion(q,answer,model,facto).ok,true,type+' '+seed);assert.deepEqual(questionFor(c,model,facto),q);assert.ok(Array.isArray(emptyInput(q)))}
- for(const map of Object.keys(maps))assert.equal(mathGrade(map,80),1,map);
+ for(const map of Object.keys(maps))assert.equal(mathGrade(map,80),2,map);
 });
 test('50% boundary gives immediate attack or a critical challenge',()=>{
  for(const roll of [0,.499999,.5,.999999]){const g=game();const seq=[roll,.2,.4];const c=requestMath(g,0,model,facto,()=>seq.shift());assert.equal(!!c,roll<.5);assert.equal(g.battle.s.turn,roll<.5?0:1)}
@@ -22,7 +22,7 @@ test('partial puzzle, seed and hints survive reload; selecting another move keep
  const same=requestMath(h,1,model,facto);assert.equal(same.seed,c.seed);assert.equal(same.type,c.type);assert.equal(same.moveIndex,1);assert.equal(h.battle.s.turn,0);
 });
 test('bag or switch cancels the pending problem while corrupted saves are rejected',()=>{
- const g=game();requestMath(g,0,model,facto,seededRandom(1));const raw=g.serialize();for(const mutate of [c=>c.type='bad',c=>c.grade=3,c=>c.seed=-1,c=>c.moveIndex=99,c=>c.input=['bad'],c=>c.hints=10]){const bad=JSON.parse(raw);mutate(bad.battle.mathChallenge);assert.equal(g.restore(JSON.stringify(bad)),false);assert.equal(g.serialize(),raw)}
+ const g=game();requestMath(g,0,model,facto,seededRandom(1));const raw=g.serialize();for(const mutate of [c=>c.type='bad',c=>c.grade=0,c=>c.seed=-1,c=>c.moveIndex=99,c=>c.input=['bad'],c=>c.hints=10]){const bad=JSON.parse(raw);mutate(bad.battle.mathChallenge);assert.equal(g.restore(JSON.stringify(bad)),false);assert.equal(g.serialize(),raw)}
  g.state.potions=1;g.battle.player.hp--;g.battle.action('potion');assert.equal(g.battle.s.mathChallenge,undefined);
 });
 
@@ -38,8 +38,8 @@ test('solved attacks always hit and apply actual Gen II critical damage even wit
  g.battle.s.animationPending=false;const hp=g.battle.enemy.hp;g.battle.action('move',0);assert.equal(g.battle.enemy.hp,hp,'the next unsolved attack obeys normal accuracy');
 });
 
-test('random pool mixes beginner and one higher grade, persisting either without reroll',()=>{
- for(const [seedRoll,grade] of [[0,1],[.499999,1],[.5,2],[.999999,2]]){
+test('random pool is 80% middle and 20% hard, persisting either without reroll',()=>{
+ for(const [seedRoll,grade] of [[0,2],[.799999,2],[.8,3],[.999999,3]]){
   const g=game(),rolls=[0,.1,seedRoll],c=requestMath(g,0,model,facto,()=>rolls.shift());
   assert.equal(c.grade,grade);const raw=g.serialize(),h=game();assert.ok(h.restore(raw));
   const restored=requestMath(h,0,model,facto,()=>{throw Error('must not reroll')});

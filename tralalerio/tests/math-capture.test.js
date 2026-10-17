@@ -9,9 +9,9 @@ test('capture always asks math and solving guarantees every species at full or l
   const q=questionFor(c,model,facto);c.input=q.solution||q.answer;g.rng=()=>{throw Error('capture must not roll random chance')};assert.ok(submitMath(g,model,facto).resolved);assert.equal(g.battle.s.result,'caught');assert.equal(g.state.party.at(-1).species,species);assert.equal(g.state.balls,4);assert.equal(g.battle.s.turn,1);assert.ok(g.battle.s.logs.includes(captureReward(data.species[species].name)));assert.equal(g.battle.s.animationEvents.length,1);assert.equal(submitMath(g,model,facto).ok,false);
  }
 });
-test('all 28 types and both difficulties work for capture, with wrong answers or skipping costing one ball and an enemy turn',()=>{
- for(const type of MATH_TYPES)for(const grade of [1,2]){
-  const g=game(),rolls=[(MATH_TYPES.indexOf(type)+.1)/MATH_TYPES.length,grade===1?.2:.7],c=requestCapture(g,model,facto,()=>rolls.shift());assert.equal(c.type,type);assert.equal(c.grade,type==='analogy'?Math.max(2,grade):grade);const q=questionFor(c,model,facto);c.input=q.solution||q.answer;assert.ok(submitMath(g,model,facto).ok);assert.equal(g.battle.s.result,'caught');
+test('all 27 types and both current difficulties work for capture, with wrong answers or skipping costing one ball and an enemy turn',()=>{
+ for(const type of MATH_TYPES)for(const grade of [2,3]){
+  const g=game('mc_zombie'),rolls=[(MATH_TYPES.indexOf(type)+.1)/MATH_TYPES.length,grade===2?.2:.9],c=requestCapture(g,model,facto,()=>rolls.shift());assert.equal(c.type,type);assert.equal(c.grade,grade);const q=questionFor(c,model,facto);c.input=q.solution||q.answer;assert.ok(submitMath(g,model,facto).ok);assert.equal(g.battle.s.result,'caught');
  }
  for(const skip of [false,true]){const g=game(),hp=g.battle.player.hp,pp=g.battle.player.moves[0].pp,c=requestCapture(g,model,facto,()=>0);c.input=[];assert.ok((skip?skipMath(g):submitMath(g,model,facto)).resolved);assert.equal(g.battle.s.result,null);assert.equal(g.state.party.length,1);assert.equal(g.state.balls,4);assert.equal(g.battle.s.turn,1);assert.ok(g.battle.player.hp<hp);assert.equal(g.battle.player.moves[0].pp,pp);assert.deepEqual(g.battle.s.animationEvents.map(e=>e.kind),['capture',undefined]);assert.equal(g.battle.s.mathChallenge,undefined);}
 });

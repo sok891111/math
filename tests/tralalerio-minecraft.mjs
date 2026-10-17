@@ -9,10 +9,10 @@ assert.equal(ids.length,24);
 const table=data.encounters.Route29;
 assert.equal(table.rateByte,25);
 for(const hour of [5,12,22]){
- const picks=Array.from({length:100},(_,i)=>pickEncounter(table,hour,()=> (i+.5)/100));
- assert.equal(picks.filter(p=>p.species.startsWith('mc_')).length,60);
+ const picks=Array.from({length:500},(_,i)=>pickEncounter(table,hour,()=> (i+.5)/500));
+ assert.equal(picks.filter(p=>p.species.startsWith('mc_')).length,300);
  for(const id of ids)assert.ok(picks.some(p=>p.species===id));
- assert.ok(picks.every(p=>p.level>=2&&p.level<=4));
+ assert.ok(picks.every(p=>[...data.challengePolicy.rareSpecies,'mew','koraidon'].includes(p.species)?p.level>=10:p.level>=2&&p.level<=4));
 }
 function game(){const g=new Game(maps,data,{random:()=>0});g.chooseStarter('치코리타');return g}
 for(const id of ids){
@@ -22,7 +22,7 @@ for(const id of ids){
  assert.ok(validPokemon(data,wild));
  const defender=createPokemon(data,'chikorita',5,()=>0);
  const hit=damage(data,wild,defender,data.moves.TACKLE,{roll:255});
- assert.ok(hit>=2&&hit<=6,`${id} damage ${hit}`);
+ assert.equal(wild.level,data.challengePolicy.rareSpecies.includes(id)?10:3);assert.ok(hit>=2&&hit<=(data.challengePolicy.rareSpecies.includes(id)?20:6),`${id} damage ${hit}`);
  const balls=g.state.balls;
  g.battle.action('ball',0,{captureAnswer:true});assert.equal(g.battle.s.result,'caught');assert.equal(g.state.balls,balls-1);
  assert.equal(g.state.party[1].species,id);assert.ok(g.finishBattle());

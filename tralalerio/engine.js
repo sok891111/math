@@ -1,8 +1,8 @@
-import {initializePC,validPC} from './pc.js?v=20261017-pc1';
-import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261017-pc1';
-import {validPhoneCall} from './phone-call.js?v=20261017-pc1';
+import {initializePC,validPC} from './pc.js?v=20261017-pokemon2';
+import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261017-pokemon2';
+import {validPhoneCall} from './phone-call.js?v=20261017-pokemon2';
 import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261017-rival1';
-import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261017-pc1';
+import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261017-pokemon2';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {
@@ -49,7 +49,7 @@ export class Game {
  buyPotion(){if(this.state.money<300)return false;this.state.money-=300;this.state.potions++;return true;}
  initializeParty(){const s=this.state;if(s.flags.mysteryEgg&&!s.flags.eggDelivered){s.items??={};s.items.MYSTERY_EGG=1;}else if(s.flags.eggDelivered&&s.items)delete s.items.MYSTERY_EGG;s.party??=[];s.storage??=[];s.balls??=0;s.grassGrace??=0;if(s.starter&&!s.party.length){const species=Object.keys(this.battleData.species).find(id=>this.battleData.species[id].name===s.starter);s.party.push(createPokemon(this.battleData,species,5,this.rng));}if(s.starter&&!s.flags.battleSupplies){s.balls+=5;s.flags.battleSupplies=true;}initializeMonsterDex(s,this.battleData);initializePC(s);}
  get battle(){return this.state.battle&&this.battleData?new Battle(this.battleData,this.state,this.rng):null;}
- startEncounter(species,level){if(!this.battleData||this.state.battle)return false;return !!Battle.start(this.battleData,this.state,createPokemon(this.battleData,species,level,this.rng),this.rng);}
+ startEncounter(species,level){if(!this.battleData||this.state.battle)return false;return !!Battle.start(this.battleData,this.state,createPokemon(this.battleData,species,Math.max(level,this.battleData.challengePolicy?.rareSpecies.includes(species)?this.battleData.challengePolicy.rareMinLevel:1),this.rng),this.rng);}
  startTrainer(id){const t=this.battleData?.trainers?.[id];if(!t||this.state.battle||this.state.flags['trainer:'+id])return false;const started=!!Battle.startTrainer(this.battleData,this.state,t,this.rng);if(started)delete this.state.trainerEncounter;return started;}
  trainerInSight(){if(!this.battleData||this.state.battle||!this.state.party.some(p=>p.hp>0))return null;for(const o of this.objects()){if(!o.trainer||!o.range||this.state.flags['trainer:'+o.trainer])continue;const d=DIRECTIONS[o.direction]||DIRECTIONS.down;for(let n=1;n<=o.range;n++){const x=o.x+d[0]*n,y=o.y+d[1]*n;if(x===this.state.x&&y===this.state.y)return o;if(!this.passable(x,y))break;}}return null;}
  healParty(){if(!this.battleData)return;for(const p of this.state.party){p.hp=p.stats.hp;p.status=null;p.sleep=0;for(const m of p.moves)m.pp=this.battleData.moves[m.id].pp;}}
