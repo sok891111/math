@@ -1,11 +1,11 @@
-import {TYPE_LEVELS,levelForType,planGymAttack} from './math-levels.js?v=20261018-photos13';
-import {rotationQuestion} from './rotation-puzzles.js?v=20261018-photos13';
-import {canStoreCapture} from './pc.js?v=20261018-photos13';
-import {advancedAnalogy} from './analogy-puzzles.js?v=20261018-photos13';
-import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261018-photos13';
+import {TYPE_LEVELS,levelForType,planGymAttack} from './math-levels.js?v=20261018-grid14';
+import {rotationQuestion} from './rotation-puzzles.js?v=20261018-grid14';
+import {canStoreCapture} from './pc.js?v=20261018-grid14';
+import {advancedAnalogy} from './analogy-puzzles.js?v=20261018-grid14';
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261018-grid14';
 export const MATH_TYPES=['pattern','mirror','logic','sequence','analogy','rotate','bond','balance','latin',...LEARNING_TYPES.filter(type=>type!=='shape_complete')].filter(type=>!['bond','add_single','add_tens'].includes(type));
 export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
-export const DIFFICULTY_VERSION=6;
+export const DIFFICULTY_VERSION=7;
 export function mathGrade(map,level=1,species=null,data=null){return data?.challengePolicy?.rareSpecies.includes(species)?5:3;}
 export function challengeGrade(game,seed){const b=game.battle;if(game.battleData.trainers?.[b.s.trainer]?.badge)return 4;const minimum=mathGrade(game.state.map,b.enemy.level,b.enemy.species,game.battleData);return minimum===5?5:seed>=3435973836?4:3;}
 function selection(game,rng){const typeRoll=rng(),seed=Math.floor(rng()*4294967296)>>>0,preferred=challengeGrade(game,seed),strict=preferred===5||!!game.battleData.trainers?.[game.battle.s.trainer]?.badge;let pool=MATH_TYPES.filter(t=>t!==game.state.lastMathType&&(!strict||TYPE_LEVELS[t].includes(preferred)));const type=pool[Math.floor(typeRoll*pool.length)];return {type,seed,grade:levelForType(type,preferred)};}
@@ -45,7 +45,7 @@ export function submitMath(game,model,facto){
 export function validMathChallenge(c,state,data){
  if(c===undefined)return true;const b=state.battle,p=state.party[b?.playerIndex];
  const selection=c?.kind==='capture'?!b?.trainer&&state.balls>0&&c.targetSpecies===b?.enemy.species&&c.moveIndex===undefined&&c.moveId===undefined:c?.kind===undefined&&Number.isInteger(c.moveIndex)&&p?.moves[c.moveIndex]?.id===c.moveId;
- return !!(c&&c.version===1&&(MATH_TYPES.includes(c.type)||c.type==='place_value'||c.type==='classify'||c.type==='shape_match'||['path','tower','shape_complete','bond','add_single','add_tens'].includes(c.type))&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=4294967295&&Number.isInteger(c.grade)&&c.grade>=(c.difficultyVersion===DIFFICULTY_VERSION?3:1)&&c.grade<=5&&[undefined,2,3,4,5,DIFFICULTY_VERSION].includes(c.difficultyVersion)&&(c.plannedRolls===undefined||Array.isArray(c.plannedRolls)&&c.plannedRolls.length<=256&&c.plannedRolls.every(n=>typeof n==='number'&&n>=0&&n<1))&&(c.gymFinisher===undefined||typeof c.gymFinisher==='boolean')&&selection&&c.playerSpecies===p.species&&!b.result&&!b.waitingSwitch&&!b.animationPending&&Array.isArray(c.input)&&c.input.length<=36&&c.input.every(v=>v===null||Number.isInteger(v)&&v>=0&&v<=100)&&Number.isInteger(c.attempts)&&c.attempts>=0&&Number.isInteger(c.hints)&&c.hints>=0&&c.hints<=3);
+ return !!(c&&c.version===1&&(MATH_TYPES.includes(c.type)||c.type==='place_value'||c.type==='classify'||c.type==='shape_match'||['path','tower','shape_complete','bond','add_single','add_tens'].includes(c.type))&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=4294967295&&Number.isInteger(c.grade)&&c.grade>=(c.difficultyVersion===DIFFICULTY_VERSION?3:1)&&c.grade<=5&&[undefined,2,3,4,5,6,DIFFICULTY_VERSION].includes(c.difficultyVersion)&&(c.plannedRolls===undefined||Array.isArray(c.plannedRolls)&&c.plannedRolls.length<=256&&c.plannedRolls.every(n=>typeof n==='number'&&n>=0&&n<1))&&(c.gymFinisher===undefined||typeof c.gymFinisher==='boolean')&&selection&&c.playerSpecies===p.species&&!b.result&&!b.waitingSwitch&&!b.animationPending&&Array.isArray(c.input)&&c.input.length<=36&&c.input.every(v=>v===null||Number.isInteger(v)&&v>=0&&v<=100)&&Number.isInteger(c.attempts)&&c.attempts>=0&&Number.isInteger(c.hints)&&c.hints>=0&&c.hints<=3);
 }
 
 export function skipMath(game){const b=game.battle,c=b?.s.mathChallenge;if(!c)return {ok:false,resolved:false};delete b.s.mathChallenge;game.state.lastMathType=c.type;return {ok:false,resolved:c.kind==='capture'?b.action('ball',0,{captureAnswer:false}):b.action('math-pass',0,{gymDodge:c.gymFinisher===true})};}
@@ -82,7 +82,7 @@ function gradedFacto(type,grade,r,facto){
   q.shown=values.slice(0,7);q.answer=values.slice(7);q.choices=[...new Set([...q.answer,...q.answer.flatMap(n=>[n-1,n+1,n+2])])].filter(n=>n>=0&&n<=100).map(value=>({value,label:String(value)}));for(let i=q.choices.length-1;i>0;i--){const j=pick(i+1);[q.choices[i],q.choices[j]]=[q.choices[j],q.choices[i]];}
   q.instruction=['이웃한 수 사이의 증가량도 규칙적으로 바뀌어요. 다음 두 수를 순서대로 넣어 주세요.','홀수 번째와 짝수 번째를 따로 읽으면 서로 다른 두 수열이 보여요. 두 규칙을 이어 다음 두 수를 넣어 주세요.','더하기와 빼기가 번갈아 나와요. 두 가지 변화를 찾아 다음 두 수를 순서대로 넣어 주세요.'][mode];
  }
- if(type==='latin'){q.n=4;const offset=Math.floor(r()*4);q.grid=Array.from({length:16},(_,i)=>(Math.floor(i/4)+i%4+offset)%4+1);q.holes=grade>=4?[0,1,5,6,10,15]:[0,5,10,15];q.answer=q.holes.map(i=>q.grid[i]);q.choices=[1,2,3,4].map(value=>({value,label:String(value)}));q.instruction='4행 4열 숫자 격자예요. 가로줄마다, 세로줄마다 1~4가 한 번씩만 나타나도록 빈칸을 채워 주세요.';}
+ if(type==='latin'){q.n=3;const offset=Math.floor(r()*3);q.grid=Array.from({length:9},(_,i)=>(Math.floor(i/3)+i%3+offset)%3+1);q.holes=grade>=4?[0,1,4,8]:[0,4,8];q.answer=q.holes.map(i=>q.grid[i]);q.choices=[1,2,3].map(value=>({value,label:String(value)}));q.instruction='3행 3열 숫자 격자예요. 가로줄마다, 세로줄마다 1~3이 한 번씩만 나타나도록 빈칸을 채워 주세요.';}
 
  return q;
 }

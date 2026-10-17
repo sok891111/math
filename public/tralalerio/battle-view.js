@@ -1,11 +1,11 @@
-import {messageVisual} from './battle-presentation.js?v=20261018-photos13';
-import {isHpLossMessage} from './hp-messages.js?v=20261018-photos13';
-import {isMathReward,isCaptureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261018-photos13';
-import {requestMath,requestCapture} from './math-challenge.js?v=20261018-photos13';
-import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261018-photos13';
-import {createSendoutAnimator} from './sendout-animation.js?v=20261018-photos13';
+import {messageVisual} from './battle-presentation.js?v=20261018-grid14';
+import {isHpLossMessage} from './hp-messages.js?v=20261018-grid14';
+import {isMathReward,isCaptureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261018-grid14';
+import {requestMath,requestCapture} from './math-challenge.js?v=20261018-grid14';
+import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261018-grid14';
+import {createSendoutAnimator} from './sendout-animation.js?v=20261018-grid14';
 import {createCaptureAnimator,showCaughtBall} from './capture-animation.js?v=20261016-capture3';
-import {createBattleAnimator,animationAssets} from './battle-animation.js?v=20261018-photos13';
+import {createBattleAnimator,animationAssets} from './battle-animation.js?v=20261018-grid14';
 const typeNames={NORMAL:'노말',FIRE:'불꽃',WATER:'물',GRASS:'풀',FLYING:'비행',DARK:'악',PSYCHIC_TYPE:'에스퍼',POISON:'독',BUG:'벌레',ELECTRIC:'전기',GROUND:'땅',ROCK:'바위',FIGHTING:'격투',ICE:'얼음',DRAGON:'드래곤',GHOST:'고스트',STEEL:'강철'};
 const statusNames={burn:'화상',poison:'독',paralysis:'마비',sleep:'잠듦',freeze:'얼음'};
 export function createBattleView(getGame,onChange,onSave,onFinish,onNewCapture=()=>{}){
