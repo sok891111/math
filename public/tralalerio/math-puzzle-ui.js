@@ -1,6 +1,6 @@
-import {puzzleHintSteps} from './learning-hints.js?v=20261017-arithmetic4';
-import {renderLearning} from './learning-ui.js?v=20261017-arithmetic4';
-import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-arithmetic4';
+import {puzzleHintSteps} from './learning-hints.js?v=20261017-rotation5';
+import {renderLearning} from './learning-ui.js?v=20261017-rotation5';
+import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-rotation5';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');
@@ -36,9 +36,24 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
   }
   $('submit').disabled=!complete();persist();
  }
+ function rotationGuide(){
+  const half=q.turns===2,left=q.turns===3,end=half?[130,124]:left?[86,80]:[174,80],sweep=left?0:1;
+  const wrap=document.createElement('figure');wrap.className='rotation-guide';
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 260 160');svg.setAttribute('role','img');svg.setAttribute('aria-label',`${q.direction} 회전 안내. 위쪽 시작점에서 ${half?'아래쪽까지 반 바퀴':left?'왼쪽까지 4분의 1바퀴':'오른쪽까지 4분의 1바퀴'} 화살표를 따라가요.`);
+  svg.innerHTML=`<defs><marker id="rotation-guide-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#52783c"/></marker></defs>
+   <circle cx="130" cy="80" r="44" fill="none" stroke="#bbc7ab" stroke-width="2" stroke-dasharray="4 5"/>
+   <path d="M130 80 L130 36 A44 44 0 0 ${sweep} ${end[0]} ${end[1]} Z" fill="#dcebc9"/>
+   <path d="M130 80 L130 36" stroke="#7d8875" stroke-width="2" stroke-dasharray="4 3"/>
+   <path d="M130 80 L${end[0]} ${end[1]}" stroke="#52783c" stroke-width="3"/>
+   <path d="M130 36 A44 44 0 0 ${sweep} ${end[0]} ${end[1]}" fill="none" stroke="#52783c" stroke-width="5" marker-end="url(#rotation-guide-arrow)"/>
+   <circle cx="130" cy="80" r="4" fill="#52783c"/>
+   <text x="130" y="19" text-anchor="middle">시작</text>
+   <text x="${half?130:left?57:203}" y="${half?151:86}" text-anchor="middle">끝</text>`;
+  wrap.append(svg,text('figcaption',`${q.direction} · ${half?'반 바퀴':'한 바퀴의 4분의 1'}`),text('p','시작에서 끝까지 굽은 화살표만큼 돌려요.'));return wrap;
+ }
  function renderRotation(){
   function picture(values){const grid=document.createElement('div');grid.className='shape-preview';grid.setAttribute('aria-hidden','true');values.forEach(v=>{const cell=document.createElement('span');cell.className=v?'on':'';grid.append(cell)});return grid}
-  const source=document.createElement('div');source.className='rotation-prediction-source';source.append(text('p','돌리기 전 그림'));source.append(picture(q.source),text('p',q.direction+' 돌린 뒤의 모습을 생각해 봐요.'));board.append(source);
+  const source=document.createElement('div');source.className='rotation-prediction-source';source.append(text('p','돌리기 전 그림'));source.append(picture(q.source),text('p',q.direction+' 돌린 뒤의 모습을 생각해 봐요.'));board.append(rotationGuide(),source);
   const choices=document.createElement('div');choices.className='rotation-prediction-choices';q.options.forEach((values,i)=>{const b=button('',()=>{c.input=[i];render()},'facto-choice');b.setAttribute('aria-label',`회전 후 모습 ${i+1}번 선택`);b.setAttribute('aria-pressed',String(c.input[0]===i));b.append(text('span',`${i+1}번`),picture(values));choices.append(b)});board.append(choices);
  }
  function pathTo(i){if(q.blocked.includes(i))return;const previous=c.input.indexOf(i);if(previous>=0)c.input=c.input.slice(0,previous+1);else{const last=c.input.at(-1),distance=Math.abs(Math.floor(last/q.size)-Math.floor(i/q.size))+Math.abs(last%q.size-i%q.size);if(distance!==1||c.input.length-1>=q.budget){$('feedback').textContent='막힌 돌을 피해 가로·세로로 한 칸씩 이어 주세요.';return}c.input.push(i)}render()}

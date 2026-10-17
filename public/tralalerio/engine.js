@@ -1,8 +1,8 @@
-import {initializePC,validPC} from './pc.js?v=20261017-arithmetic4';
-import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261017-arithmetic4';
-import {validPhoneCall} from './phone-call.js?v=20261017-arithmetic4';
+import {initializePC,validPC} from './pc.js?v=20261017-rotation5';
+import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261017-rotation5';
+import {validPhoneCall} from './phone-call.js?v=20261017-rotation5';
 import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261017-rival1';
-import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261017-arithmetic4';
+import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261017-rotation5';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {

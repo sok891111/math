@@ -1,15 +1,15 @@
-import {createPCUI} from './pc-ui.js?v=20261017-arithmetic4';
-import {createMonsterDexUI} from './monster-dex-ui.js?v=20261017-arithmetic4';
-import {createPhoneAnimation,LAB_CALL_PAGES,finishLabCall} from './phone-call.js?v=20261017-arithmetic4';
-import {installTouchGuard} from './touch-guard.js?v=20261017-arithmetic4';
+import {createPCUI} from './pc-ui.js?v=20261017-rotation5';
+import {createMonsterDexUI} from './monster-dex-ui.js?v=20261017-rotation5';
+import {createPhoneAnimation,LAB_CALL_PAGES,finishLabCall} from './phone-call.js?v=20261017-rotation5';
+import {installTouchGuard} from './touch-guard.js?v=20261017-rotation5';
 installTouchGuard();
-import {createTrainerEncounter,rivalEncounterPlan} from './trainer-encounter.js?v=20261017-arithmetic4';
-import {chapterGoal,storyInteraction,storyEntry} from './chapter.js?v=20261017-arithmetic4';
-import {createHealingAnimation} from './healing-animation.js?v=20261017-arithmetic4';
-import {npcDialogue,signDialogue,LESSONS} from './npc-dialogue.js?v=20261017-arithmetic4';
-import {trainerName,personalize,walkingPose,PlayerWalk,MOVEMENT_TIMING} from './overworld-player.js?v=20261017-arithmetic4';
-import {Game} from './engine.js?v=20261017-arithmetic4';
-import {createBattleView} from './battle-view.js?v=20261017-arithmetic4';
+import {createTrainerEncounter,rivalEncounterPlan} from './trainer-encounter.js?v=20261017-rotation5';
+import {chapterGoal,storyInteraction,storyEntry} from './chapter.js?v=20261017-rotation5';
+import {createHealingAnimation} from './healing-animation.js?v=20261017-rotation5';
+import {npcDialogue,signDialogue,LESSONS} from './npc-dialogue.js?v=20261017-rotation5';
+import {trainerName,personalize,walkingPose,PlayerWalk,MOVEMENT_TIMING} from './overworld-player.js?v=20261017-rotation5';
+import {Game} from './engine.js?v=20261017-rotation5';
+import {createBattleView} from './battle-view.js?v=20261017-rotation5';
 const $=s=>document.querySelector(s);const canvas=$('#screen'),ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
 import {createEncounterTransition,transitionData} from './battle-transition.js?v=20261016-skills1';
 const playerName=trainerName(window.__BLOCK_USER__);const playerWalk=new PlayerWalk();
@@ -119,5 +119,5 @@ window.addEventListener('keyup',e=>{const k=e.key.length===1?e.key.toLowerCase()
 for(const b of document.querySelectorAll('[data-move]')){b.onpointerdown=e=>{e.preventDefault();if(game?.state.trainerEncounter||trainerScene.active()||encounterTransition.active()||healing.active())return;b.setPointerCapture(e.pointerId);move(b.dataset.move);held.add(b.dataset.move);nextMove=performance.now()+MOVEMENT_TIMING.holdDelay};b.onpointerup=b.onpointercancel=()=>held.delete(b.dataset.move);b.onlostpointercapture=()=>held.delete(b.dataset.move)}
 $('#dex-menu').onclick=()=>{held.clear();dexUI.open()};
 $('#party-menu').onclick=()=>{if(game?.state.phoneCall)return;if(game?.state.trainerEncounter||encounterTransition.active()||healing.active())return;menu=false;$('#menu').hidden=true;held.clear();battleUI.openParty()};$('#dialog-next').onclick=advance;$('#menu-button').onclick=()=>toggleMenu();$('#touch-menu').onclick=()=>toggleMenu();$('#touch-action').onclick=act;$('#save-button').onclick=save;$('#save-menu').onclick=save;$('#load-menu').onclick=load;$('#close-menu').onclick=()=>toggleMenu(false);$('#restart').onclick=()=>{if(game?.state.phoneCall)return;if(game?.state.trainerEncounter||healing.active())return;menu=false;$('#menu').hidden=true;say('새로운 모험','피카츄와 연구실에서 새 모험을 시작할까요?\n현재 저장 기록이 새 모험으로 바뀌어요.',null,[['처음부터',()=>{battleUI.close();game=new Game(game.maps,game.battleData);game.startAdventure();persist();playerWalk.reset();update();toast('피카츄와 함께 연구실에서 출발해요!')}],['계속할래요',()=>{}]])};
-async function init(){try{const res=await fetch('assets/maps.json?v=20261017-arithmetic4', {cache:'no-store'});if(!res.ok)throw Error('맵 파일을 읽을 수 없어요');const maps=await res.json();const sprites=await (await fetch('assets/sprites.json?v=20261017-arithmetic4', {cache:'no-store'})).json();const names=[...Object.keys(maps),...sprites];await Promise.all(names.map(n=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[n]=im;resolve()};im.onerror=()=>reject(Error('그래픽 로딩 실패: '+n));im.src=`assets/${n}.png?v=20261017-arithmetic4`;})));const battleData=await(await fetch('assets/battle-data.json?v=20261017-arithmetic4',{cache:'no-store'})).json();game=new Game(maps,battleData);try{const raw=localStorage.getItem(KEY);if(raw&&game.restore(raw))toast('지난 모험을 이어서 시작해요.')}catch{}if(!game.state.starter)game.startAdventure();transitionData().catch(()=>{});$('#loading').hidden=true;update();canvas.focus({preventScroll:true});if(game.battle)battleUI.show();if(game.state.dexIntro&&!game.state.battle?.animationPending)dexUI.openIntro(game.state.dexIntro);healing.prepare().catch(()=>{});if(game.state.healing)resumeHealing();if(game.state.trainerEncounter)resumeTrainerEncounter();const event=storyEntry(game);if(event){persist();showStoryEvent(event);}persist();requestAnimationFrame(draw);}catch(e){$('#loading').textContent=`로딩하지 못했어요. 새로고침해 주세요. (${e.message})`;console.error(e)}}
+async function init(){try{const res=await fetch('assets/maps.json?v=20261017-rotation5', {cache:'no-store'});if(!res.ok)throw Error('맵 파일을 읽을 수 없어요');const maps=await res.json();const sprites=await (await fetch('assets/sprites.json?v=20261017-rotation5', {cache:'no-store'})).json();const names=[...Object.keys(maps),...sprites];await Promise.all(names.map(n=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[n]=im;resolve()};im.onerror=()=>reject(Error('그래픽 로딩 실패: '+n));im.src=`assets/${n}.png?v=20261017-rotation5`;})));const battleData=await(await fetch('assets/battle-data.json?v=20261017-rotation5',{cache:'no-store'})).json();game=new Game(maps,battleData);try{const raw=localStorage.getItem(KEY);if(raw&&game.restore(raw))toast('지난 모험을 이어서 시작해요.')}catch{}if(!game.state.starter)game.startAdventure();transitionData().catch(()=>{});$('#loading').hidden=true;update();canvas.focus({preventScroll:true});if(game.battle)battleUI.show();if(game.state.dexIntro&&!game.state.battle?.animationPending)dexUI.openIntro(game.state.dexIntro);healing.prepare().catch(()=>{});if(game.state.healing)resumeHealing();if(game.state.trainerEncounter)resumeTrainerEncounter();const event=storyEntry(game);if(event){persist();showStoryEvent(event);}persist();requestAnimationFrame(draw);}catch(e){$('#loading').textContent=`로딩하지 못했어요. 새로고침해 주세요. (${e.message})`;console.error(e)}}
 init();

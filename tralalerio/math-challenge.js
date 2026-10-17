@@ -1,7 +1,7 @@
-import {rotationQuestion} from './rotation-puzzles.js?v=20261017-arithmetic4';
-import {canStoreCapture} from './pc.js?v=20261017-arithmetic4';
-import {advancedAnalogy} from './analogy-puzzles.js?v=20261017-arithmetic4';
-import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-arithmetic4';
+import {rotationQuestion} from './rotation-puzzles.js?v=20261017-rotation5';
+import {canStoreCapture} from './pc.js?v=20261017-rotation5';
+import {advancedAnalogy} from './analogy-puzzles.js?v=20261017-rotation5';
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-rotation5';
 export const MATH_TYPES=['pattern','mirror','logic','sequence','analogy','rotate','bond','balance','latin',...LEARNING_TYPES.filter(type=>type!=='shape_complete')];
 export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
 export const DIFFICULTY_VERSION=2;
