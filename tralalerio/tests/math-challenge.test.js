@@ -5,8 +5,8 @@ import {MATH_TYPES,mathGrade,questionFor,emptyInput,requestMath,submitMath,skipM
 const require=createRequire(import.meta.url),model=require('../../creative/battle-model.js'),facto=require('../../creative/facto-puzzles.js');
 const maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.readFileSync('assets/battle-data.json'));
 function game(){const g=new Game(maps,data,{random:()=>.5});g.chooseStarter('리아코');g.startEncounter('mc_zombie',3);g.battle.s.animationPending=false;return g}
-test('all 28 generated problem types share a seeded random pool and valid grade 1 and 2 solutions',()=>{
- assert.equal(MATH_TYPES.length,28);
+test('all 27 generated problem types share a seeded random pool and valid grade 1 and 2 solutions',()=>{
+ assert.equal(MATH_TYPES.length,27);
  for(const type of MATH_TYPES)for(const grade of [1,2])for(let seed=0;seed<100;seed++){const c={type,seed,grade},q=questionFor(c,model,facto),answer=q.solution||q.answer;assert.equal(validateQuestion(q,answer,model,facto).ok,true,type+' '+seed);assert.deepEqual(questionFor(c,model,facto),q);assert.ok(Array.isArray(emptyInput(q)))}
  for(const map of Object.keys(maps))assert.equal(mathGrade(map,80),1,map);
 });

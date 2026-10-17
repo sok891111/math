@@ -1,7 +1,7 @@
-import {recordSeen,recordCaught} from './monster-dex.js?v=20261017-dex1';
-import {hpLossMessage} from './hp-messages.js?v=20261017-learning4';
-import {MATH_REWARDS,mathRewardIndex,captureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261017-learning4';
-import {validMathChallenge} from './math-challenge.js?v=20261017-learning4';
+import {recordSeen,recordCaught} from './monster-dex.js?v=20261017-pool2';
+import {hpLossMessage} from './hp-messages.js?v=20261017-pool2';
+import {MATH_REWARDS,mathRewardIndex,captureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261017-pool2';
+import {validMathChallenge} from './math-challenge.js?v=20261017-pool2';
 import {ESCAPE_TEXT} from './capture-rules.js?v=20261016-capture3';
 // Gen II rules with Minecraft signature attacks. Hardware timing and unrelated
 // systems (held items, weather, evolution and trainer/link battles) are excluded.

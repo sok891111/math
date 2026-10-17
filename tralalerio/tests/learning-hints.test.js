@@ -21,7 +21,7 @@ test('all active new families have three question-specific hints; story chains e
  }
 });
 test('analogy always changes color and shape, includes tempting one-attribute distractors, and place-value is retired',()=>{
- assert.equal(MATH_TYPES.length,28);assert.ok(!MATH_TYPES.includes('place_value'));assert.ok(!MATH_TYPES.includes('classify'));
+ assert.equal(MATH_TYPES.length,27);assert.ok(!MATH_TYPES.includes('place_value'));assert.ok(!MATH_TYPES.includes('classify'));
  for(let seed=0;seed<200;seed++){
   const q=questionFor({type:'analogy',seed,grade:2},model,facto);assert.equal(q.choices.length,5);assert.equal(new Set(q.choices.map(c=>c.value)).size,5);
   for(const [a,b]of [...q.pairs,[q.source,q.answer[0]]]){assert.notEqual(Math.floor(a/3),Math.floor(b/3));assert.notEqual(a%3,b%3);}
@@ -42,5 +42,15 @@ test('all legacy hint paths guide without reading an answer, solution, or solved
  for(const type of MATH_TYPES.filter(t=>!LEARNING_TYPES.includes(t)&&t!=='analogy'))for(const grade of [1,2]){
   const q=questionFor({type,grade,seed:42},model,facto);for(const key of ['answer','solution'])Object.defineProperty(q,key,{get(){throw Error('hint accessed '+type+' '+key)}});
   const hints=puzzleHintSteps(q);assert.equal(hints.length,3);assert.ok(hints.every(h=>h.title&&h.text));assert.ok(!hints.some(h=>/가능한 길 한 가지|순서로 놓으면|조각을 빈칸에 놓아요|빠져 있어요/.test(h.text)));
+ }
+});
+
+test('identical shape matching is retired; saved attack and capture puzzles migrate without a cost',()=>{
+ assert.ok(!MATH_TYPES.includes('shape_match'));
+ const maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.readFileSync('assets/battle-data.json'));
+ for(const capture of [false,true]){
+  const g=new Game(maps,data,{random:()=>.5});g.startAdventure();g.startEncounter('pidgey',3);g.battle.s.animationPending=false;requestMath(g,0,model,facto,()=>0);
+  const c=g.battle.s.mathChallenge;Object.assign(c,{type:'shape_match',grade:2,input:[0],hints:3,attempts:2});if(capture){c.kind='capture';c.targetSpecies='pidgey';delete c.moveIndex;delete c.moveId;}
+  const h=new Game(maps,data);assert.ok(h.restore(g.serialize()));const before=[h.state.balls,h.battle.s.turn,h.battle.player.moves[0].pp];assert.equal(upgradeChallenge(h,model,facto),true);assert.equal(h.battle.s.mathChallenge.type,'shape_complete');assert.equal(h.battle.s.mathChallenge.hints,0);assert.equal(h.battle.s.mathChallenge.attempts,0);assert.deepEqual([h.state.balls,h.battle.s.turn,h.battle.player.moves[0].pp],before);assert.equal(upgradeChallenge(h,model,facto),false);assert.ok(g.restore(h.serialize()));
  }
 });

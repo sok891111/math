@@ -1,7 +1,7 @@
-import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261017-dex1';
-import {validPhoneCall} from './phone-call.js?v=20261017-dex1';
+import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261017-pool2';
+import {validPhoneCall} from './phone-call.js?v=20261017-pool2';
 import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261017-rival1';
-import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261017-dex1';
+import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261017-pool2';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {
