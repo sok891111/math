@@ -1,4 +1,4 @@
-import {renderReference,referenceDiagram} from './facto-reference-puzzles.js?v=20261018-grid14';
+import {renderReference,referenceDiagram} from './facto-reference-puzzles.js?v=20261018-violet15';
 export function renderLearning({q,c,board,tools,button,render,place}){
  const node=(tag,text,cls)=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;return el;};
  const grid=shape=>{const el=node('div','','shape-preview');shape.forEach(v=>el.append(node('span','',v?'on':'')));return el;};

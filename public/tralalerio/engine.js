@@ -1,15 +1,19 @@
-import {awardWildVictory} from './wild-reward.js?v=20261018-grid14';
-import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-grid14';
-import {initializePC,validPC} from './pc.js?v=20261018-grid14';
-import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-grid14';
-import {validPhoneCall} from './phone-call.js?v=20261018-grid14';
-import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-grid14';
-import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-grid14';
+import {awardWildVictory} from './wild-reward.js?v=20261018-violet15';
+import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-violet15';
+import {initializePC,validPC} from './pc.js?v=20261018-violet15';
+import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-violet15';
+import {validPhoneCall} from './phone-call.js?v=20261018-violet15';
+import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-violet15';
+import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-violet15';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {
  constructor(maps,battleData=null,options={}){this.maps=maps;this.battleData=battleData;this.rng=options.random||Math.random;this.now=options.now||(()=>new Date());this.state={version:1,map:'PlayersHouse2F',x:3,y:4,facing:'down',flags:{},starter:null,steps:0,money:3000,potions:0};this.lock=null;this.lastEvent=null;if(battleData)this.initializeParty();}
  startAdventure(){if(this.state.starter)return false;this.chooseStarter('피카츄');this.enter(this.maps.ElmsLab,4,6);this.state.facing='down';this.state.flags.easyStart=true;return true;}
+ startVioletTest(){
+  const s=this.state;if(s.flags.violetTestStart||s.battle||s.healing||s.trainerEncounter||s.phoneCall||s.dexIntro)return false;
+  if(!s.starter)this.startAdventure();this.enter(this.maps.VioletCity,31,26);s.facing='down';s.flags.violetTestStart=true;return true;
+ }
  get map(){return this.maps[this.state.map]}
  objects(){const id=this.state.map;return this.map.objects.filter(o=>{
  if(!secondObjectVisible(this,o))return false;
