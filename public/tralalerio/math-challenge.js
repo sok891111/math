@@ -1,11 +1,11 @@
-import {TYPE_LEVELS,levelForType,planGymAttack} from './math-levels.js?v=20261017-azalea8';
-import {rotationQuestion} from './rotation-puzzles.js?v=20261017-azalea8';
-import {canStoreCapture} from './pc.js?v=20261017-azalea8';
-import {advancedAnalogy} from './analogy-puzzles.js?v=20261017-azalea8';
-import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261017-azalea8';
-export const MATH_TYPES=['pattern','mirror','logic','sequence','analogy','rotate','bond','balance','latin',...LEARNING_TYPES.filter(type=>type!=='shape_complete')];
+import {TYPE_LEVELS,levelForType,planGymAttack} from './math-levels.js?v=20261018-types9';
+import {rotationQuestion} from './rotation-puzzles.js?v=20261018-types9';
+import {canStoreCapture} from './pc.js?v=20261018-types9';
+import {advancedAnalogy} from './analogy-puzzles.js?v=20261018-types9';
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261018-types9';
+export const MATH_TYPES=['pattern','mirror','logic','sequence','analogy','rotate','bond','balance','latin',...LEARNING_TYPES.filter(type=>type!=='shape_complete')].filter(type=>!['bond','add_single','add_tens'].includes(type));
 export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
-export const DIFFICULTY_VERSION=4;
+export const DIFFICULTY_VERSION=5;
 export function mathGrade(map,level=1,species=null,data=null){return data?.challengePolicy?.rareSpecies.includes(species)?5:3;}
 export function challengeGrade(game,seed){const b=game.battle;if(game.battleData.trainers?.[b.s.trainer]?.badge)return 4;const minimum=mathGrade(game.state.map,b.enemy.level,b.enemy.species,game.battleData);return minimum===5?5:seed>=3435973836?4:3;}
 function selection(game,rng){const typeRoll=rng(),seed=Math.floor(rng()*4294967296)>>>0,preferred=challengeGrade(game,seed),strict=preferred===5||!!game.battleData.trainers?.[game.battle.s.trainer]?.badge;let pool=MATH_TYPES.filter(t=>t!==game.state.lastMathType&&(!strict||TYPE_LEVELS[t].includes(preferred)));const type=pool[Math.floor(typeRoll*pool.length)];return {type,seed,grade:levelForType(type,preferred)};}
@@ -45,7 +45,7 @@ export function submitMath(game,model,facto){
 export function validMathChallenge(c,state,data){
  if(c===undefined)return true;const b=state.battle,p=state.party[b?.playerIndex];
  const selection=c?.kind==='capture'?!b?.trainer&&state.balls>0&&c.targetSpecies===b?.enemy.species&&c.moveIndex===undefined&&c.moveId===undefined:c?.kind===undefined&&Number.isInteger(c.moveIndex)&&p?.moves[c.moveIndex]?.id===c.moveId;
- return !!(c&&c.version===1&&(MATH_TYPES.includes(c.type)||c.type==='place_value'||c.type==='classify'||c.type==='shape_match'||['path','tower','shape_complete'].includes(c.type))&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=4294967295&&Number.isInteger(c.grade)&&c.grade>=(c.difficultyVersion===DIFFICULTY_VERSION?3:1)&&c.grade<=5&&[undefined,2,3,DIFFICULTY_VERSION].includes(c.difficultyVersion)&&(c.plannedRolls===undefined||Array.isArray(c.plannedRolls)&&c.plannedRolls.length<=256&&c.plannedRolls.every(n=>typeof n==='number'&&n>=0&&n<1))&&(c.gymFinisher===undefined||typeof c.gymFinisher==='boolean')&&selection&&c.playerSpecies===p.species&&!b.result&&!b.waitingSwitch&&!b.animationPending&&Array.isArray(c.input)&&c.input.length<=36&&c.input.every(v=>v===null||Number.isInteger(v)&&v>=0&&v<=100)&&Number.isInteger(c.attempts)&&c.attempts>=0&&Number.isInteger(c.hints)&&c.hints>=0&&c.hints<=3);
+ return !!(c&&c.version===1&&(MATH_TYPES.includes(c.type)||c.type==='place_value'||c.type==='classify'||c.type==='shape_match'||['path','tower','shape_complete','bond','add_single','add_tens'].includes(c.type))&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=4294967295&&Number.isInteger(c.grade)&&c.grade>=(c.difficultyVersion===DIFFICULTY_VERSION?3:1)&&c.grade<=5&&[undefined,2,3,4,DIFFICULTY_VERSION].includes(c.difficultyVersion)&&(c.plannedRolls===undefined||Array.isArray(c.plannedRolls)&&c.plannedRolls.length<=256&&c.plannedRolls.every(n=>typeof n==='number'&&n>=0&&n<1))&&(c.gymFinisher===undefined||typeof c.gymFinisher==='boolean')&&selection&&c.playerSpecies===p.species&&!b.result&&!b.waitingSwitch&&!b.animationPending&&Array.isArray(c.input)&&c.input.length<=36&&c.input.every(v=>v===null||Number.isInteger(v)&&v>=0&&v<=100)&&Number.isInteger(c.attempts)&&c.attempts>=0&&Number.isInteger(c.hints)&&c.hints>=0&&c.hints<=3);
 }
 
 export function skipMath(game){const b=game.battle,c=b?.s.mathChallenge;if(!c)return {ok:false,resolved:false};delete b.s.mathChallenge;game.state.lastMathType=c.type;return {ok:false,resolved:c.kind==='capture'?b.action('ball',0,{captureAnswer:false}):b.action('math-pass',0,{gymDodge:c.gymFinisher===true})};}
@@ -53,7 +53,7 @@ export function skipMath(game){const b=game.battle,c=b?.s.mathChallenge;if(!c)re
 // Keep valid old saves, but replace retired/easy pending questions before displaying them.
 export function upgradeChallenge(game,model,facto){
  const c=game.battle?.s.mathChallenge;if(!c)return false;
- const removed=['path','tower','shape_complete'].includes(c.type),oldRotation=c.type==='rotate'&&c.rotationVersion!==2;
+ const removed=['path','tower','shape_complete','bond','add_single','add_tens'].includes(c.type),oldRotation=c.type==='rotate'&&c.rotationVersion!==2;
  const retiredShape=c.type==='shape_match',retired=c.type==='place_value',retiredClassify=c.type==='classify',analogy=retiredClassify||c.type==='analogy'&&(c.analogyVersion!==2||c.grade<2);
  const boss=!!game.battleData.trainers?.[game.battle.s.trainer]?.badge,rare=game.battleData.challengePolicy?.rareSpecies.includes(game.battle.enemy.species),minimum=boss?4:rare?5:levelForType(c.type,3),harder=c.difficultyVersion===DIFFICULTY_VERSION?false:true,version=c.difficultyVersion!==DIFFICULTY_VERSION;
  if(!removed&&!oldRotation&&!retired&&!analogy&&!retiredShape&&!harder&&!version)return false;
@@ -63,9 +63,11 @@ export function upgradeChallenge(game,model,facto){
  if(retired)c.type='add_carry_single';
  if(retiredShape||c.type==='shape_complete')c.type='array_rule';
  if(c.type==='path')c.type='logic';
- if(c.type==='tower')c.type='balance';
+ if(c.type==='tower'||c.type==='bond')c.type='balance';
+ if(c.type==='add_single')c.type='add_carry_single';
+ if(c.type==='add_tens')c.type='add_two';
  if(analogy){c.type='analogy';c.grade=Math.max(2,c.grade);c.analogyVersion=2;}
- if((boss||rare)&&!TYPE_LEVELS[c.type]?.includes(minimum))c.type='pattern';c.grade=levelForType(c.type,minimum);
+ if((boss||rare)&&!TYPE_LEVELS[c.type]?.includes(minimum))c.type='logic';c.grade=levelForType(c.type,minimum);
  if(c.type==='rotate')c.rotationVersion=2;c.input=emptyInput(questionFor(c,model,facto));c.hints=0;c.attempts=0;return true;
 }
 

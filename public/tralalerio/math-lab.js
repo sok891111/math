@@ -1,8 +1,8 @@
-import {TYPE_LEVELS,LEVEL_LABELS} from './math-levels.js?v=20261017-azalea8';
-import {createPokemon} from './battle.js?v=20261017-azalea8';
-import {Game} from './engine.js?v=20261017-azalea8';
-import {MATH_TYPES,MATH_LABELS,questionFor,emptyInput,validateQuestion} from './math-challenge.js?v=20261017-azalea8';
-import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261017-azalea8';
+import {TYPE_LEVELS,LEVEL_LABELS} from './math-levels.js?v=20261018-types9';
+import {createPokemon} from './battle.js?v=20261018-types9';
+import {Game} from './engine.js?v=20261018-types9';
+import {MATH_TYPES,MATH_LABELS,questionFor,emptyInput,validateQuestion} from './math-challenge.js?v=20261018-types9';
+import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261018-types9';
 const $=id=>document.getElementById(id),model=window.CreativeBattle,facto=window.FactoPuzzles;
 for(const type of MATH_TYPES){const option=document.createElement('option');option.value=type;option.textContent=MATH_LABELS[type];$('lab-type').append(option);}
 const params=new URLSearchParams(location.search);if(MATH_TYPES.includes(params.get('type')))$('lab-type').value=params.get('type');if(['3','4','5'].includes(params.get('grade')))$('lab-grade').value=params.get('grade');if(/^\d+$/.test(params.get('seed')||'')&&Number(params.get('seed'))<=4294967295)$('lab-seed').value=params.get('seed');if(params.get('mode')==='capture')$('lab-mode').value='capture';
@@ -14,7 +14,7 @@ const ui=createMathPuzzleUI({getGame:()=>game,onSave:()=>{if(!game)return;const 
 }});
 function open(){if(!maps)return;if(!$('lab-form').reportValidity())return;ui.close();const type=$('lab-type').value,seed=Number($('lab-seed').value),grade=Number($('lab-grade').value),mode=$('lab-mode').value;$('lab-grade').value=grade;
  game=new Game({...maps,MathLab:maps.Route29},data,{random:()=>.5});game.startAdventure();game.state.map=grade===3?'MathLab':'Route29';game.state.party[0]=createPokemon(data,'pikachu',50,()=>.5);game.startEncounter('mc_zombie',grade===3?15:3);game.battle.s.animationPending=false;
- const c={version:1,difficultyVersion:4,type,seed,grade,playerSpecies:game.battle.player.species,input:[],attempts:0,hints:0};if(type==='analogy')c.analogyVersion=2;if(type==='rotate')c.rotationVersion=2;if(mode==='capture'){c.kind='capture';c.targetSpecies=game.battle.enemy.species;}else{c.moveIndex=0;c.moveId=game.battle.player.moves[0].id;}
+ const c={version:1,difficultyVersion:5,type,seed,grade,playerSpecies:game.battle.player.species,input:[],attempts:0,hints:0};if(type==='analogy')c.analogyVersion=2;if(type==='rotate')c.rotationVersion=2;if(mode==='capture'){c.kind='capture';c.targetSpecies=game.battle.enemy.species;}else{c.moveIndex=0;c.moveId=game.battle.player.moves[0].id;}
  q=questionFor(c,model,facto);c.input=emptyInput(q);game.battle.s.mathChallenge=c;lastChallenge=structuredClone(c);ui.open();
  const dialog=document.querySelector('.math-dialog');dialog.querySelector('.lab-dev-tools')?.remove();const dev=document.createElement('section');dev.className='lab-dev-tools';const fill=document.createElement('button');fill.type='button';fill.textContent='정답 채우기 (개발자)';fill.onclick=()=>{if(!game.battle.s.mathChallenge)return;c.input=structuredClone(q.solution||q.answer);ui.open();};const reveal=document.createElement('button');reveal.type='button';reveal.textContent='정답·풀이 데이터 보기';const answer=document.createElement('pre');answer.className='lab-answer';answer.hidden=true;reveal.onclick=()=>{answer.hidden=!answer.hidden;answer.textContent=JSON.stringify({answer:q.answer,solution:q.solution,validation:validateQuestion(q,q.solution||q.answer,model,facto)},null,2);};dev.append(fill,reveal,answer);dialog.querySelector('.math-card').append(dev);
  const url=new URL(location.href);url.search=new URLSearchParams({type,grade:String(grade),seed:String(seed),mode}).toString();history.replaceState(null,'',url);$('lab-link').href=url.href;$('lab-info').textContent=`${MATH_LABELS[type]} · ${grade}단계 · 시드 ${seed} · 활성 ${MATH_TYPES.length}유형`;$('lab-result').textContent='문제 풀이 중';

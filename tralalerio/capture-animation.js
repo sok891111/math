@@ -1,4 +1,4 @@
-import {animationAssets,frameAt} from './battle-animation.js?v=20261017-azalea8';
+import {animationAssets,frameAt} from './battle-animation.js?v=20261018-types9';
 import {CAPTURE_FRAMES as F} from './capture-source.js?v=20261016-capture3';
 const fps=60,clamp=x=>Math.max(0,Math.min(1,x)),mix=(a,b,q)=>a+(b-a)*q;
 export function captureTimeline(event){
