@@ -1,7 +1,7 @@
-import {learningHints} from './learning-hints.js?v=20261017-pool2';
-import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './minecraft-stories.js?v=20261017-pool2';
+import {learningHints} from './learning-hints.js?v=20261017-arithmetic4';
+import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './minecraft-stories.js?v=20261017-arithmetic4';
 // Original generated questions based on public learning objectives, not workbook pages.
-export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:'모양 완성',array_rule:'배열 규칙',table_count:'표 읽기',place_value:'십 묶음과 낱개',add_single:'두 자리와 한 자리 덧셈',add_tens:'몇십 더하기',add_two:'두 자리 덧셈',add_carry_single:'받아올림 한 자리 덧셈',add_carry_two:'받아올림 두 자리 덧셈',add_story:'이야기 덧셈',calc_puzzle:'계산 탐험',...STORY_LABELS};
+export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:'모양 완성',array_rule:'배열 규칙',table_count:'표 읽기',place_value:'십 묶음과 낱개',add_single:'두 자리와 한 자리 덧셈',add_tens:'몇십 더하기',add_two:'두 자리 덧셈',add_carry_single:'받아올림 한 자리 덧셈',add_carry_two:'받아올림 두 자리 덧셈',add_story:'이야기 덧셈',subtract_single:'한 자리 뺄셈',subtract_story:'한 자리 이야기 뺄셈',times_table:'구구단 · 2~6단',calc_puzzle:'계산 탐험',...STORY_LABELS};
 export const LEARNING_TYPES=Object.keys(LEARNING_LABELS).filter(type=>!['place_value','shape_match'].includes(type));
 const shuffle=(a,r)=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 export function learningQuestion(type,grade,r){
@@ -9,7 +9,18 @@ export function learningQuestion(type,grade,r){
  const pick=n=>Math.floor(r()*n),q={type,grade,learning:true,label:LEARNING_LABELS[type],title:'조각을 모아 공격의 힘을 완성해!',instruction:'답 조각을 누르거나 빈칸으로 끌어 놓아 줘.',answer:[],hints:[]};
  const limit=grade===1?4:8;
  let a,b,result;
- if(type==='shape_match'||type==='shape_complete'){
+ if(type==='subtract_single'||type==='subtract_story'){
+  a=1+pick(9);b=1+pick(a);result=a-b;q.operands=[a,b];q.operator='-';q.answer=[result];
+  q.title=type==='subtract_story'?'이야기를 읽고 남은 수를 찾아 줘!':'덜어 내면 몇 개가 남을까?';
+  q.instruction='처음 수에서 없어진 수만큼 빼 보세요. 남은 수를 골라 빈칸에 넣어 주세요.';
+  if(type==='subtract_single'){q.prompt=`${a}개에서 ${b}개를 덜어 내면 몇 개가 남을까요?`;q.equation=`${a} - ${b} = ?`;}
+  else{const actor=['스티브','알렉스','엔더맨','피글린','주민'][pick(5)],item=['사과','다이아몬드','당근','에메랄드','쿠키'][pick(5)],stories=[`${actor}의 상자에 ${item} ${a}개가 있었어요. 친구에게 ${b}개를 주었어요. 상자에는 몇 개가 남았을까요?`,`${actor}의 가방에 ${item} ${a}개가 있었어요. 집에 ${b}개를 놓고 왔어요. 가방에는 몇 개가 남았을까요?`,`${actor}의 창고에 ${item} ${a}개가 있었어요. 모험에 쓸 ${b}개를 꺼냈어요. 창고에는 몇 개가 남았을까요?`];q.prompt=stories[pick(stories.length)];q.story=true;}
+  q.choices=shuffle([result,...shuffle(Array.from({length:10},(_,i)=>i).filter(n=>n!==result),r).slice(0,3)].map(value=>({value,label:String(value)})),r);
+ }else if(type==='times_table'){
+  a=2+pick(5);b=1+pick(9);result=a*b;q.operands=[a,b];q.operator='×';q.answer=[result];q.title='같은 수씩 모으면 모두 몇 개일까?';
+  q.instruction=`${a}단 문제예요. 한 묶음에 ${a}개씩 있는 것이 ${b}묶음이면 모두 몇 개인지 생각해 보세요. 답을 골라 빈칸에 넣어 주세요.`;
+  q.prompt=`상자 하나에 에메랄드가 ${a}개씩 들어 있어요. 상자가 ${b}개라면 에메랄드는 모두 몇 개일까요?`;q.equation=`${a} × ${b} = ?`;
+ }else if(type==='shape_match'||type==='shape_complete'){
   q.source=Array.from({length:9},()=>pick(2));q.source[4]=1;q.source[0]=0;
   if(type==='shape_match'){
    const patterns=[q.source];for(let i=0;i<3;i++){const p=q.source.slice();p[i===2?8:i]=1-p[i===2?8:i];patterns.push(p);}

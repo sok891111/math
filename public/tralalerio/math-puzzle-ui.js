@@ -1,6 +1,6 @@
-import {puzzleHintSteps} from './learning-hints.js?v=20261017-puzzles3';
-import {renderLearning} from './learning-ui.js?v=20261017-puzzles3';
-import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-puzzles3';
+import {puzzleHintSteps} from './learning-hints.js?v=20261017-arithmetic4';
+import {renderLearning} from './learning-ui.js?v=20261017-arithmetic4';
+import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-arithmetic4';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');
