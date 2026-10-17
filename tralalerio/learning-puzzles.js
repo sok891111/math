@@ -1,7 +1,7 @@
-import {REFERENCE_LABELS,referenceQuestion} from './facto-reference-puzzles.js?v=20261018-facto10';
-import {ANALYSIS_LABELS,analysisQuestion} from './story-analysis-puzzles.js?v=20261018-facto10';
-import {learningHints} from './learning-hints.js?v=20261018-facto10';
-import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './minecraft-stories.js?v=20261018-facto10';
+import {REFERENCE_LABELS,referenceQuestion} from './facto-reference-puzzles.js?v=20261018-rules12';
+import {ANALYSIS_LABELS,analysisQuestion} from './story-analysis-puzzles.js?v=20261018-rules12';
+import {learningHints} from './learning-hints.js?v=20261018-rules12';
+import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './minecraft-stories.js?v=20261018-rules12';
 // Original generated questions based on public learning objectives, not workbook pages.
 export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:'모양 완성',array_rule:'배열 규칙',table_count:'표 읽기',place_value:'십 묶음과 낱개',add_single:'두 자리와 한 자리 덧셈',add_tens:'몇십 더하기',add_two:'두 자리 덧셈',add_carry_single:'받아올림 한 자리 덧셈',add_carry_two:'받아올림 두 자리 덧셈',add_story:'이야기 덧셈',subtract_single:'한 자리 뺄셈',subtract_story:'한 자리 이야기 뺄셈',times_table:'구구단 · 2~6단',calc_puzzle:'계산 탐험',...STORY_LABELS,...ANALYSIS_LABELS,...REFERENCE_LABELS};
 export const LEARNING_TYPES=Object.keys(LEARNING_LABELS).filter(type=>!['place_value','shape_match','shape_complete'].includes(type));
@@ -35,7 +35,7 @@ export function learningQuestion(type,grade,r){
   }
 
  }else if(type==='array_rule'){
-  const n=grade===1?2:3,offset=pick(3);q.matrix=Array.from({length:n},(_,row)=>Array.from({length:n},(_,col)=>(row+col+offset)%3));q.answer=[q.matrix[n-1][n-1]];q.matrix[n-1][n-1]=null;q.symbols=['◆','▲','●'];q.prompt='오른쪽으로 한 칸, 아래로 한 칸 갈 때 모양이 어떻게 바뀔까?';q.choices=shuffle([0,1,2].map(value=>({value,label:q.symbols[value]})),r);
+  const n=4,offset=pick(4),step=pick(2)?1:3;q.matrix=Array.from({length:n},(_,row)=>Array.from({length:n},(_,col)=>(row*step+col+offset)%4));q.answer=[q.matrix[3][3]];q.matrix[3][3]=null;q.symbols=['◆','▲','●','■'];q.prompt='4행 4열 배열이에요. 가로로 이어지는 네 모양의 순서와, 다음 줄에서 시작 위치가 바뀌는 규칙을 함께 찾아 마지막 빈칸을 채워 주세요.';q.choices=shuffle([0,1,2,3].map(value=>({value,label:q.symbols[value]})),r);
 
  }else if(type==='table_count'){
   q.table=Array.from({length:2},()=>[1+pick(limit),1+pick(limit)]);q.tableAxis=pick(2);q.tableIndex=pick(2);q.answer=[q.tableAxis===0?q.table[q.tableIndex][0]+q.table[q.tableIndex][1]:q.table[0][q.tableIndex]+q.table[1][q.tableIndex]];

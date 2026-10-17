@@ -1,9 +1,10 @@
-import {gymFinisherApplies} from './math-levels.js?v=20261018-facto10';
-import {canStoreCapture,storeCapture} from './pc.js?v=20261018-facto10';
-import {recordSeen,recordCaught} from './monster-dex.js?v=20261018-facto10';
-import {hpLossMessage} from './hp-messages.js?v=20261018-facto10';
-import {MATH_REWARDS,mathRewardIndex,captureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261018-facto10';
-import {validMathChallenge} from './math-challenge.js?v=20261018-facto10';
+import {awardWildVictory,wildVictoryMoney} from './wild-reward.js?v=20261018-rules12';
+import {gymFinisherApplies} from './math-levels.js?v=20261018-rules12';
+import {canStoreCapture,storeCapture} from './pc.js?v=20261018-rules12';
+import {recordSeen,recordCaught} from './monster-dex.js?v=20261018-rules12';
+import {hpLossMessage} from './hp-messages.js?v=20261018-rules12';
+import {MATH_REWARDS,mathRewardIndex,captureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261018-rules12';
+import {validMathChallenge} from './math-challenge.js?v=20261018-rules12';
 import {ESCAPE_TEXT} from './capture-rules.js?v=20261016-capture3';
 // Gen II rules with Minecraft signature attacks. Hardware timing and unrelated
 // systems (held items, weather, evolution and trainer/link battles) are excluded.
@@ -37,7 +38,7 @@ export class Battle {
  get enemy(){return this.s.enemy}
  name(p){return this.data.species[p.species].name}
  speed(p,st){let n=Math.max(1,Math.floor(p.stats.speed*STAGE[(st.speed||0)+6]));return p.status==='paralysis'?Math.max(1,Math.floor(n/4)):n}
- end(result,text){if(this.s.result)return;this.s.result=result;this.s.logs.push(text);if(result==='won'){this.reward();if(this.s.trainer){const t=this.data.trainers[this.s.trainer];this.s.logs.push(`${t.name}와의 대결에서 이겼다!`);this.s.logs.push(`상금 ${t.reward}원을 받았다!`);if(t.badge)this.s.logs.push(`${t.badgeName||'윙배지'}와 기술머신 ${t.tmName||'진흙뿌리기'}를 받았다!`);if(t.gift)this.s.logs.push('비전머신 플래시를 받았다!');}}}
+ end(result,text){if(this.s.result)return;this.s.result=result;this.s.logs.push(text);if(result==='won'){this.reward();awardWildVictory(this.world);if(this.s.trainer){const t=this.data.trainers[this.s.trainer];this.s.logs.push(`${t.name}와의 대결에서 이겼다!`);this.s.logs.push(`상금 ${t.reward}원을 받았다!`);if(t.badge)this.s.logs.push(`${t.badgeName||'윙배지'}와 기술머신 ${t.tmName||'진흙뿌리기'}를 받았다!`);if(t.gift)this.s.logs.push('비전머신 플래시를 받았다!');}}}
  changeStage(which,key,amount){const st=which==='player'?this.s.playerStages:this.s.enemyStages;const p=which==='player'?this.player:this.enemy;const old=st[key];st[key]=clamp(old+amount,-6,6);const n={attack:'공격',defense:'방어',speed:'스피드',specialAttack:'특수공격',specialDefense:'특수방어',accuracy:'명중률',evasion:'회피율'}[key];this.s.logs.push(old===st[key]?`${this.name(p)}의 ${n}은 더 이상 변하지 않는다!`:`${this.name(p)}의 ${n}${amount>0?'이 올랐다!':'이 떨어졌다!'}`)}
  status(target,which,status){const f=which==='player'?this.s.playerFields:this.s.enemyFields;const types=this.data.species[target.species].types;if(target.hp<=0||target.status||f.safeguard||status==='poison'&&(types.includes('POISON')||types.includes('STEEL'))||status==='burn'&&types.includes('FIRE'))return false;target.status=status;target.sleep=status==='sleep'?2+Math.floor(this.rng()*6):0;this.s.logs.push(`${this.name(target)}${{burn:'는 화상을 입었다!',poison:'는 독에 걸렸다!',paralysis:'는 마비되었다!',sleep:'는 잠들었다!',freeze:'는 얼어붙었다!'}[status]}`);return true}
  canMove(p,f,st){if(p.hp<=0)return false;if(f.flinch){f.flinch=false;this.s.logs.push(`${this.name(p)}는 풀이 죽어 움직일 수 없다!`);return false}if(p.status==='sleep'){p.sleep--;if(p.sleep<=0){p.status=null;this.s.logs.push(`${this.name(p)}는 잠에서 깨어났다!`)}else{this.s.logs.push(`${this.name(p)}는 쿨쿨 잠들어 있다.`);return false}}if(p.status==='freeze'){if(byte(this.rng)<25){p.status=null;this.s.logs.push(`${this.name(p)}의 얼음이 녹았다!`)}else{this.s.logs.push(`${this.name(p)}는 얼어붙어 움직일 수 없다!`);return false}}if(p.status==='paralysis'&&byte(this.rng)<64){this.s.logs.push(`${this.name(p)}는 몸이 저려 움직일 수 없다!`);return false}if(f.confused){f.confused--;if(byte(this.rng)<128){const hit=damage(this.data,p,p,{power:40,type:'TYPELESS'},{stagesA:st,stagesD:st,random:this.rng});p.hp=Math.max(0,p.hp-hit);this.s.logs.push(`${this.name(p)}는 혼란으로 자신을 공격했다!`);return false}}return true}
@@ -119,5 +120,6 @@ export function validateBattle(data,state){const s=state.battle;if(!s)return tru
  if(fi.charge!==null&&!data.moves[fi.charge]||fi.lastMove!==null&&!data.moves[fi.lastMove])return false;}
  if(s.animationEvents!==undefined){if(!Array.isArray(s.animationEvents)||s.animationEvents.length>8)return false;const validVisual=v=>v&&validPokemon(data,v.player)&&validPokemon(data,v.enemy);if(!validVisual(s.visualBefore)||!validVisual(s.visualAfter)||typeof s.animationPending!=='boolean')return false;for(const e of s.animationEvents)if(!['player','enemy'].includes(e.actor)||!validAnimationKind(data,e)||!Number.isInteger(e.logIndex)||e.logIndex<0||e.logIndex>=s.logs.length||!Number.isInteger(e.endIndex)||e.endIndex>s.logs.length||!validVisual(e.before)||!validVisual(e.after)||typeof e.failed!=='boolean')return false;}
  if(s.trainer&&(!data.trainers?.[s.trainer]||!Array.isArray(s.enemyParty)||s.enemyParty.length!==data.trainers[s.trainer].party.length||!Number.isInteger(s.enemyIndex)||s.enemyIndex<0||s.enemyIndex>=s.enemyParty.length||s.enemyParty.some(p=>!validPokemon(data,p))))return false;
+ if(s.wildPrize!==undefined&&(s.trainer||s.result!=='won'||s.wildPrize!==wildVictoryMoney(s.enemy.level)))return false;
  if(!validMathChallenge(s.mathChallenge,state,data))return false;
  return s.learn.every(l=>Number.isInteger(l.index)&&state.party[l.index]&&data.moves[l.move]);}

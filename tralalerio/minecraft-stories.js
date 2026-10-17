@@ -1,4 +1,4 @@
-import {learningHints} from './learning-hints.js?v=20261018-facto10';
+import {learningHints} from './learning-hints.js?v=20261018-rules12';
 // New story problems using additive structures; no copied workbook wording.
 export const STORY_LABELS={story_compare:'친구보다 더 모으기',story_combine:'친구들과 함께 모으기',story_receive:'선물 받고 더 모으기',story_three:'세 곳에서 모으기',story_chain:'친구들의 단서 잇기',story_distance:'모험 길 이어 걷기'};
 export const STORY_TYPES=Object.keys(STORY_LABELS);
