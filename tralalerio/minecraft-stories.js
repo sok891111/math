@@ -1,4 +1,4 @@
-import {learningHints} from './learning-hints.js?v=20261017-learning4';
+import {learningHints} from './learning-hints.js?v=20261017-gym6';
 // New story problems using additive structures; no copied workbook wording.
 export const STORY_LABELS={story_compare:'친구보다 더 모으기',story_combine:'친구들과 함께 모으기',story_receive:'선물 받고 더 모으기',story_three:'세 곳에서 모으기',story_chain:'친구들의 단서 잇기',story_distance:'모험 길 이어 걷기'};
 export const STORY_TYPES=Object.keys(STORY_LABELS);
@@ -15,7 +15,7 @@ export function minecraftCombineText(a,b){
 const shuffle=(a,r)=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 export function minecraftStory(type,grade,r){
  const pick=n=>Math.floor(r()*n),[first,second,third]=actors(pick(NAMES.length)),item=ITEMS[pick(ITEMS.length)],place=pick(PLACES.length);
- const a=10+pick(grade===1?40:60),b=1+pick(grade===1?9:20),c=1+pick(Math.min(9,99-a-b));
+ const a=grade>=5?40+pick(20):grade>=4?20+pick(40):10+pick(40),b=grade>=4?10+pick(20):1+pick(9),c=1+pick(Math.min(9,99-a-b));
  let terms=[a,b],prompt,focus,reason;
  const q={type,grade,learning:true,story:true,label:STORY_LABELS[type],title:'이야기를 읽고 공격의 힘을 모아 줘!',instruction:'누구의 수를 묻는지 읽고, 답 조각을 누르거나 빈칸으로 끌어 놓아 줘.',models:[],equation:null,operator:'+'};
  if(type==='story_compare'){

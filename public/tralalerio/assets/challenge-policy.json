@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "difficultyVersion": 2,
-  "commonGrade": 2,
-  "hardGrade": 3,
+  "difficultyVersion": 3,
+  "commonGrade": 3,
+  "hardGrade": 4,
   "hardChance": 0.2,
   "rareSpecies": ["mc_enderdragon", "mc_wither"],
   "rareMinLevel": 10,
