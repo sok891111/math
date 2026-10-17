@@ -1,5 +1,5 @@
-import {renderLearning} from './learning-ui.js?v=20261017-stories1';
-import {MATH_LABELS,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-stories1';
+import {renderLearning} from './learning-ui.js?v=20261017-hp1';
+import {MATH_LABELS,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261017-hp1';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');

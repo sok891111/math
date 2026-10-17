@@ -1,5 +1,6 @@
-import {MATH_REWARDS,mathRewardIndex} from './math-rewards.js?v=20261017-stories1';
-import {validMathChallenge} from './math-challenge.js?v=20261017-stories1';
+import {hpLossMessage} from './hp-messages.js?v=20261017-hp1';
+import {MATH_REWARDS,mathRewardIndex} from './math-rewards.js?v=20261017-hp1';
+import {validMathChallenge} from './math-challenge.js?v=20261017-hp1';
 import {captureWobbles,ESCAPE_TEXT} from './capture-rules.js?v=20261016-capture3';
 // Gen II rules with Minecraft signature attacks. Hardware timing and unrelated
 // systems (held items, weather, evolution and trainer/link battles) are excluded.
@@ -63,9 +64,9 @@ export class Battle {
  if(m.effect==='FORCE_SWITCH'){this.end('fled',`${this.name(t)}는 전투에서 멀어졌다!`);return}
  if(m.effect==='DREAM_EATER'&&t.status!=='sleep'){this.s.logs.push('하지만 실패했다!');return}
  let criticalStage=(['RAZOR_LEAF','SLASH'].includes(id)?2:0)+(pf.focus?1:0);const crit=(which==='player'&&this.forceCritical)||byte(this.rng)<[17,32,64,85,128][Math.min(4,criticalStage)];const effectiveness=id==='STRUGGLE'?1:typeEffect(this.data,m.type,this.data.species[t.species].types,tf.foresight);
- let total=0,hits=m.effect==='MULTI_HIT'?[2,2,2,3,3,3,4,5][Math.floor(this.rng()*8)]:1;
+ const targetHPBefore=t.hp;let total=0,hits=m.effect==='MULTI_HIT'?[2,2,2,3,3,3,4,5][Math.floor(this.rng()*8)]:1;
  for(let i=0;i<hits&&t.hp>0;i++){let amount=m.effect==='SUPER_FANG'?Math.max(1,Math.floor(t.hp/2)):damage(this.data,p,t,id==='STRUGGLE'?{...m,type:'TYPELESS'}:m,{critical:crit,stagesA:ps,stagesD:ts,screen:(SPECIAL_TYPES.has(m.type)?tf.lightScreen:tf.reflect)>0,random:this.rng,foresight:tf.foresight});if(m.effect==='SUPER_FANG'&&effectiveness===0)amount=0;const loss=Math.min(t.hp,amount);total+=loss;t.hp-=loss;}
- if(crit&&total)this.s.logs.push('급소에 맞았다!');if(effectiveness===0)this.s.logs.push('효과가 없는 것 같다…');else if(effectiveness>1)this.s.logs.push('효과는 굉장했다!');else if(effectiveness<1)this.s.logs.push('효과가 별로인 듯하다…');if(total)this.s.logs.push(`${this.name(t)}에게 ${total}의 데미지!`);if(hits>1)this.s.logs.push(`${hits}번 맞았다!`);
+ if(crit&&total)this.s.logs.push('급소에 맞았다!');if(effectiveness===0)this.s.logs.push('효과가 없는 것 같다…');else if(effectiveness>1)this.s.logs.push('효과는 굉장했다!');else if(effectiveness<1)this.s.logs.push('효과가 별로인 듯하다…');if(total){this.s.logs.push(`${this.name(t)}에게 ${total}의 데미지!`);this.s.logs.push(hpLossMessage(this.name(t),targetHPBefore,t.hp));}if(hits>1)this.s.logs.push(`${hits}번 맞았다!`);
  if(id==='STRUGGLE'||m.effect==='RECOIL_HIT'){p.hp=Math.max(0,p.hp-Math.max(1,Math.floor(total/4)));this.s.logs.push(`${this.name(p)}도 반동으로 다쳤다!`)}if(m.effect==='DREAM_EATER'){p.hp=Math.min(p.stats.hp,p.hp+Math.max(1,Math.floor(total/2)));this.s.logs.push('체력을 흡수했다!')}
  if(t.hp>0&&total){if(m.effect==='ACCURACY_DOWN_HIT'&&byte(this.rng)<Math.floor(m.chance*255/100))this.changeStage(other,'accuracy',-1);if(tf.rage)this.changeStage(other,'attack',1);if(m.effect==='RAGE')pf.rage=true;
  if(byte(this.rng)<Math.floor(m.chance*255/100)){if(['BURN_HIT','FLAME_WHEEL'].includes(m.effect))this.status(t,other,'burn');if(m.effect==='SPEED_DOWN_HIT')this.changeStage(other,'speed',-1);if(m.effect==='POISON_HIT')this.status(t,other,'poison');if(m.effect==='PARALYZE_HIT')this.status(t,other,'paralysis');if(m.effect==='CONFUSE_HIT'&&!tf.confused){tf.confused=2+Math.floor(this.rng()*4);this.s.logs.push(`${this.name(t)}는 혼란에 빠졌다!`)}if(m.effect==='FLINCH_HIT')tf.flinch=true;}}
