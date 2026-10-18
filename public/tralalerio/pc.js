@@ -17,7 +17,7 @@ const fail=message=>({ok:false,message});
 function healStored(p,data){p.hp=p.stats.hp;p.status=null;p.sleep=0;p.moves.forEach(m=>m.pp=data.moves[m.id].pp);}
 export function pcAction(game,action,index,value){
  const s=game.state;initializePC(s);const pc=s.pc;
- if(s.battle||s.healing||s.phoneCall||s.trainerEncounter||!game.map.collision.some(row=>row.includes('PC')))return fail('지금은 PC를 사용할 수 없어요.');
+ if(s.evolution||s.battle||s.healing||s.phoneCall||s.trainerEncounter||!game.map.collision.some(row=>row.includes('PC')))return fail('지금은 PC를 사용할 수 없어요.');
  const safe=i=>Number.isInteger(i)&&i>=0;
  if(action==='box'){if(!safe(index)||index>=14)return fail('박스를 확인해 주세요.');pc.currentBox=index;return {ok:true,message:`${pc.names[index]}로 바꾸었다!`};}
  if(action==='rename'){if(!safe(index)||index>=14||typeof value!=='string'||!value.trim()||value.length>16)return fail('박스 이름은 1~16자로 적어 주세요.');pc.names[index]=value.trim();return {ok:true,message:'박스 이름을 바꾸었다!'};}

@@ -40,3 +40,5 @@
 
 
 2026-10-18 최신 뺄셈 정책: subtract_single, subtract_story, story_spend_chain, story_less_chain, table_story는 레벨 1 고정으로 최소 레벨 3의 예외다. 실제 숫자도 5 이하로 줄이고 역산 대신 남은 수를 묻는다. 개발실에서도 레벨 1로 확인하며 기존 고난도 뺄셈은 비용 없이 교체한다. 관장·특별 몬스터의 고난도 전용 풀에서는 제외한다.
+
+진화는 [EVOLUTION.md](EVOLUTION.md)의 원본 조건/자산/저장 마커를 따른다. 전투 종료 전 종을 바꾸지 않으며 레벨업에 의한 자연 진화만 적용하고 교환·도구·친밀도 진화는 제외한다. 수학 정답 판정은 실제 화면 선택값을 제출하고 회전 그림/숫자 격자의 동등한 정답도 인정한다. 회귀는 evolution.test.js·math-answer-integrity.test.js와 check-evolution-math-browser.cjs로 확인한다.

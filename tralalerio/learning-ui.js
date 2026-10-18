@@ -19,6 +19,6 @@ export function renderLearning({q,c,board,tools,button,render,place}){
  });board.append(row);}
  if(q.equation)board.append(node('p',q.equation,'learning-equation'));
  if(!q.paint){const row=node('div','','math-slots');c.input.forEach((v,i)=>{const b=button(v===null?'?':q.symbols?q.symbols[v]:String(v),()=>{c.input[i]=null;render()},'math-slot');b.dataset.drop='facto';b.dataset.slot=i;b.setAttribute('aria-label',`풀이 ${i+1}번째 빈칸`);if(v!==null){b.dataset.drag='facto-slot';b.dataset.value=v;b.dataset.from=i;}row.append(b)});board.append(row);
-  for(const choice of q.shapeChoices||q.choices){const b=button(choice.label||'',()=>{place(0,choice.value)},'facto-choice');b.dataset.drag='facto';b.dataset.value=choice.value;b.setAttribute('aria-label',`답 조각 ${choice.value}`);if(choice.shape)b.append(grid(choice.shape));if(choice.diagram){b.classList.add('reference-choice');b.append(referenceDiagram(choice.diagram));}tools.append(b);}
+  for(const choice of q.shapeChoices||q.choices){const b=button(choice.label||'',()=>{place(0,choice.value)},'facto-choice');b.dataset.drag='facto';b.dataset.value=choice.value;b.setAttribute('aria-pressed',String(c.input[0]===choice.value));b.setAttribute('aria-label',`답 조각 ${choice.value}`);if(choice.shape)b.append(grid(choice.shape));if(choice.diagram){b.classList.add('reference-choice');b.append(referenceDiagram(choice.diagram));}tools.append(b);}
  }
 }

@@ -1,16 +1,16 @@
 import {TYPE_LEVELS,SUBTRACTION_TYPES,LEVEL_LABELS} from './math-levels.js?v=20261018-subtract27';
-import {createPokemon} from './battle.js?v=20261018-subtract27';
-import {Game} from './engine.js?v=20261018-subtract27';
-import {MATH_TYPES,MATH_LABELS,questionFor,emptyInput,validateQuestion} from './math-challenge.js?v=20261018-subtract27';
-import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261018-subtract27';
+import {createPokemon} from './battle.js?v=20261018-level-evolution29';
+import {Game} from './engine.js?v=20261018-level-evolution29';
+import {MATH_TYPES,MATH_LABELS,questionFor,emptyInput,validateQuestion} from './math-challenge.js?v=20261018-level-evolution29';
+import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261018-level-evolution29';
 const $=id=>document.getElementById(id),model=window.CreativeBattle,facto=window.FactoPuzzles;
 for(const type of MATH_TYPES){const option=document.createElement('option');option.value=type;option.textContent=MATH_LABELS[type];$('lab-type').append(option);}
 const params=new URLSearchParams(location.search);if(MATH_TYPES.includes(params.get('type')))$('lab-type').value=params.get('type');if(['3','4','5'].includes(params.get('grade')))$('lab-grade').value=params.get('grade');if(/^\d+$/.test(params.get('seed')||'')&&Number(params.get('seed'))<=4294967295)$('lab-seed').value=params.get('seed');if(params.get('mode')==='capture')$('lab-mode').value='capture';
 function updateLevels(){const previous=Number($('lab-grade').value)||3;$('lab-grade').replaceChildren();for(const level of TYPE_LEVELS[$('lab-type').value].filter(n=>n>=3||SUBTRACTION_TYPES.includes($('lab-type').value))){const o=document.createElement('option');o.value=level;o.textContent=`레벨 ${level} · ${LEVEL_LABELS[level]}`;$('lab-grade').append(o);}const values=TYPE_LEVELS[$('lab-type').value].filter(n=>n>=3||SUBTRACTION_TYPES.includes($('lab-type').value));$('lab-grade').value=values.includes(previous)?previous:values.reduce((a,b)=>Math.abs(b-previous)<Math.abs(a-previous)?b:a);}
 $('lab-type').onchange=updateLevels;updateLevels();
 let game,q,lastChallenge,maps,data;
-const ui=createMathPuzzleUI({getGame:()=>game,onSave:()=>{if(!game)return;const c=game.battle?.s.mathChallenge;if(c)lastChallenge=structuredClone(c);$('lab-debug').textContent=JSON.stringify({question:q,challenge:c||lastChallenge,battleLogs:game.battle?.s.logs},null,2);},onSolved:()=>{
- const b=game.battle,correct=b.s.result==='caught'||b.s.animationEvents.some(e=>e.actor==='player'&&e.critical);$('lab-result').textContent=correct?(lastChallenge.kind==='capture'?'정답 → 수학 문제를 풀어 몬스터 포획 성공':'정답 → 강력한 공격 성공 (치명타 적용)'):'오답 또는 넘기기 → 내 공격 없이 상대 차례';
+const ui=createMathPuzzleUI({getGame:()=>game,onSave:()=>{if(!game)return;const c=game.battle?.s.mathChallenge;if(c)lastChallenge=structuredClone(c);$('lab-debug').textContent=JSON.stringify({question:q,challenge:c||lastChallenge,battleLogs:game.battle?.s.logs},null,2);},onSolved:result=>{
+ const b=game.battle,correct=result.ok;$('lab-result').textContent=correct?(lastChallenge.kind==='capture'?'정답 → 수학 문제를 풀어 몬스터 포획 성공':'정답 → 강력한 공격 성공 (치명타 적용)'):'오답 또는 넘기기 → 내 공격 없이 상대 차례';
 }});
 function open(){if(!maps)return;if(!$('lab-form').reportValidity())return;ui.close();const type=$('lab-type').value,seed=Number($('lab-seed').value),grade=Number($('lab-grade').value),mode=$('lab-mode').value;$('lab-grade').value=grade;
  game=new Game({...maps,MathLab:maps.Route29},data,{random:()=>.5});game.startAdventure();game.state.map=grade===3?'MathLab':'Route29';game.state.party[0]=createPokemon(data,'pikachu',50,()=>.5);game.startEncounter('mc_zombie',grade===3?15:3);game.battle.s.animationPending=false;

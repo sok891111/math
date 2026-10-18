@@ -11,7 +11,12 @@ export function challengeGrade(game,seed){const b=game.battle;if(game.battleData
 function selection(game,rng){const typeRoll=rng(),seed=Math.floor(rng()*4294967296)>>>0,preferred=challengeGrade(game,seed),strict=preferred===5||!!game.battleData.trainers?.[game.battle.s.trainer]?.badge;let pool=MATH_TYPES.filter(t=>t!==game.state.lastMathType&&(!strict||TYPE_LEVELS[t].includes(preferred)));const type=pool[Math.floor(typeRoll*pool.length)];return {type,seed,grade:levelForType(type,preferred)};}
 export function seededRandom(seed){let n=seed>>>0;return ()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296}}
 export function questionFor(challenge,model,facto){const r=seededRandom(challenge.seed);return challenge.type==='rotate'?rotationQuestion(challenge.grade,r,facto):challenge.type==='analogy'?advancedAnalogy(challenge.grade,r):LEARNING_TYPES.includes(challenge.type)||['place_value','shape_match','shape_complete'].includes(challenge.type)?learningQuestion(challenge.type,challenge.grade,r):facto.types.includes(challenge.type)?gradedFacto(challenge.type,challenge.grade,r,facto):model.puzzle(challenge.type,challenge.grade,r)}
-export function validateQuestion(q,input,model,facto){return q.learning?validateLearning(q,input):(facto.types.includes(q.type)?facto:model).validate(q,input)}
+export function validateQuestion(q,input,model,facto){
+ if(!Array.isArray(input)||input.some(n=>!Number.isInteger(n)))return {ok:false,reason:'빈칸을 모두 채워 주세요.'};
+ if(q.type==='rotate'){const chosen=q.options?.[input[0]],expected=facto.rotate(q.source,q.turns);return {ok:input.length===1&&!!chosen&&chosen.every((n,i)=>n===expected[i]),reason:q.hint};}
+ if(q.type==='latin'){const grid=q.grid.slice();q.holes.forEach((h,i)=>grid[h]=input[i]);const line=values=>values.length===q.n&&new Set(values).size===q.n&&values.every(n=>n>=1&&n<=q.n);return {ok:input.length===q.holes.length&&Array.from({length:q.n},(_,r)=>line(grid.slice(r*q.n,(r+1)*q.n))).every(Boolean)&&Array.from({length:q.n},(_,c)=>line(Array.from({length:q.n},(_,r)=>grid[r*q.n+c]))).every(Boolean),reason:q.hint};}
+ return q.learning?validateLearning(q,input):(facto.types.includes(q.type)?facto:model).validate(q,input);
+}
 export function emptyInput(q){return q.given?q.given.slice():q.subset?[]:q.type==='path'?[q.start]:q.answer.map(()=>q.paint||q.type==='mirror'?0:null)}
 export function requestCapture(game,model,facto,rng=Math.random){
  const b=game.battle,p=b?.player;if(!b||b.s.result||b.s.trainer||b.s.waitingSwitch||b.s.animationPending||game.state.balls<1)return null;

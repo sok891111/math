@@ -1,7 +1,7 @@
 import {LEVEL_LABELS} from './math-levels.js?v=20261018-subtract27';
 import {puzzleHintSteps} from './learning-hints.js?v=20261018-table19';
-import {renderLearning} from './learning-ui.js?v=20261018-table19';
-import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261018-subtract27';
+import {renderLearning} from './learning-ui.js?v=20261018-level-evolution29';
+import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261018-level-evolution29';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');
@@ -19,13 +19,16 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
   board.replaceChildren();tools.replaceChildren();board.dataset.type=q.type;dialog.dataset.type=q.type;dialog.dataset.grade=String(c.grade);
   if(q.type==='rotate')renderRotation();
   else if(q.learning)renderLearning({q,c,board,tools,button,render,place:ui.place});
-  else if(facto.types.includes(q.type)){ui.render();if(q.type==='analogy')renderAnalogy();if(q.type==='balance')renderBalance();}
+  else if(facto.types.includes(q.type)){ui.render();
+   // A fresh choice must replace a filled answer too; the shared UI only selected it.
+   if(!q.subset&&!q.paint)for(const choice of tools.querySelectorAll('.facto-choice')){choice.setAttribute('aria-pressed',String(c.input.length===1&&c.input[0]===Number(choice.dataset.value)));choice.onclick=()=>{const empty=c.input.indexOf(null),slot=typeof selected==='number'&&selected>=0&&selected<c.input.length?selected:empty>=0?empty:c.input.length-1;c.input[slot]=Number(choice.dataset.value);selected=null;render();};}
+   if(q.type==='analogy')renderAnalogy();if(q.type==='balance')renderBalance();}
   else if(q.type==='pattern'){
    const trace=document.createElement('div');trace.className='math-rhythm';q.shown.forEach(n=>trace.append(rune(n)));board.append(trace,text('p','다음에는 어떤 순서일까요?'));
    const slots=document.createElement('div');slots.className='math-slots';c.input.forEach((n,i)=>{const b=button(n===null?'?':model.runes[n]?.symbol||'?',()=>{c.input[i]=null;cursor=i;render()},'math-slot');b.dataset.drop='pattern';b.dataset.slot=i;b.setAttribute('aria-label',`예측 ${i+1}번째 빈칸`);if(n!==null){b.dataset.drag='pattern-slot';b.dataset.value=n;b.dataset.from=i}slots.append(b)});board.append(slots);
    model.runes.forEach((r,n)=>{const b=button(r.symbol+' '+r.name,()=>{const i=c.input[cursor]===null?cursor:c.input.indexOf(null);if(i<0)return;c.input[i]=n;cursor=c.input.indexOf(null);render()},'rune-tool');b.dataset.drag='pattern';b.dataset.value=n;b.setAttribute('aria-label',r.name+' 속성 연결');tools.append(b)});
   }else if(q.type==='mirror'){
-   const wrap=document.createElement('div');wrap.className='math-mirror';
+   const wrap=document.createElement('div');wrap.className='math-mirror';wrap.dataset.axis=q.axis;
    for(const editable of [false,true]){const part=document.createElement('div');part.append(text('p',editable?'내 거울 방패':'원본의 빛'));const grid=document.createElement('div');grid.className='math-grid';grid.style.setProperty('--cols',q.cols);(editable?c.input:q.source).forEach((v,i)=>{const cell=editable?button('✦',()=>{c.input[i]=1-c.input[i];render()}):text('span','✦');cell.className='math-light'+(v?' on':'');if(editable){cell.dataset.drop='mirror';cell.dataset.slot=i;cell.setAttribute('aria-pressed',String(!!v));cell.setAttribute('aria-label',`방패 ${i+1}번째 빛`)}grid.append(cell)});part.append(grid);wrap.append(part);if(!editable)wrap.append(text('span',q.axis==='vertical'?'│':'─','math-axis'))}board.append(wrap);
    const light=button('✦ 빛 조각',()=>{},'light-tool');light.dataset.drag='mirror';light.dataset.value=1;tools.append(light);
   }else if(q.type==='path'){
@@ -75,11 +78,11 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
  function pathTo(i){if(q.blocked.includes(i))return;const previous=c.input.indexOf(i);if(previous>=0)c.input=c.input.slice(0,previous+1);else{const last=c.input.at(-1),distance=Math.abs(Math.floor(last/q.size)-Math.floor(i/q.size))+Math.abs(last%q.size-i%q.size);if(distance!==1||c.input.length-1>=q.budget){$('feedback').textContent='막힌 돌을 피해 가로·세로로 한 칸씩 이어 주세요.';return}c.input.push(i)}render()}
  function showHints(){const steps=puzzleHintSteps(q,window.PuzzleHints);$('hints').hidden=c.hints===0;$('hints').replaceChildren();steps.slice(0,c.hints).forEach(step=>{const row=document.createElement('div');row.append(text('b',step.title),text('p',step.text));$('hints').append(row)});$('hint').textContent=c.hints===0?'힌트 보기':c.hints<steps.length?'다음 단계 힌트':'힌트 모두 보기'}
  function close(){if(drag&&dialog.hasPointerCapture(drag.id))dialog.releasePointerCapture(drag.id);drag?.ghost?.remove();drag=null;if(dialog.open)dialog.close()}
- function cancel(){const result=skipMath(getGame());persist();close();if(result.resolved)onSolved()}
+ function cancel(){const result=skipMath(getGame());persist();close();if(result.resolved)onSolved(result)}
  $('back').onclick=cancel;dialog.addEventListener('cancel',e=>{e.preventDefault();cancel()});
  $('reset').onclick=()=>{c.input=emptyInput(q);selected=q.type==='logic'?q.cards[0]:null;cursor=0;$('feedback').textContent='처음부터 다시 놓아 보세요.';render()};
  $('hint').onclick=()=>{c.hints=Math.min(3,c.hints+1);showHints();persist()};
- $('submit').onclick=()=>{const result=submitMath(getGame(),model,facto);persist();if(result.resolved){close();onSolved()}else{$('feedback').textContent='아직 맞지 않아요. '+result.reason;render()}};
+ $('submit').onclick=()=>{const result=submitMath(getGame(),model,facto);persist();if(result.resolved){close();onSolved(result)}else{$('feedback').textContent='아직 맞지 않아요. '+result.reason;render()}};
  // Share Creative's drag/drop semantics while keeping the dialog node stable
  // through re-renders. Every piece is also operable by click, touch or keyboard.
  dialog.addEventListener('click',e=>{if(performance.now()<suppress){e.preventDefault();e.stopImmediatePropagation()}},true);

@@ -1,21 +1,22 @@
+import {queueBattleEvolutions,queueEvolution,validEvolution} from './evolution.js?v=20261018-level-evolution29';
 import {awardWildVictory} from './wild-reward.js?v=20261018-table19';
 import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-table19';
 import {initializePC,validPC} from './pc.js?v=20261018-table19';
 import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-table19';
 import {validPhoneCall} from './phone-call.js?v=20261018-table19';
 import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-table19';
-import {Battle,createPokemon,statsFor,experienceAt,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-subtract27';
+import {Battle,createPokemon,statsFor,experienceAt,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-level-evolution29';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {
  constructor(maps,battleData=null,options={}){this.maps=maps;this.battleData=battleData;this.rng=options.random||Math.random;this.now=options.now||(()=>new Date());this.state={version:1,map:'PlayersHouse2F',x:3,y:4,facing:'down',flags:{},starter:null,steps:0,money:3000,potions:0};this.lock=null;this.lastEvent=null;if(battleData)this.initializeParty();}
  startAdventure(){if(this.state.starter)return false;this.chooseStarter('피카츄');this.enter(this.maps.ElmsLab,4,6);this.state.facing='down';this.state.flags.easyStart=true;return true;}
  startVioletTest(){
-  const s=this.state;if(s.flags.violetTestStart||s.battle||s.healing||s.trainerEncounter||s.phoneCall||s.dexIntro)return false;
+  const s=this.state;if(s.flags.violetTestStart||s.battle||s.evolution||s.healing||s.trainerEncounter||s.phoneCall||s.dexIntro)return false;
   if(!s.starter)this.startAdventure();this.enter(this.maps.VioletCity,31,26);s.facing='down';s.flags.violetTestStart=true;return true;
  }
  configureVioletTest(){
-  const s=this.state;if(s.battle||s.healing||s.trainerEncounter||s.phoneCall||s.dexIntro)return false;
+  const s=this.state;if(s.battle||s.evolution||s.healing||s.trainerEncounter||s.phoneCall||s.dexIntro)return false;
   let p=s.party.find(p=>p.species==='pikachu');
   if(!p){p=createPokemon(this.battleData,'pikachu',99,this.rng);if(s.party.length>=6)s.storage.push(s.party.pop());s.party.unshift(p);initializePC(s);recordCaught(s,'pikachu');}
   p.level=99;p.exp=experienceAt(99,this.battleData.species.pikachu.growth);p.stats=statsFor(this.battleData.species.pikachu,99,p.dvs,p.effort);p.hp=p.stats.hp;p.status=null;p.sleep=0;
@@ -47,7 +48,7 @@ export class Game {
  if(this.map.warps.some(w=>w.x===x&&w.y===y))return true;
  return WALKABLE.test(this.map.collision[y]?.[x]||'WALL');}
  enter(map,x,y){this.state.map=map.id;this.state.x=x;this.state.y=y;this.lock=`${map.id}:${x}:${y}`;if(map.id==='NewBarkTown')this.state.flags.town=true;if(map.id==='Route29')this.state.flags.route=true;if(map.id==='CherrygroveCity')this.state.flags.city=true;if(map.id==='VioletCity')this.state.flags.violet=true;if(map.id==='AzaleaTown')this.state.flags.azalea=true;return {type:'warp',map:map.id};}
- move(direction){if(this.state.phoneCall)return {type:'phone-call-active'};if(this.state.trainerEncounter)return {type:'trainer-encounter-active'};if(this.state.healing)return {type:'healing'};if(this.state.battle)return {type:'battle-active'};const d=DIRECTIONS[direction];if(!d)return {type:'invalid'};this.state.facing=direction;
+ move(direction){if(this.state.evolution)return {type:'evolution-active'};if(this.state.phoneCall)return {type:'phone-call-active'};if(this.state.trainerEncounter)return {type:'trainer-encounter-active'};if(this.state.healing)return {type:'healing'};if(this.state.battle)return {type:'battle-active'};const d=DIRECTIONS[direction];if(!d)return {type:'invalid'};this.state.facing=direction;
  let x=this.state.x+d[0],y=this.state.y+d[1];const edge=x<0?'west':x>=this.map.width?'east':y<0?'north':y>=this.map.height?'south':null;
  if(edge){const c=this.map.connections?.find(c=>c.direction===edge),dest=c&&this.maps[c.map];if(!dest)return {type:'boundary'};
  if(this.state.map==='NewBarkTown'&&dest.id==='Route29'&&!this.state.starter)return {type:'partner-required'};
@@ -65,11 +66,11 @@ export class Game {
  buyPotion(){if(this.state.money<300)return false;this.state.money-=300;this.state.potions++;return true;}
  initializeParty(){const s=this.state;if(s.flags.mysteryEgg&&!s.flags.eggDelivered){s.items??={};s.items.MYSTERY_EGG=1;}else if(s.flags.eggDelivered&&s.items)delete s.items.MYSTERY_EGG;s.party??=[];s.storage??=[];s.balls??=0;s.grassGrace??=0;if(s.starter&&!s.party.length){const species=Object.keys(this.battleData.species).find(id=>this.battleData.species[id].name===s.starter);s.party.push(createPokemon(this.battleData,species,5,this.rng));}if(s.starter&&!s.flags.battleSupplies){s.balls+=5;s.flags.battleSupplies=true;}initializeMonsterDex(s,this.battleData);initializePC(s);}
  get battle(){return this.state.battle&&this.battleData?new Battle(this.battleData,this.state,this.rng):null;}
- startEncounter(species,level){if(!this.battleData||this.state.battle)return false;return !!Battle.start(this.battleData,this.state,createPokemon(this.battleData,species,Math.max(level,this.battleData.challengePolicy?.rareSpecies.includes(species)?this.battleData.challengePolicy.rareMinLevel:1),this.rng),this.rng);}
- startTrainer(id){const t=this.battleData?.trainers?.[id];if(!t||this.state.battle||this.state.flags['trainer:'+id]||id.startsWith('AzaleaGym:')&&!this.state.flags.slowpokeWell)return false;const started=!!Battle.startTrainer(this.battleData,this.state,t,this.rng);if(started)delete this.state.trainerEncounter;return started;}
+ startEncounter(species,level){if(!this.battleData||this.state.battle||this.state.evolution)return false;return !!Battle.start(this.battleData,this.state,createPokemon(this.battleData,species,Math.max(level,this.battleData.challengePolicy?.rareSpecies.includes(species)?this.battleData.challengePolicy.rareMinLevel:1),this.rng),this.rng);}
+ startTrainer(id){const t=this.battleData?.trainers?.[id];if(!t||this.state.battle||this.state.evolution||this.state.flags['trainer:'+id]||id.startsWith('AzaleaGym:')&&!this.state.flags.slowpokeWell)return false;const started=!!Battle.startTrainer(this.battleData,this.state,t,this.rng);if(started)delete this.state.trainerEncounter;return started;}
  trainerInSight(){if(!this.battleData||this.state.battle||!this.state.party.some(p=>p.hp>0))return null;for(const o of this.objects()){if(!o.trainer||!o.range||this.state.flags['trainer:'+o.trainer])continue;const d=DIRECTIONS[o.direction]||DIRECTIONS.down;for(let n=1;n<=o.range;n++){const x=o.x+d[0]*n,y=o.y+d[1]*n;if(x===this.state.x&&y===this.state.y)return o;if(!this.passable(x,y))break;}}return null;}
  healParty(){if(!this.battleData)return;for(const p of this.state.party){p.hp=p.stats.hp;p.status=null;p.sleep=0;for(const m of p.moves)m.pp=this.battleData.moves[m.id].pp;}}
- finishBattle(){const b=this.battle;if(!b||!b.s.result||b.s.learn.length)return false;awardWildVictory(this.state);const lost=b.s.result==='lost';if(b.s.trainer==='CherrygroveRival')this.state.flags.rivalDone=true;if(b.s.trainer==='AzaleaRival')this.state.flags.azaleaRival=true;if(b.s.result==='won'&&b.s.trainer){const t=this.battleData.trainers[b.s.trainer];if(!this.state.flags['trainer:'+t.id]){this.state.flags['trainer:'+t.id]=true;this.state.money+=t.reward;if(t.badge){this.state.flags[t.badge]=true;if(t.badge==='zephyr')this.state.flags.tmMudSlap=true;this.state.items??={};this.state.items[t.tm||(t.badge==='hive'?'TM49':'TM31')]=1;for(const a of Object.values(this.battleData.trainers).filter(a=>a.id.startsWith(t.id.split(':')[0]+':')))this.state.flags['trainer:'+a.id]=true;}if(t.id==='SlowpokeWellB1F:TrainerGruntM1'){this.state.flags.slowpokeWell=true;this.state.flags.wellReturn=true;this.healParty();this.enter(this.maps.KurtsHouse,3,3);}if(t.id.startsWith('AzaleaGym:TrainerTwins'))for(const twin of Object.values(this.battleData.trainers).filter(a=>a.id.startsWith('AzaleaGym:TrainerTwins')))this.state.flags['trainer:'+twin.id]=true;if(t.gift){this.state.flags.flash=true;this.state.items??={};this.state.items.HM05=1;}}}delete this.state.battle;this.upgradeMinecraftMoves();this.state.grassGrace=3;if(lost){this.healParty();this.state.money=Math.floor(this.state.money/2);const home=this.state.lastCenter||(this.state.flags.healed?'CherrygrovePokecenter1F':this.state.flags.easyStart?'ElmsLab':'PlayersHouse1F');this.enter(this.maps[home],home==='PlayersHouse1F'?7:home==='ElmsLab'?4:3,home==='PlayersHouse1F'?4:6);}return true;}
+ finishBattle(){const b=this.battle;if(!b||!b.s.result||b.s.learn.length||this.state.evolution)return false;if(queueBattleEvolutions(this))return false;awardWildVictory(this.state);const lost=b.s.result==='lost';if(b.s.trainer==='CherrygroveRival')this.state.flags.rivalDone=true;if(b.s.trainer==='AzaleaRival')this.state.flags.azaleaRival=true;if(b.s.result==='won'&&b.s.trainer){const t=this.battleData.trainers[b.s.trainer];if(!this.state.flags['trainer:'+t.id]){this.state.flags['trainer:'+t.id]=true;this.state.money+=t.reward;if(t.badge){this.state.flags[t.badge]=true;if(t.badge==='zephyr')this.state.flags.tmMudSlap=true;this.state.items??={};this.state.items[t.tm||(t.badge==='hive'?'TM49':'TM31')]=1;for(const a of Object.values(this.battleData.trainers).filter(a=>a.id.startsWith(t.id.split(':')[0]+':')))this.state.flags['trainer:'+a.id]=true;}if(t.id==='SlowpokeWellB1F:TrainerGruntM1'){this.state.flags.slowpokeWell=true;this.state.flags.wellReturn=true;this.healParty();this.enter(this.maps.KurtsHouse,3,3);}if(t.id.startsWith('AzaleaGym:TrainerTwins'))for(const twin of Object.values(this.battleData.trainers).filter(a=>a.id.startsWith('AzaleaGym:TrainerTwins')))this.state.flags['trainer:'+twin.id]=true;if(t.gift){this.state.flags.flash=true;this.state.items??={};this.state.items.HM05=1;}}}delete this.state.battle;this.upgradeMinecraftMoves();this.state.grassGrace=3;if(lost){this.healParty();this.state.money=Math.floor(this.state.money/2);const home=this.state.lastCenter||(this.state.flags.healed?'CherrygrovePokecenter1F':this.state.flags.easyStart?'ElmsLab':'PlayersHouse1F');this.enter(this.maps[home],home==='PlayersHouse1F'?7:home==='ElmsLab'?4:3,home==='PlayersHouse1F'?4:6);}return true;}
  buyBall(){if(!this.battleData||this.state.money<200)return false;this.state.money-=200;this.state.balls++;return true;}
  upgradeMinecraftMoves(){
   // Never rewrite a pending turn's visual snapshots or spent PP. Upgrade old
@@ -86,13 +87,13 @@ export class Game {
    p.minecraftMovesVersion=1;
   }
  }
- beginHealing(){if(this.state.battle||this.state.healing||!CENTERS.includes(this.state.map)||!this.state.party?.length)return false;this.healParty();this.state.flags.healed=true;this.state.lastCenter=this.state.map;this.state.healing={version:1,map:this.state.map,count:this.state.party.length};return true;}
+ beginHealing(){if(this.state.battle||this.state.evolution||this.state.healing||!CENTERS.includes(this.state.map)||!this.state.party?.length)return false;this.healParty();this.state.flags.healed=true;this.state.lastCenter=this.state.map;this.state.healing={version:1,map:this.state.map,count:this.state.party.length};return true;}
  finishHealing(){delete this.state.healing;}
  serialize(){if(this.battleData){initializeMonsterDex(this.state,this.battleData);initializePC(this.state);}return JSON.stringify(this.state)}
  restore(raw){const previous=this.state;try{const s=JSON.parse(raw);if(!s||s.version!==1||!this.maps[s.map]||!Number.isInteger(s.x)||!Number.isInteger(s.y)||!DIRECTIONS[s.facing]||!s.flags||Array.isArray(s.flags)||typeof s.flags!=='object'||!Number.isInteger(s.steps)||s.steps<0||!(s.starter===null||['치코리타','브케인','리아코','피카츄'].includes(s.starter)))return false;
  s.money??=3000;s.potions??=0;if(!Number.isSafeInteger(s.money)||s.money<0||!Number.isSafeInteger(s.potions)||s.potions<0)return false;
  if(this.battleData&&(!validPC(s)||!validMonsterDex(s.monsterDex,this.battleData)||!validDexIntro(s.dexIntro,s,this.battleData)))return false;
- if(!validPhoneCall(s))return false;
+ if(!validPhoneCall(s)||this.battleData&&!validEvolution(s,this.battleData))return false;
  if(s.healing&&(!s.healing||s.healing.version!==1||!CENTERS.includes(s.healing.map)||s.map!==s.healing.map||s.battle||!Number.isInteger(s.healing.count)||s.healing.count<1||s.healing.count>6||s.healing.count!==s.party?.length))return false;
  if(s.lastCenter&&!CENTERS.includes(s.lastCenter))return false;
  const map=this.maps[s.map];if(s.x<0||s.y<0||s.x>=map.width||s.y>=map.height)return false;
