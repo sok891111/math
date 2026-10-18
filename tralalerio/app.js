@@ -1,4 +1,4 @@
-import {createEvolutionUI} from './evolution-ui.js?v=20261018-gaddoongi30';
+import {createEvolutionUI} from './evolution-ui.js?v=20261018-boss-math32';
 import {createTownMapUI} from './town-map.js?v=20261018-cursor26';
 import {createGameAudio} from './game-audio.js?v=20261018-silentbattle24';
 import {createPCUI} from './pc-ui.js?v=20261018-table19';
@@ -11,8 +11,8 @@ import {chapterGoal,storyInteraction,storyEntry} from './chapter.js?v=20261018-t
 import {createHealingAnimation} from './healing-animation.js?v=20261018-audiomenu23';
 import {npcDialogue,signDialogue,LESSONS} from './npc-dialogue.js?v=20261018-table19';
 import {trainerName,personalize,walkingPose,PlayerWalk,MOVEMENT_TIMING} from './overworld-player.js?v=20261018-table19';
-import {Game} from './engine.js?v=20261018-gaddoongi30';
-import {createBattleView} from './battle-view.js?v=20261018-fly31';
+import {Game} from './engine.js?v=20261018-boss-math32';
+import {createBattleView} from './battle-view.js?v=20261018-boss-math32';
 const $=s=>document.querySelector(s);const canvas=$('#screen'),ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
 import {createEncounterTransition,transitionData} from './battle-transition.js?v=20261016-skills1';
 const playerName=trainerName(window.__BLOCK_USER__);const playerWalk=new PlayerWalk();

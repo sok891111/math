@@ -4,7 +4,7 @@ import {canStoreCapture,storeCapture} from './pc.js?v=20261018-table19';
 import {recordSeen,recordCaught} from './monster-dex.js?v=20261018-gaddoongi30';
 import {hpLossMessage} from './hp-messages.js?v=20261018-table19';
 import {MATH_REWARDS,mathRewardIndex,captureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261018-table19';
-import {validMathChallenge} from './math-challenge.js?v=20261018-level-evolution29';
+import {validMathChallenge} from './math-challenge.js?v=20261018-boss-math32';
 import {ESCAPE_TEXT} from './capture-rules.js?v=20261016-capture3';
 // Gen II rules with Minecraft signature attacks. Hardware timing and unrelated
 // systems (held items, weather and link battle combat) are excluded.

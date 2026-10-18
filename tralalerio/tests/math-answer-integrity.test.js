@@ -28,11 +28,11 @@ test('all valid Latin completions and visually identical rotation choices are ac
  const rotate={type:'rotate',source:[1,1,1,1,1,1,1,1,1],turns:1,options:Array(4).fill(Array(9).fill(1)),answer:[1]};for(let i=0;i<4;i++)assert.ok(validateQuestion(rotate,[i],model,facto).ok);
 });
 test('every live question type submits its selected correct answer after a saved attack/capture reload',async()=>{
- const fs=await import('node:fs'),{Game}=await import('../engine.js'),{createPokemon}=await import('../battle.js'),{requestCapture,requestMath,submitMath}=await import('../math-challenge.js');
+ const fs=await import('node:fs'),{Game}=await import('../engine.js'),{createPokemon}=await import('../battle.js'),{requestCapture,requestMath,submitMath,mathTypesForBattle}=await import('../math-challenge.js');
  const maps=JSON.parse(fs.readFileSync(new URL('../assets/maps.json',import.meta.url))),data=JSON.parse(fs.readFileSync(new URL('../assets/battle-data.json',import.meta.url)));
- for(const type of MATH_TYPES)for(const capture of [false,true]){
-  const g=new Game(maps,data,{random:()=>.5});g.startAdventure();g.state.party[0]=createPokemon(data,'pikachu',50,()=>.5);g.startEncounter('mc_zombie',3);g.battle.s.animationPending=false;
-  const rolls=capture?[(MATH_TYPES.indexOf(type)+.1)/MATH_TYPES.length,.4]:[0,(MATH_TYPES.indexOf(type)+.1)/MATH_TYPES.length,.4];const c=capture?requestCapture(g,model,facto,()=>rolls.shift()):requestMath(g,0,model,facto,()=>rolls.shift());assert.equal(c.type,type);c.input=questionFor(c,model,facto).answer.slice();
+ for(const boss of [false,true])for(const type of MATH_TYPES)for(const capture of [false,true]){
+  const g=new Game(maps,data,{random:()=>.5});g.startAdventure();g.state.party[0]=createPokemon(data,'pikachu',50,()=>.5);g.startEncounter(boss?'mew':'mc_zombie',3);g.battle.s.animationPending=false;const pool=mathTypesForBattle(g);if(!pool.includes(type))continue;
+  const rolls=capture?[(pool.indexOf(type)+.1)/pool.length,.4]:[0,(pool.indexOf(type)+.1)/pool.length,.4];const c=capture?requestCapture(g,model,facto,()=>rolls.shift()):requestMath(g,0,model,facto,()=>rolls.shift());assert.equal(c.type,type);c.input=questionFor(c,model,facto).answer.slice();
   const h=new Game(maps,data,{random:()=>.5});assert.ok(h.restore(g.serialize()),type+' restore');const result=submitMath(h,model,facto);assert.ok(result.ok,type+(capture?' capture':' attack'));assert.ok(result.resolved);if(capture)assert.equal(h.battle.s.result,'caught');else assert.ok(h.battle.s.animationEvents.some(e=>e.actor==='player'&&e.critical));assert.equal(h.battle.s.mathChallenge,undefined);
  }
 });
