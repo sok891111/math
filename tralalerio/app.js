@@ -1,4 +1,4 @@
-import {createGameAudio} from './game-audio.js?v=20261018-silentwarp22';
+import {createGameAudio} from './game-audio.js?v=20261018-audiomenu23';
 import {createPCUI} from './pc-ui.js?v=20261018-table19';
 import {createMonsterDexUI} from './monster-dex-ui.js?v=20261018-table19';
 import {createPhoneAnimation,LAB_CALL_PAGES,finishLabCall} from './phone-call.js?v=20261018-table19';
@@ -6,7 +6,7 @@ import {installTouchGuard} from './touch-guard.js?v=20261018-table19';
 installTouchGuard();
 import {createTrainerEncounter,rivalEncounterPlan} from './trainer-encounter.js?v=20261018-table19';
 import {chapterGoal,storyInteraction,storyEntry} from './chapter.js?v=20261018-table19';
-import {createHealingAnimation} from './healing-animation.js?v=20261018-table19';
+import {createHealingAnimation} from './healing-animation.js?v=20261018-audiomenu23';
 import {npcDialogue,signDialogue,LESSONS} from './npc-dialogue.js?v=20261018-table19';
 import {trainerName,personalize,walkingPose,PlayerWalk,MOVEMENT_TIMING} from './overworld-player.js?v=20261018-table19';
 import {Game} from './engine.js?v=20261018-table19';

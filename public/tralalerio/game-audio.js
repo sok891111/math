@@ -52,9 +52,7 @@ export function createGameAudio(getGame,{storage=window.localStorage}={}){
  let context,master,manifest,manifestPromise,desired=null,current=null,nodes=[],ticket=0,encounter=null,encounterMap=null,healing=false,disposed=false;
  let muted=false,volume=.4;try{const p=JSON.parse(storage.getItem('tralalerio-audio')||'null');if(p){muted=p.muted===true;volume=typeof p.volume==='number'?Math.max(0,Math.min(1,p.volume)):.4}}catch{}
  const cache=new Map(),loads=new Map();let effects,fxNodes=new Set();
- const button=document.createElement('button');button.id='sound-toggle';button.type='button';button.setAttribute('aria-label','게임 소리 켜기 또는 끄기');
- const slider=document.createElement('input');slider.id='sound-volume';slider.type='range';slider.min='0';slider.max='100';slider.value=String(Math.round(volume*100));slider.setAttribute('aria-label','게임 소리 크기');
- const controls=document.createElement('div');controls.className='game-audio-controls';controls.append(button,slider);document.querySelector('.console-bottom')?.after(controls);
+ const button=document.querySelector('#sound-toggle'),controls=button;
  function reflect(){button.textContent=muted?'소리 켜기':'소리 끄기';button.setAttribute('aria-pressed',String(!muted));if(master&&context)master.gain.setTargetAtTime(muted||healing?0:volume,context.currentTime,.04);document.dispatchEvent(new CustomEvent('game-audio-setting',{detail:{muted,volume}}));}
  function save(){try{storage.setItem('tralalerio-audio',JSON.stringify({muted,volume}))}catch{}reflect();}
  fetch(BASE+'effects.json?v=20261018-silentwarp22').then(r=>r.json()).then(raw=>effects=raw).catch(()=>{});
@@ -86,7 +84,7 @@ export function createGameAudio(getGame,{storage=window.localStorage}={}){
   desired=musicForState(game.state,game.battleData,manifest,undefined,encounter);
   if(desired!==current)play(desired);
  }
- button.onclick=()=>{muted=!muted;save();unlock();};slider.oninput=()=>{volume=Number(slider.value)/100;save();unlock();};
+ button.onclick=()=>{muted=!muted;if(!muted&&volume===0)volume=.4;save();unlock();};
  const gesture=()=>unlock();document.addEventListener('pointerdown',gesture,{passive:true});document.addEventListener('keydown',gesture);
  const visibility=()=>{if(!context)return;if(document.hidden){stop();context.suspend().catch(()=>{});}else unlock();};document.addEventListener('visibilitychange',visibility);
  const timer=setInterval(sync,150);reflect();prepare().then(sync);

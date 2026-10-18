@@ -26,5 +26,3 @@ html,body{touch-action:manipulation}*,*::before,*::after{-webkit-user-select:non
 .dpad{--direction-size:clamp(44px,8vw,64px);width:calc(var(--direction-size)*3);height:calc(var(--direction-size)*3);grid-template-columns:repeat(3,var(--direction-size));grid-template-rows:repeat(3,var(--direction-size));flex-shrink:0}
 .dpad button{font-size:24px}.dpad span{font-size:22px}.touch-controls{gap:12px;flex-wrap:wrap;row-gap:30px}
 @media(max-width:360px){.dpad{--direction-size:42px}.touch-controls{padding-inline:0;gap:10px}.action-buttons{gap:12px;padding-right:0;transform:none}}
-
-.game-audio-controls{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:8px 12px}.game-audio-controls button{min-height:44px;padding:6px 12px;border:1px solid #84917a;border-radius:8px;background:#eef1e2;color:#344638;font:inherit}.game-audio-controls input{max-width:130px;min-height:44px;accent-color:#627d49}
