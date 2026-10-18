@@ -57,13 +57,13 @@ export function createGameAudio(getGame,{storage=window.localStorage}={}){
  const controls=document.createElement('div');controls.className='game-audio-controls';controls.append(button,slider);document.querySelector('.console-bottom')?.after(controls);
  function reflect(){button.textContent=muted?'소리 켜기':'소리 끄기';button.setAttribute('aria-pressed',String(!muted));if(master&&context)master.gain.setTargetAtTime(muted||healing?0:volume,context.currentTime,.04);document.dispatchEvent(new CustomEvent('game-audio-setting',{detail:{muted,volume}}));}
  function save(){try{storage.setItem('tralalerio-audio',JSON.stringify({muted,volume}))}catch{}reflect();}
- fetch(BASE+'effects.json?v=20261018-azalea20').then(r=>r.json()).then(raw=>effects=raw).catch(()=>{});
- const prepare=()=>manifestPromise??=(fetch(BASE+'manifest.json?v=20261018-azalea20').then(r=>{if(!r.ok)throw Error('music manifest');return r.json()}).then(m=>{manifest=m;return m}).catch(()=>null));
+ fetch(BASE+'effects.json?v=20261018-nodrums21').then(r=>r.json()).then(raw=>effects=raw).catch(()=>{});
+ const prepare=()=>manifestPromise??=(fetch(BASE+'manifest.json?v=20261018-nodrums21').then(r=>{if(!r.ok)throw Error('music manifest');return r.json()}).then(m=>{manifest=m;return m}).catch(()=>null));
  function stop(){ticket++;for(const n of nodes){try{n.stop()}catch{}n.disconnect();}nodes=[];current=null;controls.dataset.track='';}
  async function score(id){
   if(cache.has(id)){const value=cache.get(id);cache.delete(id);cache.set(id,value);return value;}
   if(loads.has(id))return loads.get(id);
-  const p=(async()=>{const res=await fetch(BASE+manifest.tracks[id].file+'?v=20261018-azalea20');if(!res.ok)throw Error('music score');const raw=await res.json();const value=raw.channels.map(ch=>({buffer:synthesizeChannel(context,ch,raw.waves),loopStart:ch.loopStart,duration:ch.duration}));cache.set(id,value);while(cache.size>2)cache.delete(cache.keys().next().value);return value;})().finally(()=>loads.delete(id));loads.set(id,p);return p;
+  const p=(async()=>{const res=await fetch(BASE+manifest.tracks[id].file+'?v=20261018-nodrums21');if(!res.ok)throw Error('music score');const raw=await res.json();const value=raw.channels.filter(ch=>ch.channel!==4).map(ch=>({buffer:synthesizeChannel(context,ch,raw.waves),loopStart:ch.loopStart,duration:ch.duration}));cache.set(id,value);while(cache.size>2)cache.delete(cache.keys().next().value);return value;})().finally(()=>loads.delete(id));loads.set(id,p);return p;
  }
  async function play(id){
   if(disposed||!context||context.state!=='running'||!manifest||!id||current===id)return;

@@ -84,8 +84,8 @@ for name in sorted(wanted):
   op,args=program[pc];pc+=1
   if op=='channel':chs.append((number(args[0]),args[1]))
  tempo=next((number(args[0]) for op,args in program[labels[chs[0][1]]:] if op=='tempo'),160)
- # User-requested mix: remove Azalea's noisy percussion, keep its melody channels.
- channels=[compile_channel(label,ch,tempo) for ch,label in chs if not (name=='Music_AzaleaTown' and ch==4)]
+ # User-requested mix: omit percussion from every song; retain melodic channels.
+ channels=[compile_channel(label,ch,tempo) for ch,label in chs if ch!=4]
  (out/(name+'.json')).write_text(json.dumps({'id':name,'channels':channels,'waves':waves},separators=(',',':')))
  manifest['tracks'][name]={'file':name+'.json','source':files[name],'duration':max(c['duration'] for c in channels)}
 sfx=(r/'audio/sfx.asm').read_text();effects={}
