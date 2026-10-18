@@ -1,10 +1,10 @@
-import {awardWildVictory,wildVictoryMoney} from './wild-reward.js?v=20261018-mobs16';
-import {gymFinisherApplies} from './math-levels.js?v=20261018-mobs16';
-import {canStoreCapture,storeCapture} from './pc.js?v=20261018-mobs16';
-import {recordSeen,recordCaught} from './monster-dex.js?v=20261018-mobs16';
-import {hpLossMessage} from './hp-messages.js?v=20261018-mobs16';
-import {MATH_REWARDS,mathRewardIndex,captureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261018-mobs16';
-import {validMathChallenge} from './math-challenge.js?v=20261018-mobs16';
+import {awardWildVictory,wildVictoryMoney} from './wild-reward.js?v=20261018-test17';
+import {gymFinisherApplies} from './math-levels.js?v=20261018-test17';
+import {canStoreCapture,storeCapture} from './pc.js?v=20261018-test17';
+import {recordSeen,recordCaught} from './monster-dex.js?v=20261018-test17';
+import {hpLossMessage} from './hp-messages.js?v=20261018-test17';
+import {MATH_REWARDS,mathRewardIndex,captureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261018-test17';
+import {validMathChallenge} from './math-challenge.js?v=20261018-test17';
 import {ESCAPE_TEXT} from './capture-rules.js?v=20261016-capture3';
 // Gen II rules with Minecraft signature attacks. Hardware timing and unrelated
 // systems (held items, weather, evolution and trainer/link battles) are excluded.
@@ -50,7 +50,7 @@ export class Battle {
  let m=this.data.moves[id];if(!m)return;if(m.effect==='FURY_CUTTER')m={...m,power:m.power*2**(pf.furyCutter||0)};else pf.furyCutter=0;if(id==='FLAME_WHEEL'&&p.status==='freeze')p.status=null;this.s.logs.push(`${this.name(p)}의 ${m.name}!`);pf.lastMove=id;if(m.effect!=='RAGE')pf.rage=false;
  if(m.effect==='SOLARBEAM'&&!pf.charge){pf.charge=id;this.s.logs.push('빛을 모으고 있다!');return}pf.charge=null;
  const selfEffects=['SPEED_UP_2','DEFENSE_CURL','LIGHT_SCREEN','REFLECT','FOCUS_ENERGY','SP_DEF_UP_2','HEAL','SAFEGUARD','SYNTHESIS'];const always=self&&this.forceCritical||m.effect==='ALWAYS_HIT'||selfEffects.includes(m.effect);
- const accuracy=accuracyByte(m,ps,ts,tf.foresight);if(!always&&accuracy<255&&byte(this.rng)>=accuracy){pf.furyCutter=0;this.s.logs.push('하지만 공격은 빗나갔다!');return}
+ const testOneHit=self&&this.world.flags.violetTestMode&&p.species==='pikachu';const accuracy=testOneHit?255:accuracyByte(m,ps,ts,tf.foresight);if(!always&&accuracy<255&&byte(this.rng)>=accuracy){pf.furyCutter=0;this.s.logs.push('하지만 공격은 빗나갔다!');return}
  if(m.effect==='SPLASH'){this.s.logs.push('하지만 아무 일도 일어나지 않았다!');return;}
  if(m.effect==='MIRROR_MOVE'){if(!tf.lastMove||tf.lastMove==='MIRROR_MOVE'){this.s.logs.push('하지만 실패했다!');return}this.performUse(which,moveIndex,tf.lastMove);return}
  const stageEffects={ATTACK_DOWN:['attack',-1],DEFENSE_DOWN:['defense',-1],ACCURACY_DOWN:['accuracy',-1],DEFENSE_DOWN_2:['defense',-2],SPEED_DOWN:['speed',-1],DEFENSE_UP:['defense',1],ATTACK_UP:['attack',1],SP_ATK_UP:['specialAttack',1],EVASION_UP:['evasion',1],SPEED_DOWN_2:['speed',-2],SPEED_UP_2:['speed',2],DEFENSE_CURL:['defense',1],SP_DEF_UP_2:['specialDefense',2]};if(stageEffects[m.effect]){const[k,n]=stageEffects[m.effect];this.changeStage(n>0?which:other,k,n);return}
@@ -59,9 +59,9 @@ export class Battle {
  if(['HEAL','SYNTHESIS'].includes(m.effect)){if(p.hp===p.stats.hp){this.s.logs.push('하지만 실패했다!');return}p.hp=m.effect==='HEAL'?p.stats.hp:Math.min(p.stats.hp,p.hp+Math.floor(p.stats.hp/2));if(m.effect==='HEAL'){p.status='sleep';p.sleep=3}this.s.logs.push(`${this.name(p)}의 체력이 회복되었다!`);return}
  if(m.effect==='FORCE_SWITCH'){this.end('fled',`${this.name(t)}는 전투에서 멀어졌다!`);return}
  if(m.effect==='DREAM_EATER'&&t.status!=='sleep'){this.s.logs.push('하지만 실패했다!');return}
- let criticalStage=(['RAZOR_LEAF','SLASH'].includes(id)?2:0)+(pf.focus?1:0);const crit=(which==='player'&&this.forceCritical)||byte(this.rng)<[17,32,64,85,128][Math.min(4,criticalStage)];const effectiveness=id==='STRUGGLE'?1:typeEffect(this.data,m.type,this.data.species[t.species].types,tf.foresight);
+ let criticalStage=(['RAZOR_LEAF','SLASH'].includes(id)?2:0)+(pf.focus?1:0);const crit=(which==='player'&&this.forceCritical)||byte(this.rng)<[17,32,64,85,128][Math.min(4,criticalStage)];const effectiveness=testOneHit||id==='STRUGGLE'?1:typeEffect(this.data,m.type,this.data.species[t.species].types,tf.foresight);
  const targetHPBefore=t.hp;let total=0,hits=m.effect==='MULTI_HIT'?[2,2,2,3,3,3,4,5][Math.floor(this.rng()*8)]:1;
- for(let i=0;i<hits&&t.hp>0;i++){let amount=m.effect==='SUPER_FANG'?Math.max(1,Math.floor(t.hp/2)):damage(this.data,p,t,id==='STRUGGLE'?{...m,type:'TYPELESS'}:m,{critical:crit,stagesA:ps,stagesD:ts,screen:(SPECIAL_TYPES.has(m.type)?tf.lightScreen:tf.reflect)>0,random:this.rng,foresight:tf.foresight});if(m.effect==='SUPER_FANG'&&effectiveness===0)amount=0;const loss=Math.min(t.hp,amount);if(self&&loss>=t.hp&&gymFinisherApplies(this)&&!this.mathFinisherSolved){t.hp=targetHPBefore;pf.furyCutter=0;this.s.logs.push(`${this.name(t)}는 마지막 공격을 회피했다!`);return;}total+=loss;t.hp-=loss;}
+ for(let i=0;i<hits&&t.hp>0;i++){let amount=m.effect==='SUPER_FANG'?Math.max(1,Math.floor(t.hp/2)):damage(this.data,p,t,id==='STRUGGLE'?{...m,type:'TYPELESS'}:m,{critical:crit,stagesA:ps,stagesD:ts,screen:(SPECIAL_TYPES.has(m.type)?tf.lightScreen:tf.reflect)>0,random:this.rng,foresight:tf.foresight});if(m.effect==='SUPER_FANG'&&effectiveness===0)amount=0;if(testOneHit)amount=t.hp;const loss=Math.min(t.hp,amount);if(self&&loss>=t.hp&&gymFinisherApplies(this)&&!this.mathFinisherSolved){t.hp=targetHPBefore;pf.furyCutter=0;this.s.logs.push(`${this.name(t)}는 마지막 공격을 회피했다!`);return;}total+=loss;t.hp-=loss;}
  if(m.effect==='FURY_CUTTER')pf.furyCutter=total?Math.min(4,(pf.furyCutter||0)+1):0;
  if(self&&this.forceCritical&&crit&&total){const index=mathRewardIndex(this.mathRewardSeed,this.world.lastMathReward);this.world.lastMathReward=index;this.s.logs.push(MATH_REWARDS[index]);}
  if(crit&&total)this.s.logs.push('급소에 맞았다!');if(effectiveness===0)this.s.logs.push('효과가 없는 것 같다…');else if(effectiveness>1)this.s.logs.push('효과는 굉장했다!');else if(effectiveness<1&&!(crit&&total))this.s.logs.push('효과가 별로인 듯하다…');if(total){this.s.logs.push(`${this.name(t)}에게 ${total}의 데미지!`);this.s.logs.push(hpLossMessage(this.name(t),targetHPBefore,t.hp));}if(hits>1)this.s.logs.push(`${hits}번 맞았다!`);

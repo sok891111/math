@@ -1,10 +1,10 @@
-import {awardWildVictory} from './wild-reward.js?v=20261018-mobs16';
-import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-mobs16';
-import {initializePC,validPC} from './pc.js?v=20261018-mobs16';
-import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-mobs16';
-import {validPhoneCall} from './phone-call.js?v=20261018-mobs16';
-import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-mobs16';
-import {Battle,createPokemon,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-mobs16';
+import {awardWildVictory} from './wild-reward.js?v=20261018-test17';
+import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-test17';
+import {initializePC,validPC} from './pc.js?v=20261018-test17';
+import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-test17';
+import {validPhoneCall} from './phone-call.js?v=20261018-test17';
+import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-test17';
+import {Battle,createPokemon,statsFor,experienceAt,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-test17';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {
@@ -13,6 +13,14 @@ export class Game {
  startVioletTest(){
   const s=this.state;if(s.flags.violetTestStart||s.battle||s.healing||s.trainerEncounter||s.phoneCall||s.dexIntro)return false;
   if(!s.starter)this.startAdventure();this.enter(this.maps.VioletCity,31,26);s.facing='down';s.flags.violetTestStart=true;return true;
+ }
+ configureVioletTest(){
+  const s=this.state;if(s.battle||s.healing||s.trainerEncounter||s.phoneCall||s.dexIntro)return false;
+  let p=s.party.find(p=>p.species==='pikachu');
+  if(!p){p=createPokemon(this.battleData,'pikachu',99,this.rng);if(s.party.length>=6)s.storage.push(s.party.pop());s.party.unshift(p);initializePC(s);recordCaught(s,'pikachu');}
+  p.level=99;p.exp=experienceAt(99,this.battleData.species.pikachu.growth);p.stats=statsFor(this.battleData.species.pikachu,99,p.dvs,p.effort);p.hp=p.stats.hp;p.status=null;p.sleep=0;
+  p.moves=['THUNDERSHOCK','TACKLE'].map(id=>({id,pp:this.battleData.moves[id].pp}));
+  s.party=[p,...s.party.filter(mon=>mon!==p)];s.flags.violetTestMode=true;return true;
  }
  get map(){return this.maps[this.state.map]}
  objects(){const id=this.state.map;return this.map.objects.filter(o=>{

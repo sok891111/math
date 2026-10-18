@@ -1,6 +1,6 @@
-import {secondInteraction,secondEntry,secondGoal} from './second-badge.js?v=20261018-mobs16';
-import {beginLabCall,LAB_CALL_PAGES} from './phone-call.js?v=20261018-mobs16';
-import {functionalInteraction} from './functional-npc.js?v=20261018-mobs16';
+import {secondInteraction,secondEntry,secondGoal} from './second-badge.js?v=20261018-test17';
+import {beginLabCall,LAB_CALL_PAGES} from './phone-call.js?v=20261018-test17';
+import {functionalInteraction} from './functional-npc.js?v=20261018-test17';
 // First badge chapter: original Gold locations, with short directions for young players.
 export function chapterGoal(state){
  if(!state.flags.mysteryEgg&&!state.flags.eggDelivered)return '무궁시티 북쪽 30번 도로의 오른쪽 길로 가요! 북동쪽 포켓몬 할아버지의 집을 찾아요.';
