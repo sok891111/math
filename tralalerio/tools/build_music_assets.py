@@ -89,7 +89,7 @@ for name in sorted(wanted):
  (out/(name+'.json')).write_text(json.dumps({'id':name,'channels':channels,'waves':waves},separators=(',',':')))
  manifest['tracks'][name]={'file':name+'.json','source':files[name],'duration':max(c['duration'] for c in channels)}
 sfx=(r/'audio/sfx.asm').read_text();effects={}
-for key,label,ch in [('confirm','Sfx_ReadText2_Ch5',1),('menu','Sfx_Menu_Ch8',4),('door','Sfx_EnterDoor_Ch8',4),('exit','Sfx_ExitBuilding_Ch8',4)]:
+for key,label,ch in [('confirm','Sfx_ReadText2_Ch5',1),('menu','Sfx_Menu_Ch8',4)]:
  block=sfx.split(label+':')[1].split('sound_ret')[0];events=[];clock=0.;duty=2
  for line in block.splitlines():
   line=line.strip()
