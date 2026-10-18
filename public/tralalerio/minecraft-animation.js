@@ -1,4 +1,4 @@
-import {MINECRAFT_MOVE_BY_ID} from './minecraft-moves.js?v=20261018-test17';
+import {MINECRAFT_MOVE_BY_ID} from './minecraft-moves.js?v=20261018-audio18';
 const clamp=n=>Math.max(0,Math.min(1,n));
 const mix=(a,b,t)=>a+(b-a)*t;
 export function minecraftProfile(id){const m=MINECRAFT_MOVE_BY_ID[id];return m?'mc-'+m.profile:null}

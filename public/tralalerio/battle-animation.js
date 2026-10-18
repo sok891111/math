@@ -1,4 +1,4 @@
-import {minecraftProfile,minecraftDuration,drawMinecraftMove} from './minecraft-animation.js?v=20261018-test17';
+import {minecraftProfile,minecraftDuration,drawMinecraftMove} from './minecraft-animation.js?v=20261018-audio18';
 // Original OAM frames are pre-rendered at build time. Motion and screen effects
 // are recreated on a low-resolution Canvas; no ROM or emulator is involved.
 const REV='20261016-capture3';

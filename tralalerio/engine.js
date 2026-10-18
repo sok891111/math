@@ -1,10 +1,10 @@
-import {awardWildVictory} from './wild-reward.js?v=20261018-test17';
-import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-test17';
-import {initializePC,validPC} from './pc.js?v=20261018-test17';
-import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-test17';
-import {validPhoneCall} from './phone-call.js?v=20261018-test17';
-import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-test17';
-import {Battle,createPokemon,statsFor,experienceAt,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-test17';
+import {awardWildVictory} from './wild-reward.js?v=20261018-audio18';
+import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-audio18';
+import {initializePC,validPC} from './pc.js?v=20261018-audio18';
+import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-audio18';
+import {validPhoneCall} from './phone-call.js?v=20261018-audio18';
+import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-audio18';
+import {Battle,createPokemon,statsFor,experienceAt,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-audio18';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {

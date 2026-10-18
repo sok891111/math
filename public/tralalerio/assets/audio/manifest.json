@@ -1,0 +1,247 @@
+{
+  "version": 1,
+  "encounterGroups": {
+    "BIRD_KEEPER": "MUSIC_YOUNGSTER_ENCOUNTER",
+    "BUGSY": "MUSIC_YOUNGSTER_ENCOUNTER",
+    "BUG_CATCHER": "MUSIC_YOUNGSTER_ENCOUNTER",
+    "CAMPER": "MUSIC_YOUNGSTER_ENCOUNTER",
+    "COOLTRAINERF": "MUSIC_BEAUTY_ENCOUNTER",
+    "COOLTRAINERM": "MUSIC_HIKER_ENCOUNTER",
+    "FALKNER": "MUSIC_YOUNGSTER_ENCOUNTER",
+    "FIREBREATHER": "MUSIC_HIKER_ENCOUNTER",
+    "FISHER": "MUSIC_HIKER_ENCOUNTER",
+    "GRUNTF": "MUSIC_ROCKET_ENCOUNTER",
+    "GRUNTM": "MUSIC_ROCKET_ENCOUNTER",
+    "HIKER": "MUSIC_HIKER_ENCOUNTER",
+    "PICNICKER": "MUSIC_LASS_ENCOUNTER",
+    "POKEMANIAC": "MUSIC_POKEMANIAC_ENCOUNTER",
+    "RIVAL1": "MUSIC_RIVAL_ENCOUNTER",
+    "SAGE": "MUSIC_SAGE_ENCOUNTER",
+    "TWINS": "MUSIC_LASS_ENCOUNTER",
+    "YOUNGSTER": "MUSIC_YOUNGSTER_ENCOUNTER"
+  },
+  "maps": {
+    "SproutTower1F": "Music_SproutTower",
+    "SproutTower2F": "Music_SproutTower",
+    "SproutTower3F": "Music_SproutTower",
+    "UnionCave1F": "Music_UnionCave",
+    "UnionCaveB1F": "Music_UnionCave",
+    "UnionCaveB2F": "Music_UnionCave",
+    "SlowpokeWellB1F": "Music_DarkCave",
+    "SlowpokeWellB2F": "Music_DarkCave",
+    "DarkCaveVioletEntrance": "Music_DarkCave",
+    "Route46": "Music_Route36",
+    "AzaleaPokecenter1F": "Music_PokemonCenter",
+    "CharcoalKiln": "Music_AzaleaTown",
+    "AzaleaMart": "Music_AzaleaTown",
+    "KurtsHouse": "Music_AzaleaTown",
+    "AzaleaGym": "Music_Gym",
+    "Route33": "Music_Route30",
+    "AzaleaTown": "Music_AzaleaTown",
+    "Route32": "Music_Route30",
+    "VioletCity": "Music_VioletCity",
+    "VioletMart": "Music_VioletCity",
+    "VioletGym": "Music_Gym",
+    "EarlsPokemonAcademy": "Music_VioletCity",
+    "VioletNicknameSpeechHouse": "Music_VioletCity",
+    "VioletPokecenter1F": "Music_PokemonCenter",
+    "VioletKylesHouse": "Music_VioletCity",
+    "Route32Pokecenter1F": "Music_PokemonCenter",
+    "IlexForestAzaleaGate": "Music_Route36",
+    "Route29": "Music_Route29",
+    "NewBarkTown": "Music_NewBarkTown",
+    "ElmsLab": "Music_ElmsLab",
+    "PlayersHouse1F": "Music_NewBarkTown",
+    "PlayersHouse2F": "Music_NewBarkTown",
+    "PlayersNeighborsHouse": "Music_NewBarkTown",
+    "ElmsHouse": "Music_NewBarkTown",
+    "Route29Route46Gate": "Music_Route29",
+    "Route30": "Music_Route30",
+    "Route31": "Music_Route30",
+    "CherrygroveCity": "Music_CherrygroveCity",
+    "CherrygroveMart": "Music_CherrygroveCity",
+    "CherrygrovePokecenter1F": "Music_PokemonCenter",
+    "CherrygroveGymSpeechHouse": "Music_CherrygroveCity",
+    "GuideGentsHouse": "Music_CherrygroveCity",
+    "CherrygroveEvolutionSpeechHouse": "Music_CherrygroveCity",
+    "Route30BerryHouse": "Music_CherrygroveCity",
+    "MrPokemonsHouse": "Music_CherrygroveCity",
+    "Route31VioletGate": "Music_Route30"
+  },
+  "ids": {
+    "MUSIC_JOHTO_WILD_BATTLE": "Music_JohtoWildBattle",
+    "MUSIC_JOHTO_WILD_BATTLE_NIGHT": "Music_JohtoWildBattleNight",
+    "MUSIC_JOHTO_TRAINER_BATTLE": "Music_JohtoTrainerBattle",
+    "MUSIC_JOHTO_GYM_LEADER_BATTLE": "Music_JohtoGymBattle",
+    "MUSIC_RIVAL_BATTLE": "Music_RivalBattle",
+    "MUSIC_ROCKET_BATTLE": "Music_RocketBattle",
+    "MUSIC_WILD_VICTORY": "Music_WildPokemonVictory",
+    "MUSIC_TRAINER_VICTORY": "Music_TrainerVictory",
+    "MUSIC_GYM_VICTORY": "Music_GymLeaderVictory",
+    "MUSIC_YOUNGSTER_ENCOUNTER": "Music_LookYoungster",
+    "MUSIC_LASS_ENCOUNTER": "Music_LookLass",
+    "MUSIC_SAGE_ENCOUNTER": "Music_LookSage",
+    "MUSIC_HIKER_ENCOUNTER": "Music_LookHiker",
+    "MUSIC_ROCKET_ENCOUNTER": "Music_LookRocket",
+    "MUSIC_RIVAL_ENCOUNTER": "Music_LookRival",
+    "MUSIC_BEAUTY_ENCOUNTER": "Music_LookBeauty",
+    "MUSIC_POKEMANIAC_ENCOUNTER": "Music_LookPokemaniac"
+  },
+  "tracks": {
+    "Music_AzaleaTown": {
+      "file": "Music_AzaleaTown.json",
+      "source": "audio/music/azaleatown.asm",
+      "duration": 52.488385
+    },
+    "Music_CherrygroveCity": {
+      "file": "Music_CherrygroveCity.json",
+      "source": "audio/music/cherrygrovecity.asm",
+      "duration": 24.812691
+    },
+    "Music_DarkCave": {
+      "file": "Music_DarkCave.json",
+      "source": "audio/music/darkcave.asm",
+      "duration": 83.579591
+    },
+    "Music_ElmsLab": {
+      "file": "Music_ElmsLab.json",
+      "source": "audio/music/elmslab.asm",
+      "duration": 38.876564
+    },
+    "Music_Gym": {
+      "file": "Music_Gym.json",
+      "source": "audio/music/gym.asm",
+      "duration": 35.26014
+    },
+    "Music_GymLeaderVictory": {
+      "file": "Music_GymLeaderVictory.json",
+      "source": "audio/music/gymleadervictory.asm",
+      "duration": 37.872002
+    },
+    "Music_JohtoGymBattle": {
+      "file": "Music_JohtoGymBattle.json",
+      "source": "audio/music/johtogymbattle.asm",
+      "duration": 72.290821
+    },
+    "Music_JohtoTrainerBattle": {
+      "file": "Music_JohtoTrainerBattle.json",
+      "source": "audio/music/johtotrainerbattle.asm",
+      "duration": 112.071491
+    },
+    "Music_JohtoWildBattle": {
+      "file": "Music_JohtoWildBattle.json",
+      "source": "audio/music/johtowildbattle.asm",
+      "duration": 49.625382
+    },
+    "Music_JohtoWildBattleNight": {
+      "file": "Music_JohtoWildBattleNight.json",
+      "source": "audio/music/johtowildbattlenight.asm",
+      "duration": 51.056883
+    },
+    "Music_LookBeauty": {
+      "file": "Music_LookBeauty.json",
+      "source": "audio/music/lookbeauty.asm",
+      "duration": 16.072998
+    },
+    "Music_LookHiker": {
+      "file": "Music_LookHiker.json",
+      "source": "audio/music/lookhiker.asm",
+      "duration": 7.873258
+    },
+    "Music_LookLass": {
+      "file": "Music_LookLass.json",
+      "source": "audio/music/looklass.asm",
+      "duration": 8.28764
+    },
+    "Music_LookPokemaniac": {
+      "file": "Music_LookPokemaniac.json",
+      "source": "audio/music/lookpokemaniac.asm",
+      "duration": 28.027291
+    },
+    "Music_LookRival": {
+      "file": "Music_LookRival.json",
+      "source": "audio/music/lookrival.asm",
+      "duration": 27.424553
+    },
+    "Music_LookRocket": {
+      "file": "Music_LookRocket.json",
+      "source": "audio/music/lookrocket.asm",
+      "duration": 14.093696
+    },
+    "Music_LookSage": {
+      "file": "Music_LookSage.json",
+      "source": "audio/music/looksage.asm",
+      "duration": 14.691725
+    },
+    "Music_LookYoungster": {
+      "file": "Music_LookYoungster.json",
+      "source": "audio/music/lookyoungster.asm",
+      "duration": 9.26081
+    },
+    "Music_NewBarkTown": {
+      "file": "Music_NewBarkTown.json",
+      "source": "audio/music/newbarktown.asm",
+      "duration": 38.157674
+    },
+    "Music_PokemonCenter": {
+      "file": "Music_PokemonCenter.json",
+      "source": "audio/music/pokemoncenter.asm",
+      "duration": 30.538697
+    },
+    "Music_RivalBattle": {
+      "file": "Music_RivalBattle.json",
+      "source": "audio/music/rivalbattle.asm",
+      "duration": 66.602486
+    },
+    "Music_RocketBattle": {
+      "file": "Music_RocketBattle.json",
+      "source": "audio/music/rocketbattle.asm",
+      "duration": 68.486041
+    },
+    "Music_Route29": {
+      "file": "Music_Route29.json",
+      "source": "audio/music/route29.asm",
+      "duration": 31.395714
+    },
+    "Music_Route30": {
+      "file": "Music_Route30.json",
+      "source": "audio/music/route30.asm",
+      "duration": 32.547821
+    },
+    "Music_Route36": {
+      "file": "Music_Route36.json",
+      "source": "audio/music/route36.asm",
+      "duration": 39.780671
+    },
+    "Music_SproutTower": {
+      "file": "Music_SproutTower.json",
+      "source": "audio/music/sprouttower.asm",
+      "duration": 24.31041
+    },
+    "Music_TrainerVictory": {
+      "file": "Music_TrainerVictory.json",
+      "source": "audio/music/trainervictory.asm",
+      "duration": 13.561592
+    },
+    "Music_UnionCave": {
+      "file": "Music_UnionCave.json",
+      "source": "audio/music/unioncave.asm",
+      "duration": 56.757775
+    },
+    "Music_VioletCity": {
+      "file": "Music_VioletCity.json",
+      "source": "audio/music/violetcity.asm",
+      "duration": 43.246411
+    },
+    "Music_WildPokemonVictory": {
+      "file": "Music_WildPokemonVictory.json",
+      "source": "audio/music/wildpokemonvictory.asm",
+      "duration": 14.239672
+    }
+  },
+  "source": {
+    "repository": "https://github.com/Narishma-gb/pokegold-kr",
+    "commit": "c90f31dadef17f033a8f1bdada701b26cef18241"
+  },
+  "note": "Original score and map assignments; Web Audio pulse/wave/LFSR synthesis, not cycle-accurate Game Boy audio."
+}
