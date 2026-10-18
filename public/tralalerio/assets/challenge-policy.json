@@ -12,5 +12,37 @@
   "rareEncounterWeight": 50,
   "totalEncounterWeight": 5000,
   "pokemonShare": 0.6,
-  "minecraftShare": 0.4
+  "minecraftShare": 0.4,
+  "featuredSpecies": [
+    {
+      "id": "mc_gaddoongi",
+      "maps": [
+        "Route30",
+        "Route31",
+        "Route32",
+        "DarkCaveVioletEntrance"
+      ],
+      "weight": 1000
+    },
+    {
+      "id": "mc_megaply",
+      "maps": [
+        "Route30",
+        "Route31",
+        "Route32",
+        "DarkCaveVioletEntrance"
+      ],
+      "weight": 400
+    },
+    {
+      "id": "mc_giantfly",
+      "maps": [
+        "Route30",
+        "Route31",
+        "Route32",
+        "DarkCaveVioletEntrance"
+      ],
+      "weight": 100
+    }
+  ]
 }

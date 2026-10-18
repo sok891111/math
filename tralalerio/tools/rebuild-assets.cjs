@@ -7,6 +7,8 @@ run(process.execPath,[path.join(__dirname,'build-minecraft.cjs')]);
 run('python3',[path.join(__dirname,'build_first_badge.py'),...process.argv.slice(2)]);
 run(process.execPath,[path.join(__dirname,'add-pokemon.cjs')]);
 run(process.execPath,[path.join(__dirname,'add-minecraft.cjs')]);
+run(process.execPath,[path.join(__dirname,'add-gaddoongi.cjs')]);
+run(process.execPath,[path.join(__dirname,'add-fly-monsters.cjs')]);
 run(process.execPath,[path.join(__dirname,'apply-challenge-policy.cjs')]);
 run('python3',[path.join(__dirname,'build_evolution_assets.py'),...process.argv.slice(2)]);
 run('python3',[path.join(__dirname,'build_dex_assets.py'),...process.argv.slice(2)]);

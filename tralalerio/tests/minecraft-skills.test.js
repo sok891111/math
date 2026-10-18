@@ -8,8 +8,8 @@ import {profileFor} from '../battle-animation.js';
 const data=JSON.parse(fs.readFileSync('assets/battle-data.json')),maps=JSON.parse(fs.readFileSync('assets/maps.json'));
 function game(){const g=new Game(maps,data,{random:()=>.5});g.chooseStarter('치코리타');return g}
 function legacy(kind='enderknight',pp=14){const p=createPokemon(data,'mc_'+kind,3,()=>.5);delete p.minecraftMovesVersion;p.moves=[{id:'TACKLE',pp},{id:'GROWL',pp:40}];return p}
-test('all 28 species start with their own animated signature attack and can use it after capture',()=>{
- assert.equal(Object.keys(MINECRAFT_MOVES).length,28);
+test('all 31 species start with their own animated signature attack and can use it after capture',()=>{
+ assert.equal(Object.keys(MINECRAFT_MOVES).length,31);
  for(const [kind,s] of Object.entries(MINECRAFT_MOVES)){
   const g=game(),p=createPokemon(data,'mc_'+kind,3,()=>.5);assert.equal(p.moves[0].id,s.id);assert.equal(profileFor(s.id),'mc-'+s.profile);
   g.state.party=[p];g.startEncounter('hoothoot',5);g.battle.rng=()=>.5;

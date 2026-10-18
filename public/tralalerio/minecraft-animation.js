@@ -1,8 +1,8 @@
-import {MINECRAFT_MOVE_BY_ID} from './minecraft-moves.js?v=20261018-table19';
+import {MINECRAFT_MOVE_BY_ID} from './minecraft-moves.js?v=20261018-fly31';
 const clamp=n=>Math.max(0,Math.min(1,n));
 const mix=(a,b,t)=>a+(b-a)*t;
 export function minecraftProfile(id){const m=MINECRAFT_MOVE_BY_ID[id];return m?'mc-'+m.profile:null}
-export function minecraftDuration(id){return ['breath','beam','sonic','fangs'].includes(MINECRAFT_MOVE_BY_ID[id]?.profile)?1250:1050}
+export function minecraftDuration(id){return ['breath','beam','sonic','fangs','water-cannons','storm'].includes(MINECRAFT_MOVE_BY_ID[id]?.profile)?1250:1050}
 // Pixel geometry is drawn at 160x96. Coordinates follow the actual actor and
 // defender, so the same effects work for wild enemies and captured teammates.
 export function drawMinecraftMove(ctx,id,{a,t,p,reduced=false}){
@@ -25,7 +25,15 @@ export function drawMinecraftMove(ctx,id,{a,t,p,reduced=false}){
  }
  if(p<.07||p>.92)return motion;
  ctx.save();ctx.globalAlpha=Math.min(1,(p-.07)/.1,(.92-p)/.12);
- if(kind==='sword'||kind==='axe'){
+ if(kind==='water-cannons'){
+  // Four streams start at separate shell cannons and converge on the defender.
+  if(p>.12&&p<.8)for(let i=0;i<4;i++){
+   const offset=(i-1.5)*5,travel=clamp((p-.12-i*.025)/.38),sx=a.x+(i%2?4:-4),sy=a.y+offset;
+   for(let j=0;j<9;j++){const f=travel-j*.045;if(f<0)continue;const x=mix(sx,t.x,f),y=mix(sy,t.y,f)+Math.sin(j*2+p*30)*1.2;square(x-1,y-1,3,3,j%2?'#e1faff':color);}
+   if(p>.47)ring(t.x,t.y,3+(p-.47)*23,color);
+  }
+  if(p>.5)sparks(t.x,t.y,12,'#b8f3ff');
+ }else if(kind==='sword'||kind==='axe'){
   // The weapon swings across the defender rather than reusing Scratch sprites.
   motion.x=dx*.23*strike;motion.y=dy*.23*strike;
   if(p>.2&&p<.76){ctx.save();ctx.translate(t.x,t.y);ctx.rotate(-1.6+q*2.6);
@@ -56,6 +64,10 @@ export function drawMinecraftMove(ctx,id,{a,t,p,reduced=false}){
    const x=mix(a.x,t.x,f),y=mix(a.y,t.y,f)+6;ring(x,y,6,'#557f69');
    for(const side of [-1,1]){square(x+side*5-2,y-open*14,4,open*14,'#e1ddba');square(x+side*5-1,y-open*14-2,2,3,'#fff3d1')}
   }
+ }else if(kind==='storm'){
+  if(p<.4){ring(a.x,a.y,5+p*30,color);square(a.x-3,a.y-3,6,6,'#d8f6ff');}
+  for(let i=0;i<8;i++){const f=clamp(q-i*.035),x=mix(a.x,t.x,f),y=mix(a.y,t.y,f);ring(x,y+(i%2?3:-3),5+i*.8,i%2?color:'#e4faff');}
+  if(p>.45){for(let i=0;i<5;i++){const spin=p*18+i*1.7,radius=7+strike*13;square(t.x+Math.cos(spin)*radius,t.y+Math.sin(spin)*radius*.7,3,3,i%2?color:'#e4faff');}sparks(t.x,t.y,12,'#b9f0ff');}
  }else if(kind==='wind'){
   for(let i=0;i<5;i++){const f=clamp(q-i*.06),x=mix(a.x,t.x,f),y=mix(a.y,t.y,f);ring(x,y,4+i*1.2,i%2?color:'#7cb2cc')}
   if(p>.52){ring(t.x,t.y,8+(p-.52)*38);sparks(t.x,t.y)}

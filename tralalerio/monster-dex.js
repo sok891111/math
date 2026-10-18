@@ -19,7 +19,7 @@ export function initializeMonsterDex(state,data){
  if(legacy){for(const t of Object.values(data.trainers||{}))if(state.flags['trainer:'+t.id])for(const p of t.party)recordSeen(state,p.species);if(state.flags.onixTrade){recordCaught(state,'bellsprout');recordCaught(state,'onix');}}
 }
 export function dexHabitats(id,data,maps){
- return Object.entries(data.encounters).flatMap(([map,table])=>{const periods=['morning','day','night'].filter(time=>table[time].some(p=>p.species===id));return periods.length?[{map,name:maps[map]?.name||map,periods,levels:[...new Set(periods.flatMap(time=>table[time].filter(p=>p.species===id).map(p=>p.level)))].sort((a,b)=>a-b)}]:[];});
+ return Object.entries(data.encounters).flatMap(([map,table])=>{const periods=['morning','day','night'].filter(time=>table[time].some((p,i)=>p.species===id&&table.weights[i]>0));return periods.length?[{map,name:maps[map]?.name||map,periods,levels:[...new Set(periods.flatMap(time=>table[time].filter((p,i)=>p.species===id&&table.weights[i]>0).map(p=>p.level)))].sort((a,b)=>a-b)}]:[];});
 }
 
 export function validDexIntro(marker,state,data){

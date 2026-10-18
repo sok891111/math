@@ -4,6 +4,9 @@ const skill=(kind,name,type,profile,power=35,effect='NORMAL_HIT',chance=0,color=
  id:'MC_'+kind.toUpperCase(),kind,name,type,profile,power,effect,chance,color,accuracy:100,pp:25,
 });
 export const MINECRAFT_MOVES={
+ megaply:skill('megaply','메가 윈드','FLYING','wind',35,'NORMAL_HIT',0,'#96dfff'),
+ giantfly:skill('giantfly','거대 폭풍','FLYING','storm',35,'NORMAL_HIT',0,'#79d9ff'),
+ gaddoongi:skill('gaddoongi','네 갈래 물대포','WATER','water-cannons',35,'NORMAL_HIT',0,'#74d8f4'),
  blaze:skill('blaze','블레이즈 화염구','FIRE','fireball',30,'BURN_HIT',10,'#ffc34e'),
  irongolem:skill('irongolem','철 골렘 강타','STEEL','punch',35,'NORMAL_HIT',0,'#d2d6bd'),
  snowgolem:skill('snowgolem','눈덩이 던지기','ICE','bullet',30,'NORMAL_HIT',0,'#dceef5'),

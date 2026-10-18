@@ -1,6 +1,6 @@
 import {TYPE_LEVELS,SUBTRACTION_TYPES,LEVEL_LABELS} from './math-levels.js?v=20261018-subtract27';
-import {createPokemon} from './battle.js?v=20261018-level-evolution29';
-import {Game} from './engine.js?v=20261018-level-evolution29';
+import {createPokemon} from './battle.js?v=20261018-gaddoongi30';
+import {Game} from './engine.js?v=20261018-gaddoongi30';
 import {MATH_TYPES,MATH_LABELS,questionFor,emptyInput,validateQuestion} from './math-challenge.js?v=20261018-level-evolution29';
 import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261018-level-evolution29';
 const $=id=>document.getElementById(id),model=window.CreativeBattle,facto=window.FactoPuzzles;

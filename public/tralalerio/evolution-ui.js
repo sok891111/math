@@ -1,4 +1,4 @@
-import {commitEvolution,cancelEvolution,finishEvolution,learnEvolutionMove,queueBattleEvolutions} from './evolution.js?v=20261018-level-evolution29';
+import {commitEvolution,cancelEvolution,finishEvolution,learnEvolutionMove,queueBattleEvolutions} from './evolution.js?v=20261018-gaddoongi30';
 export function createEvolutionUI({getGame,onSave,onChange,onDone}){
  const root=document.createElement('dialog');root.id='evolution-screen';root.setAttribute('aria-label','포켓몬 진화');document.body.append(root);let generation=0;
  const el=(tag,copy,cls)=>{const e=document.createElement(tag);if(copy!==undefined)e.textContent=copy;if(cls)e.className=cls;return e;};

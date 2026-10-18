@@ -1,11 +1,11 @@
-import {queueBattleEvolutions,queueEvolution,validEvolution} from './evolution.js?v=20261018-level-evolution29';
+import {queueBattleEvolutions,queueEvolution,validEvolution} from './evolution.js?v=20261018-gaddoongi30';
 import {awardWildVictory} from './wild-reward.js?v=20261018-table19';
 import {CENTERS,secondObjectVisible,secondStep} from './second-badge.js?v=20261018-table19';
 import {initializePC,validPC} from './pc.js?v=20261018-table19';
-import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-table19';
+import {initializeMonsterDex,validMonsterDex,validDexIntro,recordCaught} from './monster-dex.js?v=20261018-gaddoongi30';
 import {validPhoneCall} from './phone-call.js?v=20261018-table19';
 import {trainerEncounterPlan,validTrainerEncounter} from './trainer-encounter.js?v=20261018-table19';
-import {Battle,createPokemon,statsFor,experienceAt,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-level-evolution29';
+import {Battle,createPokemon,statsFor,experienceAt,pickEncounter,validPokemon,validateBattle,byte,periodFor} from './battle.js?v=20261018-gaddoongi30';
 export const DIRECTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const WALKABLE=/^(FLOOR|TALL_GRASS|LADDER|STAIRCASE|DOOR|WARP_CARPET|CAVE|ENTRANCE|HOP_|00)/;
 export class Game {
