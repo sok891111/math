@@ -1,8 +1,8 @@
-import {TYPE_LEVELS,levelForType,planGymAttack} from './math-levels.js?v=20261018-table19';
+import {TYPE_LEVELS,SUBTRACTION_TYPES,levelForType,planGymAttack} from './math-levels.js?v=20261018-subtract27';
 import {rotationQuestion} from './rotation-puzzles.js?v=20261018-table19';
 import {canStoreCapture} from './pc.js?v=20261018-table19';
 import {advancedAnalogy} from './analogy-puzzles.js?v=20261018-table19';
-import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261018-table19';
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261018-subtract27';
 export const MATH_TYPES=['pattern','mirror','logic','sequence','analogy','rotate','bond','balance','latin',...LEARNING_TYPES.filter(type=>type!=='shape_complete')].filter(type=>!['bond','add_single','add_tens'].includes(type));
 export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
 export const DIFFICULTY_VERSION=7;
@@ -45,7 +45,7 @@ export function submitMath(game,model,facto){
 export function validMathChallenge(c,state,data){
  if(c===undefined)return true;const b=state.battle,p=state.party[b?.playerIndex];
  const selection=c?.kind==='capture'?!b?.trainer&&state.balls>0&&c.targetSpecies===b?.enemy.species&&c.moveIndex===undefined&&c.moveId===undefined:c?.kind===undefined&&Number.isInteger(c.moveIndex)&&p?.moves[c.moveIndex]?.id===c.moveId;
- return !!(c&&c.version===1&&(MATH_TYPES.includes(c.type)||c.type==='place_value'||c.type==='classify'||c.type==='shape_match'||['path','tower','shape_complete','bond','add_single','add_tens'].includes(c.type))&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=4294967295&&Number.isInteger(c.grade)&&c.grade>=(c.difficultyVersion===DIFFICULTY_VERSION?3:1)&&c.grade<=5&&[undefined,2,3,4,5,6,DIFFICULTY_VERSION].includes(c.difficultyVersion)&&(c.plannedRolls===undefined||Array.isArray(c.plannedRolls)&&c.plannedRolls.length<=256&&c.plannedRolls.every(n=>typeof n==='number'&&n>=0&&n<1))&&(c.gymFinisher===undefined||typeof c.gymFinisher==='boolean')&&selection&&c.playerSpecies===p.species&&!b.result&&!b.waitingSwitch&&!b.animationPending&&Array.isArray(c.input)&&c.input.length<=36&&c.input.every(v=>v===null||Number.isInteger(v)&&v>=0&&v<=100)&&Number.isInteger(c.attempts)&&c.attempts>=0&&Number.isInteger(c.hints)&&c.hints>=0&&c.hints<=3);
+ return !!(c&&c.version===1&&(MATH_TYPES.includes(c.type)||c.type==='place_value'||c.type==='classify'||c.type==='shape_match'||['path','tower','shape_complete','bond','add_single','add_tens'].includes(c.type))&&Number.isInteger(c.seed)&&c.seed>=0&&c.seed<=4294967295&&Number.isInteger(c.grade)&&c.grade>=(c.difficultyVersion===DIFFICULTY_VERSION&&!SUBTRACTION_TYPES.includes(c.type)?3:1)&&c.grade<=5&&[undefined,2,3,4,5,6,DIFFICULTY_VERSION].includes(c.difficultyVersion)&&(c.plannedRolls===undefined||Array.isArray(c.plannedRolls)&&c.plannedRolls.length<=256&&c.plannedRolls.every(n=>typeof n==='number'&&n>=0&&n<1))&&(c.gymFinisher===undefined||typeof c.gymFinisher==='boolean')&&selection&&c.playerSpecies===p.species&&!b.result&&!b.waitingSwitch&&!b.animationPending&&Array.isArray(c.input)&&c.input.length<=36&&c.input.every(v=>v===null||Number.isInteger(v)&&v>=0&&v<=100)&&Number.isInteger(c.attempts)&&c.attempts>=0&&Number.isInteger(c.hints)&&c.hints>=0&&c.hints<=3);
 }
 
 export function skipMath(game){const b=game.battle,c=b?.s.mathChallenge;if(!c)return {ok:false,resolved:false};delete b.s.mathChallenge;game.state.lastMathType=c.type;return {ok:false,resolved:c.kind==='capture'?b.action('ball',0,{captureAnswer:false}):b.action('math-pass',0,{gymDodge:c.gymFinisher===true})};}
@@ -55,7 +55,7 @@ export function upgradeChallenge(game,model,facto){
  const c=game.battle?.s.mathChallenge;if(!c)return false;
  const removed=['path','tower','shape_complete','bond','add_single','add_tens'].includes(c.type),oldRotation=c.type==='rotate'&&c.rotationVersion!==2;
  const retiredShape=c.type==='shape_match',retired=c.type==='place_value',retiredClassify=c.type==='classify',analogy=retiredClassify||c.type==='analogy'&&(c.analogyVersion!==2||c.grade<2);
- const boss=!!game.battleData.trainers?.[game.battle.s.trainer]?.badge,rare=game.battleData.challengePolicy?.rareSpecies.includes(game.battle.enemy.species),minimum=boss?4:rare?5:levelForType(c.type,3),harder=c.difficultyVersion!==DIFFICULTY_VERSION||['table_count','table_story'].includes(c.type)&&c.grade!==3,version=c.difficultyVersion!==DIFFICULTY_VERSION;
+ const boss=!!game.battleData.trainers?.[game.battle.s.trainer]?.badge,rare=game.battleData.challengePolicy?.rareSpecies.includes(game.battle.enemy.species),minimum=boss?4:rare?5:levelForType(c.type,3),harder=c.difficultyVersion!==DIFFICULTY_VERSION||(c.type==='table_count'&&c.grade!==3||SUBTRACTION_TYPES.includes(c.type)&&c.grade!==1),version=c.difficultyVersion!==DIFFICULTY_VERSION;
  if(!removed&&!oldRotation&&!retired&&!analogy&&!retiredShape&&!harder&&!version)return false;
  c.difficultyVersion=DIFFICULTY_VERSION;
  if(!removed&&!oldRotation&&!retired&&!analogy&&!retiredShape&&!harder)return true;

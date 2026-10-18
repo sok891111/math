@@ -1,6 +1,6 @@
 import {NUMBER_REASONING_LABELS,numberReasoningQuestion} from './number-reasoning-puzzles.js?v=20261018-table19';
 import {REFERENCE_LABELS,referenceQuestion} from './facto-reference-puzzles.js?v=20261018-table19';
-import {ANALYSIS_LABELS,analysisQuestion} from './story-analysis-puzzles.js?v=20261018-table19';
+import {ANALYSIS_LABELS,analysisQuestion} from './story-analysis-puzzles.js?v=20261018-subtract27';
 import {learningHints} from './learning-hints.js?v=20261018-table19';
 import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './minecraft-stories.js?v=20261018-table19';
 // Original generated questions based on public learning objectives, not workbook pages.
@@ -8,6 +8,7 @@ export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:
 export const LEARNING_TYPES=Object.keys(LEARNING_LABELS).filter(type=>!['place_value','shape_match','shape_complete'].includes(type));
 const shuffle=(a,r)=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 export function learningQuestion(type,grade,r){
+ if(['subtract_single','subtract_story'].includes(type))grade=1;
  if(Object.hasOwn(NUMBER_REASONING_LABELS,type))return numberReasoningQuestion(type,r);
  if(Object.hasOwn(REFERENCE_LABELS,type))return referenceQuestion(type,grade,r);
  if(Object.hasOwn(ANALYSIS_LABELS,type))return analysisQuestion(type,grade,r);
