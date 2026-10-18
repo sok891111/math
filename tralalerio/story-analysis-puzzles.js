@@ -2,6 +2,7 @@
 export const ANALYSIS_LABELS={story_spend_chain:'두 번 쓰고 남기기',story_less_chain:'친구들의 적은 수 잇기',table_story:'표와 이야기로 남은 수 찾기'};
 const shuffle=(a,r)=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 export function analysisQuestion(type,grade,r){
+ if(type==='table_story')grade=3;
  const pick=n=>Math.floor(r()*n),names=['스티브','알렉스','엔더맨','피글린'],start=pick(4),first=names[start],second=names[(start+1)%4],third=names[(start+2)%4],item=['에메랄드','다이아몬드','당근','사과'][pick(4)];
  const q={type,grade,learning:true,story:true,label:ANALYSIS_LABELS[type],title:'이야기의 단서를 차례로 풀어 봐!',instruction:'누구의 수를 묻는지 먼저 읽어요. 필요한 수만 찾아 계산하고 답 조각을 골라 주세요.',models:[],hints:[]};let answer;
  const hint=(title,text)=>({title,text});

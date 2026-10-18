@@ -18,7 +18,7 @@ export function validTrainerEncounter(game,c){
 }
 export function createTrainerEncounter(container){
  let running=false,view=null;
- const icon=new Image();icon.src='/tralalerio/assets/trainer-shock.png?v=20261018-audio18';icon.decode().catch(()=>{});
+ const icon=new Image();icon.src='/tralalerio/assets/trainer-shock.png?v=20261018-table19';icon.decode().catch(()=>{});
  const emit=phase=>{container.dataset.trainerEncounter=phase;container.dispatchEvent(new CustomEvent('trainer-encounter-phase',{bubbles:true,detail:{phase,id:view.id}}))};
  async function play(marker){
   if(running)return;running=true;view={...marker,phase:'shock',started:performance.now()};

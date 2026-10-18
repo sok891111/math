@@ -1,8 +1,8 @@
-import {TYPE_LEVELS,levelForType,planGymAttack} from './math-levels.js?v=20261018-audio18';
-import {rotationQuestion} from './rotation-puzzles.js?v=20261018-audio18';
-import {canStoreCapture} from './pc.js?v=20261018-audio18';
-import {advancedAnalogy} from './analogy-puzzles.js?v=20261018-audio18';
-import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261018-audio18';
+import {TYPE_LEVELS,levelForType,planGymAttack} from './math-levels.js?v=20261018-table19';
+import {rotationQuestion} from './rotation-puzzles.js?v=20261018-table19';
+import {canStoreCapture} from './pc.js?v=20261018-table19';
+import {advancedAnalogy} from './analogy-puzzles.js?v=20261018-table19';
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261018-table19';
 export const MATH_TYPES=['pattern','mirror','logic','sequence','analogy','rotate','bond','balance','latin',...LEARNING_TYPES.filter(type=>type!=='shape_complete')].filter(type=>!['bond','add_single','add_tens'].includes(type));
 export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
 export const DIFFICULTY_VERSION=7;
@@ -55,7 +55,7 @@ export function upgradeChallenge(game,model,facto){
  const c=game.battle?.s.mathChallenge;if(!c)return false;
  const removed=['path','tower','shape_complete','bond','add_single','add_tens'].includes(c.type),oldRotation=c.type==='rotate'&&c.rotationVersion!==2;
  const retiredShape=c.type==='shape_match',retired=c.type==='place_value',retiredClassify=c.type==='classify',analogy=retiredClassify||c.type==='analogy'&&(c.analogyVersion!==2||c.grade<2);
- const boss=!!game.battleData.trainers?.[game.battle.s.trainer]?.badge,rare=game.battleData.challengePolicy?.rareSpecies.includes(game.battle.enemy.species),minimum=boss?4:rare?5:levelForType(c.type,3),harder=c.difficultyVersion===DIFFICULTY_VERSION?false:true,version=c.difficultyVersion!==DIFFICULTY_VERSION;
+ const boss=!!game.battleData.trainers?.[game.battle.s.trainer]?.badge,rare=game.battleData.challengePolicy?.rareSpecies.includes(game.battle.enemy.species),minimum=boss?4:rare?5:levelForType(c.type,3),harder=c.difficultyVersion!==DIFFICULTY_VERSION||['table_count','table_story'].includes(c.type)&&c.grade!==3,version=c.difficultyVersion!==DIFFICULTY_VERSION;
  if(!removed&&!oldRotation&&!retired&&!analogy&&!retiredShape&&!harder&&!version)return false;
  c.difficultyVersion=DIFFICULTY_VERSION;
  if(!removed&&!oldRotation&&!retired&&!analogy&&!retiredShape&&!harder)return true;
