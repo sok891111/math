@@ -1,4 +1,4 @@
-import {createGameAudio} from './game-audio.js?v=20261018-table19';
+import {createGameAudio} from './game-audio.js?v=20261018-azalea20';
 import {createPCUI} from './pc-ui.js?v=20261018-table19';
 import {createMonsterDexUI} from './monster-dex-ui.js?v=20261018-table19';
 import {createPhoneAnimation,LAB_CALL_PAGES,finishLabCall} from './phone-call.js?v=20261018-table19';

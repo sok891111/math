@@ -17,3 +17,5 @@ test('pulse, wave and noise synthesis produce finite non-silent stereo audio',()
  const context={createBuffer(channels,length){const values=Array.from({length:channels},()=>new Float32Array(length));return {getChannelData:n=>values[n]};}};
  for(const file of ['Music_VioletCity','Music_JohtoWildBattle']){const score=JSON.parse(fs.readFileSync('assets/audio/'+file+'.json'));for(const channel of score.channels){const short={...channel,duration:2,events:channel.events.filter(e=>e[0]<2)};if(!short.events.length)continue;const buffer=synthesizeChannel(context,short,score.waves,8000),values=buffer.getChannelData(0);assert.ok(values.every(Number.isFinite));assert.ok(values.some(v=>Math.abs(v)>.001));}}
 });
+
+test('Azalea removes only its percussion while other towns retain the drum channel',()=>{const read=id=>JSON.parse(fs.readFileSync('assets/audio/'+id+'.json'));assert.deepEqual(read('Music_AzaleaTown').channels.map(c=>c.channel),[1,2,3]);assert.ok(read('Music_VioletCity').channels.some(c=>c.channel===4));});

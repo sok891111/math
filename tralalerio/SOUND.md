@@ -31,3 +31,5 @@ iPad Safari 자동재생 정책에 따라 첫 터치나 키 입력에서 AudioCo
 - `cd tralalerio && node --test tests/game-audio.test.js tests/healing.test.js tests/phone-call.test.js`
 - 서버 실행 후 `node tralalerio/tools/check-audio-browser.cjs`: Chrome·WebKit 첫 터치 재생, 음소거/음량 저장, 실제 필드·전투 종류별 전환
 - 기존 `browser-healing.mjs`, `browser-phone-call.mjs` 회복/전화 연출 회귀
+
+고동마을 믹스 변경: 사용자 요청으로 `Music_AzaleaTown`의 노이즈/드럼4번 채널만 생성에서 제외한다. 멜로디1~3번 채널과 나머지 지역 드럼은 유지한다. 전체 자산을 재생성해도 이 설정을 유지한다.
