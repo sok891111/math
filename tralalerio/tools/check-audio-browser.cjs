@@ -12,10 +12,10 @@ const {chromium,webkit}=require('playwright');
  if(kind==='field'){g.enter(maps.Route30,0,0);let spot;for(let y=1;y<g.map.height-1&&!spot;y++)for(let x=1;x<g.map.width-1&&!spot;x++)if(g.passable(x,y))spot={x,y};g.enter(maps.Route30,spot.x,spot.y);expected='Music_Route30';}
  else if(kind==='wild'){g.startEncounter('pidgey',3);expected=new Date().getHours()>=18||new Date().getHours()<4?'Music_JohtoWildBattleNight':'Music_JohtoWildBattle';}
  else {const id=kind==='rival'?'CherrygroveRival':Object.values(data.trainers).find(t=>kind==='leader'?t.badge:t.group==='YOUNGSTER').id;g.startTrainer(id);expected=kind==='leader'?'Music_JohtoGymBattle':kind==='rival'?'Music_RivalBattle':'Music_JohtoTrainerBattle';}
- if(g.state.battle)g.state.battle.animationPending=false;if(!new Game(maps,data).restore(g.serialize()))throw Error('Invalid audio fixture '+kind);
+ if(g.state.battle){g.state.battle.animationPending=false;expected='';}if(!new Game(maps,data).restore(g.serialize()))throw Error('Invalid audio fixture '+kind);
  await page.evaluate(raw=>localStorage.setItem('tralalerio-save-v1:violet-test',raw),g.serialize());await page.reload();await page.waitForFunction(()=>document.querySelector('#loading').hidden);await page.keyboard.press('Shift');await page.waitForFunction(expected=>document.querySelector('#sound-toggle')?.dataset.track===expected,expected,{timeout:5000}).catch(async e=>{console.log(kind,expected,await page.evaluate(()=>({track:document.querySelector('#sound-toggle')?.dataset.track,contexts:testAudioContexts.map(c=>c.state),location:document.querySelector('#location').textContent,save:localStorage.getItem('tralalerio-save-v1:violet-test')?.slice(0,500)})));throw e});
  }
- console.log('Live field / wild / trainer / leader / rival transitions passed.');
+ console.log('Field music and silent wild / trainer / leader / rival battle screens passed.');
  }
  if(errors.length)throw Error(errors.join('\n'));console.log(name+': first-touch unlock, original Violet music, menu-only mute/reload and clean load passed.');
  await context.close();}finally{await browser.close();}}

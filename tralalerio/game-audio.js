@@ -11,13 +11,8 @@ export function trainerEncounterMusic(t,groups={}){
  return 'MUSIC_YOUNGSTER_ENCOUNTER';
 }
 export function musicForState(state,data,manifest,hour=new Date().getHours(),encounter=null){
- const b=state.battle,t=data.trainers?.[b?.trainer];let id;
- if(b){
-  if(['won','caught'].includes(b.result)&&!b.animationPending)id=t?.badge?'MUSIC_GYM_VICTORY':t?'MUSIC_TRAINER_VICTORY':'MUSIC_WILD_VICTORY';
-  else if(['lost','fled'].includes(b.result))return manifest.maps[state.map];
-  else if(t)id=t.badge?'MUSIC_JOHTO_GYM_LEADER_BATTLE':t.group?.startsWith('RIVAL')?'MUSIC_RIVAL_BATTLE':['GRUNTM','GRUNTF'].includes(t.group)?'MUSIC_ROCKET_BATTLE':'MUSIC_JOHTO_TRAINER_BATTLE';
-  else id=hour>=18||hour<4?'MUSIC_JOHTO_WILD_BATTLE_NIGHT':'MUSIC_JOHTO_WILD_BATTLE';
- }else if(state.trainerEncounter||encounter)id=trainerEncounterMusic(data.trainers?.[state.trainerEncounter?.id||encounter],manifest.encounterGroups);
+ if(state.battle)return null;
+ let id;if(state.trainerEncounter||encounter)id=trainerEncounterMusic(data.trainers?.[state.trainerEncounter?.id||encounter],manifest.encounterGroups);
  return id?manifest.ids[id]:manifest.maps[state.map];
 }
 export function synthesizeChannel(context,channel,waves,rate=22050){
@@ -52,7 +47,7 @@ export function createGameAudio(getGame,{storage=window.localStorage}={}){
  let context,master,manifest,manifestPromise,desired=null,current=null,nodes=[],ticket=0,encounter=null,encounterMap=null,healing=false,disposed=false;
  let muted=false,volume=.4;try{const p=JSON.parse(storage.getItem('tralalerio-audio')||'null');if(p){muted=p.muted===true;volume=typeof p.volume==='number'?Math.max(0,Math.min(1,p.volume)):.4}}catch{}
  const cache=new Map(),loads=new Map();let effects,fxNodes=new Set();
- const button=document.querySelector('#sound-toggle'),controls=button;
+ const button=document.querySelector('#sound-toggle'),controls=button;controls.dataset.track='';
  function reflect(){button.textContent=muted?'소리 켜기':'소리 끄기';button.setAttribute('aria-pressed',String(!muted));if(master&&context)master.gain.setTargetAtTime(muted||healing?0:volume,context.currentTime,.04);document.dispatchEvent(new CustomEvent('game-audio-setting',{detail:{muted,volume}}));}
  function save(){try{storage.setItem('tralalerio-audio',JSON.stringify({muted,volume}))}catch{}reflect();}
  fetch(BASE+'effects.json?v=20261018-silentwarp22').then(r=>r.json()).then(raw=>effects=raw).catch(()=>{});
@@ -82,6 +77,7 @@ export function createGameAudio(getGame,{storage=window.localStorage}={}){
   const game=getGame();if(!game||!manifest)return;
   if(game.state.battle||encounterMap!==game.state.map){encounter=null;encounterMap=null;}
   desired=musicForState(game.state,game.battleData,manifest,undefined,encounter);
+  if(!desired){if(current!==null||nodes.length)stop();return;}
   if(desired!==current)play(desired);
  }
  button.onclick=()=>{muted=!muted;if(!muted&&volume===0)volume=.4;save();unlock();};
