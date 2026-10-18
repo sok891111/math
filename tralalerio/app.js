@@ -1,4 +1,4 @@
-import {createTownMapUI} from './town-map.js?v=20261018-map25';
+import {createTownMapUI} from './town-map.js?v=20261018-cursor26';
 import {createGameAudio} from './game-audio.js?v=20261018-silentbattle24';
 import {createPCUI} from './pc-ui.js?v=20261018-table19';
 import {createMonsterDexUI} from './monster-dex-ui.js?v=20261018-table19';

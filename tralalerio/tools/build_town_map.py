@@ -27,5 +27,5 @@ for line in (r/'data/maps/maps.asm').read_text().splitlines():
  if m and m[1] in mapids:mapping[m[1]]=m[2]
 assert len(mapping)==len(mapids)
 # Gold's cursor arrow, using the original transparent monochrome sprite.
-arrow=Image.open(gfx/'pokegear_sprites.png').convert('RGBA').crop((0,0,8,16));arrow.putdata([(0,0,0,0) if p[0]>240 else (50,65,49,255) for p in arrow.getdata()]);arrow.save(out/'cursor.png')
+arrow=Image.open(gfx/'pokegear_sprites.png').convert('RGBA').crop((0,0,16,16));arrow.putdata([(0,0,0,0) if p[0]>240 else (237,241,222,255) if p[0]>80 else (50,65,49,255) for p in arrow.getdata()]);arrow.save(out/'cursor.png')
 (out/'map.json').write_text(json.dumps({'version':1,'maps':mapping,'landmarks':landmarks,'source':{'repository':'https://github.com/Narishma-gb/pokegold-kr','commit':subprocess.check_output(['git','-C',str(r),'rev-parse','HEAD'],text=True).strip(),'files':['gfx/pokegear/town_map.png','gfx/pokegear/johto.bin','gfx/pokegear/kanto.bin','gfx/pokegear/pokegear.pal','gfx/pokegear/town_map_palette_map.asm','data/maps/landmarks.asm','data/maps/maps.asm']}},ensure_ascii=False,indent=2)+'\n');print('Built original Johto/Kanto maps and',len(landmarks),'landmarks for',len(mapping),'playable maps.')
