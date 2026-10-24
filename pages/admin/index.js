@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
+import AdminMonsterGrants from '../../components/AdminMonsterGrants';
 import { getBaseUrl, setCustomBaseUrl } from '../../lib/config';
 
 export default function AdminPage() {
@@ -190,7 +191,7 @@ export default function AdminPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      <style>{`
+      <style jsx global>{`
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
           background: #0b141a;
@@ -640,6 +641,7 @@ export default function AdminPage() {
                       </div>
                     </div>
 
+                    <details><summary style={{ cursor: 'pointer', color: '#86efac' }}>포켓몬·몬스터 추가 / 복구</summary><AdminMonsterGrants user={user} secret={secret} /></details>
                     <div className="url-box">
                       {/* 대표 접속 링크 (도트 모험 로비) */}
                       <div className="url-row" style={{ background: 'rgba(74,222,128,0.1)', padding: '6px 8px', borderRadius: '8px' }}>

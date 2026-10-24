@@ -10,7 +10,7 @@ const base='http://localhost:4191';
 (async()=>{try{
  let ready=false;for(let i=0;i<40;i++){try{ready=(await fetch(base+'/creative')).ok;if(ready)break;}catch{}await new Promise(r=>setTimeout(r,250));}assert.ok(ready);
  const response=await fetch(base+'/api/admin/users',{method:'POST',headers:{'Content-Type':'application/json','x-admin-secret':'creative-local-test'},body:JSON.stringify({name:'테스트</script><script>bad()</script>'})});assert.equal(response.status,200);const {user}=await response.json();
- const page=await fetch(base+'/'+user.id+'/creative');assert.equal(page.status,200);assert.match(page.headers.get('cache-control'),/no-store/);const html=await page.text();assert.ok(html.includes('window.__BLOCK_USER__'));assert.ok(html.includes(user.id));assert.ok(!html.includes('<script>bad()'));assert.ok(html.includes('/creative/game.js'));
+ const page=await fetch(base+'/'+user.id+'/creative');assert.equal(page.status,200);assert.match(page.headers.get('cache-control'),/no-store/);const html=await page.text();assert.ok(html.includes('window.__BLOCK_USER__'));assert.ok(html.includes(user.id));assert.ok(!html.includes('<script>bad()'));assert.ok(html.includes('/creative/battle.js'));
  assert.equal((await fetch(base+'/zzzzzz/creative')).status,404);
  assert.equal((await fetch(base+'/'+user.id)).status,200);assert.equal((await fetch(base+'/'+user.id+'/island')).status,200);assert.equal((await fetch(base+'/admin')).status,200);
  const trace=JSON.parse(fs.readFileSync(path.join(root,'.next/server/pages/[userId]/creative.js.nft.json')));assert.ok(trace.files.some(p=>p.endsWith('public/creative/index.html')));

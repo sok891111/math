@@ -473,8 +473,8 @@ function finishLevelTest(){
  $('exam-result-title').textContent=r.passed?'숫자 도전 성공!':r.reason==='time'?'TNT가 펑! 다음에는 끝까지 도전해 보자!':'TNT가 펑! 배운 만큼 다시 도전하자!';
  const growth=r.previousCorrect!==null&&r.correct>r.previousCorrect?` 지난번보다 ${r.correct-r.previousCorrect}개 더 맞혔어!`:'';
  $('exam-result-copy').textContent=r.passed?`${SunshineCampaign.QUESTION_COUNT}문제 중 ${r.correct}개 정답 (${r.percentage.toFixed(1)}%)! ${state.level===3?'레벨 1부터 새로운 모험을 시작하자.':'레벨 '+(state.level+1)+' 모험이 열렸어!'}`:
-  `${r.answered}문제를 풀고 ${r.correct}개를 맞혔어.${growth} ${r.reason==='time'?`다음 목표는 10분 안에 ${SunshineCampaign.QUESTION_COUNT}문제를 끝까지 풀기야.`:`통과까지 ${Math.max(0,SunshineCampaign.PASS_COUNT-r.correct)}개 더! 놓친 문제 하나를 배우고 다시 해 보자.`}`;
- $('exam-action').textContent=r.passed?(state.level===3?'보물과 함께 레벨 1로 돌아가기 →':'다음 레벨 모험 시작 →'):'TNT 다시 장전! 10분 재도전 →';
+  `${r.answered}문제를 풀고 ${r.correct}개를 맞혔어.${growth} ${r.reason==='time'?`다음 목표는 10분 안에 ${SunshineCampaign.QUESTION_COUNT}문제를 끝까지 풀기야.`:`통과까지 ${Math.max(0,SunshineCampaign.PASS_COUNT-r.correct)}개 더! 스테이지 1에서 몬스터를 만나 연습하면 다음 도전에 더 강해질 거야!`}`;
+ $('exam-action').textContent=r.passed?(state.level===3?'보물과 함께 레벨 1로 돌아가기 →':'다음 레벨 모험 시작 →'):'스테이지 1에서 몬스터와 다시 모험! →';
  const review=$('exam-review');review.replaceChildren();warmupQuestion=null;
  state.exam.questions.forEach((q,i)=>{
   const value=state.exam.answers[i],correct=value===SunshineCampaign.solution(q),li=document.createElement('li');
@@ -488,18 +488,18 @@ function finishLevelTest(){
 }
 function playExamBlast(){
  const dialog=$('level-test'),pieces=$('blast-pieces');pieces.replaceChildren();
- for(let i=0;i<42;i++){
-  const piece=document.createElement('i'),angle=i*Math.PI*2/42,distance=90+Math.random()*240;
-  piece.style.setProperty('--dx',`${Math.cos(angle)*distance}px`);piece.style.setProperty('--dy',`${Math.sin(angle)*distance}px`);piece.style.setProperty('--spin',`${i*43}deg`);piece.style.background=['#e88747','#f3c35b','#846759','#f5dfa9'][i%4];pieces.append(piece);
+ for(let i=0;i<84;i++){
+  const piece=document.createElement('i'),angle=i*Math.PI*2/84,distance=160+Math.random()*420;
+  piece.style.setProperty('--dx',`${Math.cos(angle)*distance}px`);piece.style.setProperty('--dy',`${Math.sin(angle)*distance}px`);piece.style.setProperty('--spin',`${i*43}deg`);piece.style.background=['#ff4b12','#ffb900','#4a302a','#fff4ac'][i%4];pieces.append(piece);
  }
  $('exam-result').hidden=true;$('exam-blast').hidden=false;dialog.classList.add('is-blasting');dialog.scrollTop=0;
- clearTimeout(blastTimer);blastTimer=setTimeout(()=>{dialog.classList.remove('is-blasting');$('exam-blast').hidden=true;$('exam-result').hidden=false;$('exam-action').focus({preventScroll:true});},1800);
+ clearTimeout(blastTimer);blastTimer=setTimeout(()=>{dialog.classList.remove('is-blasting');$('exam-blast').hidden=true;$('exam-result').hidden=false;$('exam-action').focus({preventScroll:true});},2600);
 }
 $('exam-submit').onclick=submitExamAnswer;$('exam-next').onclick=nextExamQuestion;
 $('exam-action').onclick=()=>{
  const state=campaign.snapshot();if(!state.test?.finished)return;
  if(state.test.passed){if(!campaign.advanceLevel())return;$('level-test').close();loadLevel();begin();notify(state.level===3?'새로운 모험 한 바퀴! 모은 보물은 그대로야.':'새 레벨이 열렸어!');}
- else openLevelTest(true);
+ else {if(!campaign.returnToStageOne())return;$('level-test').close();loadLevel();begin();notify('다시 모험 시작! 보물은 그대로야. 몬스터를 만나 연습하고 숫자 도전에 다시 도전하자!');}
 };
 $('warmup-check').onclick=()=>{
  if(!warmupQuestion)return;

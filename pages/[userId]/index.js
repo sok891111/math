@@ -73,7 +73,17 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
       accentBg: 'linear-gradient(135deg, #29452c 0%, #101e18 100%)',
       sceneClass: 'tralalerio-scene',
     },
-
+    {
+      id: 'hanja',
+      title: '마법한자',
+      path: `/${user.id}/hanja`,
+      type: 'SPELL CARD ADVENTURE',
+      meta: 'SPIRIT COLLECTION · 1P',
+      themeColor: '#e7c784',
+      themeBorder: '#bca46c',
+      accentBg: 'linear-gradient(135deg, #163e32 0%, #071e21 100%)',
+      sceneClass: 'hanja-scene',
+    },
   ];
 
   // Unlock iOS Safari AudioContext on first touch
@@ -475,6 +485,8 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
                       </div>
                     ) : g.id === 'tralalerio' ? (
                       <div className="tralalerio-preview" role="img" aria-label="뜨랠레리오 연두마을" />
+                    ) : g.id === 'hanja' ? (
+                      <div className="hanja-preview"><span>火 · 水 · 木 · 風 · 月</span></div>
                     ) : (
                       <div className="pixel-stage creative-stage">
                         <div className="pixel-sun creative-sun">☀️</div>
@@ -1178,6 +1190,15 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
           width: 100%; height: 100%;
           background: #dbe7ba url('/tralalerio/assets/NewBarkTown.png') center / cover;
           image-rendering: pixelated;
+        }
+        .hanja-preview {
+          width: 100%; height: 100%;
+          background: url('/hanja/assets/sanctuary.jpg') center / cover;
+          display: flex; align-items: end; justify-content: center;
+        }
+        .hanja-preview span {
+          color: #fff3cc; background: #123d34bb; padding: 8px 15px;
+          font-family: serif; font-size: 1.5rem; margin-bottom: 12px;
         }
         .screen-lines {
           position: absolute;

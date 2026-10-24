@@ -16,7 +16,7 @@ async function moveUntil(page,predicate){await page.locator('#scene').focus();aw
  const browser=await chromium.launch({headless:true,executablePath});
  try{
   const page=await browser.newPage({viewport:{width:1280,height:1400},reducedMotion:'reduce'}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-  assert.equal((await page.goto(base+'/creative')).status(),200);
+  assert.equal((await page.goto(base+'/creative/legacy.html')).status(),200);
   const scene=await page.locator('#scene').boundingBox();await page.mouse.click(scene.x+900*scene.width/1000,scene.y+195*scene.height/360);
   assert.equal((await snap(page)).mode,'friend');assert.ok((await page.locator('#friend-message').innerText()).length>10);const firstMessage=await page.locator('#friend-message').innerText();
   const waiting=(await snap(page)).player.x;await page.keyboard.press('ArrowRight');assert.equal((await snap(page)).player.x,waiting);
@@ -43,7 +43,7 @@ async function moveUntil(page,predicate){await page.locator('#scene').focus();aw
   }
   assert.equal((await snap(page)).mode,'warden');assert.equal((await snap(page)).completed.length,6);await page.reload();assert.equal((await snap(page)).mode,'warden');assert.equal((await snap(page)).gems,80);assert.equal(await page.locator('#replay').count(),0);
   // Mobile pointer events exercise the same capture-based drag path as real touch.
-  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});await mobile.goto(base+'/creative');
+  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});await mobile.goto(base+'/creative/legacy.html');
   assert.equal(await mobile.locator('#talk-friend').count(),0);
   const mobileErrors=[];mobile.on('pageerror',e=>mobileErrors.push(e.message));
   await mobile.locator('#scene').scrollIntoViewIfNeeded();
@@ -66,9 +66,9 @@ async function moveUntil(page,predicate){await page.locator('#scene').focus();aw
   await mobile.getByRole('button',{name:'해 블록 선택',exact:true}).tap();await mobile.locator('[data-position="7"]').tap();assert.equal((await snap(mobile)).placements[7],undefined);
   const m=await mobile.locator('[data-move="1"]').boundingBox();await mobile.mouse.move(m.x+20,m.y+20);await mobile.mouse.down();await mobile.waitForTimeout(250);await mobile.mouse.up();assert.ok((await snap(mobile)).player.x>ms.player.x);const stopped=(await snap(mobile)).player.x;await mobile.waitForTimeout(200);assert.equal((await snap(mobile)).player.x,stopped);
   await mobile.locator('#pause').tap();assert.equal((await snap(mobile)).mode,'pause');await mobile.locator('#resume').tap();assert.equal((await snap(mobile)).mode,'play');assert.equal(await mobile.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await mobile.screenshot({path:'test-artifacts/creative-playable-mobile.png',fullPage:true});
-  const context=await browser.newContext();const a=await context.newPage();await a.addInitScript(()=>window.__BLOCK_USER__={id:'testA',name:'하나'});await a.goto(base+'/creative');await a.evaluate(()=>localStorage.setItem('block-creative-bridge-v1:testA',JSON.stringify({index:3,completed:[0,1,2]})));await a.reload();assert.equal((await snap(a)).index,3);
-  const b=await context.newPage();await b.addInitScript(()=>window.__BLOCK_USER__={id:'testB',name:'둘'});await b.goto(base+'/creative');assert.equal((await snap(b)).index,0);assert.equal((await snap(b)).gems,0);
-  const blocked=await browser.newPage();await blocked.addInitScript(()=>Object.defineProperty(window,'localStorage',{get(){throw Error('blocked')}}));await blocked.goto(base+'/creative');assert.match(await blocked.locator('#storage-note').innerText(),/저장할 수 없어요/);
+  const context=await browser.newContext();const a=await context.newPage();await a.addInitScript(()=>window.__BLOCK_USER__={id:'testA',name:'하나'});await a.goto(base+'/creative/legacy.html');await a.evaluate(()=>localStorage.setItem('block-creative-bridge-v1:testA',JSON.stringify({index:3,completed:[0,1,2]})));await a.reload();assert.equal((await snap(a)).index,3);
+  const b=await context.newPage();await b.addInitScript(()=>window.__BLOCK_USER__={id:'testB',name:'둘'});await b.goto(base+'/creative/legacy.html');assert.equal((await snap(b)).index,0);assert.equal((await snap(b)).gems,0);
+  const blocked=await browser.newPage();await blocked.addInitScript(()=>Object.defineProperty(window,'localStorage',{get(){throw Error('blocked')}}));await blocked.goto(base+'/creative/legacy.html');assert.match(await blocked.locator('#storage-note').innerText(),/저장할 수 없어요/);
   assert.deepEqual(errors,[]);console.log('PASS: drag/drop, cancel, invalid drop, left/right, gaps, wrong blocks, recovery, no jump, 6 completions, reward persistence/dedup, one-time bridge completion, album, mobile, pause, user isolation.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

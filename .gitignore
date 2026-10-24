@@ -5,3 +5,5 @@ test-artifacts/
 users.json
 state_*.json
 events_*.json
+
+.tralalerio-grants/

@@ -41,6 +41,11 @@ if (fs.existsSync(creativeDir)) {
   fs.cpSync(creativeDir, path.join(publicDir, 'creative'), { recursive: true });
 }
 
+const hanjaDir = path.join(rootDir, 'hanja');
+if (fs.existsSync(hanjaDir)) {
+  fs.cpSync(hanjaDir, path.join(publicDir, 'hanja'), { recursive: true });
+}
+
 const tralalerioDir = path.join(rootDir, 'tralalerio');
 fs.cpSync(tralalerioDir, path.join(publicDir, 'tralalerio'), {
   recursive: true,

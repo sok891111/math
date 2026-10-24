@@ -7,6 +7,8 @@
   {id:2,name:'큰 수와 작은 묶음',description:'합 20~40 덧셈 · 2~3단의 작은 묶음',monsters:['skeleton','spider','witch','enderman','magma','ghast','shulker','pig','chicken','rabbit'],sum:[20,40]},
   {id:3,name:'강적과 숫자 마법',description:'합 30~50 덧셈 · 2~5단',monsters:['wither','elderguardian','evoker','ravager','piglinbrute','enderdragon','warden','enderknight','pig','chicken','rabbit'],sum:[30,50]}
  ];
+ const eliteKinds=['wither','elderguardian','evoker','ravager','piglinbrute'];
+ for(const level of levels)level.monsters=[...new Set([...level.monsters,...eliteKinds])];
  const clone=x=>JSON.parse(JSON.stringify(x));
  const qkey=q=>`${q.a}${q.operator}${q.b}`;
  function pool(level,operator='+'){
@@ -73,9 +75,13 @@
    if(state.level===levels.length){state.level=1;state.cycle++;}else state.level++;
    state.stage=1;state.stageCompleted=false;state.awaitingTest=false;state.exam=null;save();return true;
   }
+  function returnToStageOne(){
+   if(!result()?.finished||result().passed)return false;
+   state.stage=1;state.stageCompleted=false;state.awaitingTest=false;state.exam=null;save();return true;
+  }
   function updateRewards(rewards){const next={...state.rewards,...rewards};if(JSON.stringify(next)!==JSON.stringify(state.rewards)){state.rewards=next;save();}}
   function restart(){if(state.awaitingTest)return false;state.level=1;state.stage=1;state.stageCompleted=false;state.exam=null;save();return true;}
-  save();return {snapshot,question,finishStage,continueAfterStage,startTest,submitTest,advanceLevel,updateRewards,restart};
+  save();return {snapshot,question,finishStage,continueAfterStage,startTest,submitTest,advanceLevel,returnToStageOne,updateRewards,restart};
  }
  const api={create,levels,pool,solution,STAGES,TEST_MS,QUESTION_COUNT,PASS_COUNT,KEY};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else window.SunshineCampaign=api;

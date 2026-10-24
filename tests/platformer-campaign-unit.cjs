@@ -10,7 +10,7 @@ c.updateRewards({score:777,collected:42,weapon:'sword'});finishSix();
 c.startTest();assert.equal(c.snapshot().exam.questions.length,10);assert.equal(c.snapshot().test.remainingMs,C.TEST_MS);assert.equal(new Set(c.snapshot().exam.questions.map(q=>`${q.a}${q.operator}${q.b}`)).size,10);
 now+=1234;c=C.create(store,random,()=>now);assert.equal(c.snapshot().test.remainingMs,C.TEST_MS-1234);assert.equal(c.restart(),false);assert.equal(c.continueAfterStage(),false);
 solve(6);assert.equal(c.snapshot().test.passed,false);assert.equal(c.advanceLevel(),false);assert.equal(c.submitTest(12),false);
-c.startTest(true);assert.equal(c.snapshot().test.previousCorrect,6);solve(7);assert.equal(c.snapshot().test.passed,true);assert.equal(c.advanceLevel(),true);assert.equal(c.advanceLevel(),false);
+assert.equal(c.returnToStageOne(),true);assert.equal(c.snapshot().stage,1);assert.equal(c.snapshot().awaitingTest,false);assert.equal(c.snapshot().exam,null);assert.equal(c.snapshot().level,1);assert.equal(c.startTest(true),false);c=C.create(store,random,()=>now);assert.equal(c.snapshot().stage,1);assert.equal(c.snapshot().rewards.score,777);finishSix();c.startTest();assert.equal(c.snapshot().test.previousCorrect,6);solve(7);assert.equal(c.snapshot().test.passed,true);assert.equal(c.advanceLevel(),true);assert.equal(c.advanceLevel(),false);
 assert.equal(c.snapshot().level,2);assert.equal(c.snapshot().stage,1);assert.deepEqual(c.snapshot().rewards,{score:777,collected:42,weapon:'sword'});
 finishSix();c.startTest();assert.equal(c.snapshot().exam.questions.filter(q=>q.operator==='×').length,0);
 const qs=c.snapshot().exam.questions;for(let i=0;i<7;i++)c.submitTest(C.solution(qs[i]));now+=C.TEST_MS;
@@ -23,7 +23,7 @@ for(const def of C.levels){
  for(const map of Maps.layouts)for(let i=0;i<20;i++){
   const spawns=art.populate(Maps.build(map.id),random,{allowedKinds:def.monsters,windUnlocked:i%2===0});
   assert.ok(spawns.length>=5&&spawns.length<=8);assert.ok(spawns.every(z=>def.monsters.includes(z.kind)||(i%2===0&&z.kind==='breeze')));
-  if(def.id===3)assert.ok(spawns.some(z=>art.catalog[z.kind].elite));
+  assert.ok(spawns.some(z=>art.catalog[z.kind].elite));
  }
 }
 assert.equal(C.create({getItem(){throw Error('no storage');},setItem(){throw Error('no storage');}}).snapshot().level,1);

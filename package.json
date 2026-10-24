@@ -22,19 +22,27 @@
     "test:platformer-multiply-lesson": "node tests/platformer-multiply-lesson.cjs",
     "test:platformer-campaign": "node tests/platformer-campaign-unit.cjs && node tests/platformer-campaign.cjs",
     "test:service": "node tests/next-service-test.cjs",
-    "test:creative": "node tests/creative.cjs",
+    "test:creative": "node tests/creative-world.cjs && node tests/creative-battle-model.cjs && node tests/creative-battle.cjs && node tests/creative-drag-edge.cjs && node tests/creative-motion-combat.cjs && node tests/creative-facto-model.cjs && node tests/creative-facto.cjs && node tests/creative-hints.cjs && node tests/creative-learning-profile.cjs && node tests/creative-building.cjs",
     "test:creative-routes": "node tests/creative-routes.cjs",
     "test:creative-ipad": "node tests/creative-ipad.cjs",
     "test:creative-warden": "node tests/creative-warden.cjs",
+    "test:creative-battle": "node tests/creative-world.cjs && node tests/creative-battle-model.cjs && node tests/creative-battle.cjs && node tests/creative-drag-edge.cjs && node tests/creative-motion-combat.cjs && node tests/creative-facto-model.cjs && node tests/creative-facto.cjs && node tests/creative-hints.cjs && node tests/creative-learning-profile.cjs && node tests/creative-building.cjs",
+    "test:creative-legacy": "node tests/creative.cjs",
+    "test:creative-retry": "node tests/creative-retry-layout.cjs",
+    "test:creative-facto": "node tests/creative-facto-model.cjs && node tests/creative-facto.cjs",
+    "test:creative-hints": "node tests/creative-hints.cjs",
+    "test:creative-age-seven": "node tests/creative-facto-model.cjs && node tests/creative-age-seven.cjs",
+    "test:creative-learning": "node tests/creative-facto-model.cjs && node tests/creative-battle-model.cjs && node tests/creative-learning-profile.cjs",
+    "test:creative-building": "node tests/creative-building.cjs",
     "test:tralalerio": "npm --prefix tralalerio test",
-    "test:tralalerio-browser": "npm --prefix tralalerio run test:browser",
-    "test:tralalerio-player": "node tests/tralalerio-player.cjs"
+    "test:tralalerio-browser": "npm --prefix tralalerio run test:browser"
   },
   "devDependencies": {
     "playwright": "1.63.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
+    "@vercel/analytics": "^2.0.1",
     "next": "^14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

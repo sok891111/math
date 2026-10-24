@@ -2,7 +2,7 @@ const assert=require('node:assert/strict');const {chromium}=require('playwright'
 (async()=>{const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});try{
  const p=await b.newPage({viewport:{width:1024,height:900},hasTouch:true,reducedMotion:'reduce'}),errors=[];p.on('pageerror',e=>errors.push(e.message));
  await p.addInitScript(()=>{if(!localStorage.getItem('block-creative-bridge-v1:guest'))localStorage.setItem('block-creative-bridge-v1:guest',JSON.stringify({index:0,completed:[0,1,2,3,4,5],gems:80,points:800}));});
- const url=process.env.CREATIVE_TEST_URL||'http://localhost:4190/creative';await p.goto(url);
+ const url=process.env.CREATIVE_TEST_URL||'http://localhost:4190/creative/legacy.html';await p.goto(url);
  assert.equal(await p.evaluate(()=>creativeGame.snapshot().mode),'warden');assert.equal(await p.locator('#warden-game').isVisible(),true);assert.equal(await p.locator('#warden-avatar').getAttribute('aria-label'),'워든');assert.equal(await p.locator('[aria-label$="울타리 안"]').count(),9);
  await p.locator('#check-sentences').click();assert.match(await p.locator('#warden-feedback').innerText(),/먼저/);
  async function drop(n,i){const from=await p.locator(`[data-number="${n}"]`).boundingBox(),to=await p.locator(`[data-answer="${i}"]`).boundingBox();await p.mouse.move(from.x+from.width/2,from.y+from.height/2);await p.mouse.down();await p.mouse.move(to.x+to.width/2,to.y+to.height/2,{steps:8});await p.mouse.up();}

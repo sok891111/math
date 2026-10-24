@@ -41,10 +41,13 @@ module.exports = {
   },
   experimental: {
     outputFileTracingIncludes: {
+      '/api/admin/tralalerio': ['./tralalerio/assets/battle-data.json'],
       '/[userId]/platformer': ['./public/platformer/index.html'],
       '/[userId]/island': ['./public/index.html'],
       '/tralalerio': ['./public/tralalerio/index.html'],
       '/[userId]/tralalerio': ['./public/tralalerio/index.html'],
+      '/hanja': ['./public/hanja/index.html'],
+      '/[userId]/hanja': ['./public/hanja/index.html'],
     },
   },
 };
