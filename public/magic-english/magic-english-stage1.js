@@ -1,3 +1,6 @@
+import {heartRewardForBlocks} from './block-world/hearts.js';
+import {createStage3Maps,isStage3Map,ensureStage3,stage3Goal,STAGE3_CHECKLIST,STAGE3_WORDS,renderStage3Map,drawStage3Actor,sampleStage3Actor} from './magic-english-stage3.js';
+import {createStage3Controller} from './magic-english-stage3-controller.js';
 import {speechAttemptOutcome,npcVoiceLocked} from './speech-attempts.js';
 import {chooseFarewell} from './magic-english-farewells.js';
 import {conversationPages} from './magic-english-conversations.js';
@@ -93,10 +96,14 @@ export async function startMagicEnglishStage1App() {
     JoseonMarket: JOSEON_MARKET_MAP,
     AirportHall: AIRPORT_MAP,
     ...STAGE2_MAPS,
+    ...createStage3Maps(),
   };
+  const schoolLives={};
+  for(const [id,map]of Object.entries(MAPS)){if(!isStage3Map(id))continue;const life=new AirportLife(),base=map.getObjects;schoolLives[id]={life,base};map.getObjects=state=>life.objects(base(state));}
 
   const user = window.__BLOCK_USER__ || (new URLSearchParams(location.search).get('user') ? {id:new URLSearchParams(location.search).get('user')} : null);
-  const saveKey = magicEnglishSaveKey(user);
+  const stage3Test = window.__MAGIC_ENGLISH_TEST_STAGE3__ === true;
+  const saveKey = stage3Test ? 'magic-english-stage3-test-v1' : magicEnglishSaveKey(user);
   const playerWalk = new PlayerWalk();
   const followerWalk = new PlayerWalk();
   const speechRecognizer = createSpeechRecognizer();
@@ -151,7 +158,7 @@ export async function startMagicEnglishStage1App() {
       [state.x, state.y - 1],
     ];
     for (const [cx, cy] of candidates) {
-      if (currentMap().isPassable(state, cx, cy)) {
+      if (currentMap().isPassable(state, cx, cy) && !currentMap().getObjects(state).some(o=>o.x===cx&&o.y===cy)) {
         followerState = { x: cx, y: cy, facing: state.facing };
         followerWalk.reset();
         return;
@@ -188,7 +195,9 @@ export async function startMagicEnglishStage1App() {
     }
   }
 
-  const blockUser = typeof user === 'string' ? user : user?.id || new URLSearchParams(location.search).get('user') || 'demo';
+  let testProfile;
+  if(stage3Test){testProfile=localStorage.getItem('magic-english-stage3-test-profile');if(!testProfile){testProfile='stage3-test-'+crypto.randomUUID();localStorage.setItem('magic-english-stage3-test-profile',testProfile);}}
+  const blockUser = testProfile || (typeof user === 'string' ? user : user?.id || new URLSearchParams(location.search).get('user') || 'demo');
   let delivering = false;
   async function flushRewards() {
     if (delivering || saveCorruptedError) return;
@@ -220,8 +229,16 @@ export async function startMagicEnglishStage1App() {
     open:()=>{void flushRewards();const returnTo=location.pathname+location.search;
       return travelToWorld('/magic-english/block-world?user='+encodeURIComponent(blockUser)+'&controls=easy&returnTo='+encodeURIComponent(returnTo),'🧱 내 블록 세계로 여행하는 중…');},
   };
+  $('#mode-link-magic').href=location.pathname+location.search;
+  document.querySelector('.brand').href=location.pathname+location.search;
+  $('#mode-link-block').onclick=event=>{event.preventDefault();blockWorldUI.open();};
   window.addEventListener('online',flushRewards);
   setInterval(flushRewards,10000);
+
+  const school = createStage3Controller({getState:()=>state,say,save:persist,update:updateSidebar,queueReward,go:(map,x,y)=>{
+    state.map=map;state.x=x;state.y=y;state.facing='up';playerWalk.reset();syncFollowerToPlayer();held.clear();persist();updateSidebar();
+  }});
+  function schoolAct(target){if(target.id?.startsWith('s3_')){school.act(target);return;}stage2Act(target);}
 
   function anyModalOpen() {
     return interactiveModal.open || blockWorldUI.active();
@@ -319,16 +336,17 @@ export async function startMagicEnglishStage1App() {
         el.insertBefore(badgeShowEl, $('#choices'));
       }
       const isStage2Badge = rawStep.letter === 'B';
+      const isStage3Badge = rawStep.letter === 'C';
       badgeShowEl.innerHTML = `
-        <span class="me-badge-showcase-kicker">🏆 MAGIC LETTER #0${isStage2Badge ? '2' : '1'} · ALPHABET PIECE</span>
+        <span class="me-badge-showcase-kicker">🏆 MAGIC LETTER #0${isStage3Badge ? '3' : isStage2Badge ? '2' : '1'} · ALPHABET PIECE</span>
         <div class="me-badge-giant-emblem" role="img" aria-label="황금 ${rawStep.letter || 'A'} 알파벳 조각">
           <span class="me-badge-giant-letter">${rawStep.letter || 'A'}</span>
-          <span class="me-badge-giant-sub">${isStage2Badge ? 'STAGE 2' : 'STAGE 1'}</span>
+          <span class="me-badge-giant-sub">${isStage3Badge ? 'STAGE 3' : isStage2Badge ? 'STAGE 2' : 'STAGE 1'}</span>
         </div>
         <div class="me-badge-showcase-title">${rawStep.badgeTitle || '황금 알파벳 「A」 알파벳 조각 획득!'}</div>
         <div class="me-badge-showcase-words">
           ${
-            isStage2Badge
+            isStage3Badge ? `<span>Class</span><span>Cat</span><span>Come</span>` : isStage2Badge
               ? `<span>🚌 Bus [bʌs]</span><span>🎒 Bag [bæɡ]</span><span>🐘 Big [bɪɡ]</span>`
               : `<span>✈️ Airplane [ˈeər.pleɪn]</span><span>🍎 Apple [ˈæp.əl]</span><span>❓ Ask [æsk]</span>`
           }
@@ -370,7 +388,7 @@ export async function startMagicEnglishStage1App() {
         rewardEl.className = 'me-dialog-reward-banner';
         el.insertBefore(rewardEl, $('#choices'));
       }
-      rewardEl.textContent = isBadgeRevealTurn ? '🏆 조각: 돌·하트 각 1개 · Stage 완료: 블록 15개·하트 15개' : (typeof rawStep.rewardBanner==='string' ? rewardBannerText : rawStep.speaker?.includes('활빈') ? '💛 활빈과 함께 여행해요!' : ensureLearningState(state).lastRewardQuantity ? '🧱 블록 +'+state.learning.lastRewardQuantity+'개 · ❤️ 하트 +'+state.learning.lastRewardQuantity+'개' : rewardBannerText);
+      rewardEl.textContent = isBadgeRevealTurn ? '🏆 조각: 돌 1개·하트 0.5개 · Stage 완료: 블록 15개·하트 7.5개' : (typeof rawStep.rewardBanner==='string' ? rewardBannerText : rawStep.speaker?.includes('활빈') ? '💛 활빈과 함께 여행해요!' : ensureLearningState(state).lastRewardQuantity ? '🧱 블록 +'+state.learning.lastRewardQuantity+'개 · ❤️ 하트 +'+heartRewardForBlocks(state.learning.lastRewardQuantity)+'개' : rewardBannerText);
       if(ensureLearningState(state).lastWeapon)rewardEl.textContent+=' · ⚔️ '+state.learning.lastWeapon+' 획득!';
       rewardEl.hidden = false;
     } else if (rewardEl) {
@@ -490,7 +508,7 @@ export async function startMagicEnglishStage1App() {
             const learning=ensureLearningState(state); learning.failures=0; learning.lastFeedback=outcome.message;learning.lastQuality=outcome.quality; learning.lastRewardQuantity=outcome.quantity || 1;learning.lastWeapon=outcome.weaponName||null;
             if(serverAssessment?.rewardToken) queueReward({id:attemptId,type:'speech',token:serverAssessment.rewardToken});
             st.statusType='success';
-            st.statusText=`💬 ${outcome.message} 🧱 ${outcome.blockName || '블록'} +${outcome.quantity || 1}개 · ❤️ 하트 +${outcome.quantity || 1}개${outcome.weaponName?' · ⚔️ '+outcome.weaponName+' 획득!':''}`;
+            st.statusText=`💬 ${outcome.message} 🧱 ${outcome.blockName || '블록'} +${outcome.quantity || 1}개 · ❤️ 하트 +${heartRewardForBlocks(outcome.quantity || 1)}개${outcome.weaponName?' · ⚔️ '+outcome.weaponName+' 획득!':''}`;
             if(outcome.weaponName)toast('완전한 문장 보상! ⚔️ '+outcome.weaponName+'을 내 블록 세계로 보냈어요!');
             rawStep.onPass?.('self'); persist();updateSidebar();renderDialog();
             setTimeout(()=>{if(stillHere())advanceDialog(true);},750);
@@ -594,7 +612,7 @@ export async function startMagicEnglishStage1App() {
     learning.farewells??={};const [farewell,farewellKo]=chooseFarewell(target.id,learning.farewells);learning.farewells[target.id]=farewell;learning.farewells.last=farewell;persist();
     say(target.label||'친구',[
       {type:'npc',speaker:target.label||'친구',text:question,voiceClip:question},
-      {type:'speak',prompt:'친구에게 영어로 대답해 보세요!',targetPhrase:phrase,targetKey:key,guideClip:phrase,rewardHint:'말하기 성공: 랜덤 블록·하트 각 1개 · 완전한 문장: 각 2개'},
+      {type:'speak',prompt:'친구에게 영어로 대답해 보세요!',targetPhrase:phrase,targetKey:key,guideClip:phrase,rewardHint:'말하기 성공: 블록 1개·하트 0.5개 · 완전한 문장: 블록 2개·하트 1개'},
       {type:'npc',speaker:target.label||'친구',text:farewell+'\n('+farewellKo+')',voiceClip:farewell},
     ]);
   }
@@ -643,7 +661,7 @@ export async function startMagicEnglishStage1App() {
       meaningKo: extra.meaningKo || '',
       targetKey: key,
       guideClip: phrase,
-      rewardHint: extra.rewardHint || '랜덤 블록·하트 각 1~2개 · 완전한 문장: 검 확률 20%',
+      rewardHint: extra.rewardHint || '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
       bossBattle: extra.bossBattle || null,
       onPass: () => {
         onPass?.();
@@ -678,7 +696,7 @@ export async function startMagicEnglishStage1App() {
             prompt: `🔊 가이드 음성을 듣고 Speak 버튼을 눌러 「${info.sentence}」를 따라 말해 보세요!`,
             phonetic: info.phonetic,
             meaningKo: info.korean,
-            rewardHint: '단서 도감 등록 + 랜덤 블록·하트 1~2개',
+            rewardHint: '단서 도감 등록 + 랜덤 블록 1~2개·하트 0.5~1개',
           }
         ),
         {
@@ -975,13 +993,14 @@ export async function startMagicEnglishStage1App() {
           badgeTitle: '두 번째 모험 황금 알파벳 「B」 조각 획득!',
           text: '링고: “Ding! Correct! You got the letter B piece! Good job!\n축하합니다! 빛나는 두 번째 황금 B 조각을 얻었어요! 돌 블록 1개가 내 세계로 전달돼요!”',
           voiceClip: 'You got the letter B piece! Good job!',
-          rewardBanner: '🎁 보스 격파 보상: 🅱️ 황금 B 조각 + 🧱 돌 블록 1개 · ❤️ 하트 1개 전달!',
+          rewardBanner: '🎁 보스 격파 보상: 🅱️ 황금 B 조각 + 🧱 돌 블록 1개 · ❤️ 하트 0.5개 전달!',
         },
       ]);
       return;
     }
 
     if (target.id === 's2_next') {
+      if(st.completed){school.enter();return;}
       if (!st.bagRecovered) {
         say('활빈', '보따리를 먼저 되찾자!');
         return;
@@ -1002,7 +1021,8 @@ export async function startMagicEnglishStage1App() {
           milestone(2);
           persist();
           updateSidebar();
-          toast('Stage 2 완료! 나무·흙·돌 각 5개와 하트 15개를 받았어요!');
+          toast('Stage 2 완료! 다음은 C의 학교예요!');
+          school.enter();
         }
       );
       return;
@@ -1025,6 +1045,7 @@ export async function startMagicEnglishStage1App() {
     }
   }
   function openWordDiscoveryModal(wordId) {
+    if(Object.hasOwn(STAGE3_WORDS,wordId)){school.act({id:wordId==='class'?'s3_class':wordId==='cat'?'s3_cat':'s3_ringo'});return;}
     if (STAGE2_WORDS[wordId]) {
       held.clear();
       stage2Act({ id: `s2_word_${wordId}` });
@@ -1077,7 +1098,7 @@ export async function startMagicEnglishStage1App() {
           meaningKo: guideMap.meaning,
           targetKey: wordId,
           guideClip: guideMap.wordClip,
-          rewardHint: '단서 도감 등록 + 랜덤 블록·하트 1~2개',
+          rewardHint: '단서 도감 등록 + 랜덤 블록 1~2개·하트 0.5~1개',
           onPass: () => {
             const disc = recordWordDiscovery(state, wordId);
             allFoundNow = disc.allDiscovered;
@@ -1126,6 +1147,7 @@ export async function startMagicEnglishStage1App() {
 
   // 2. Turn-based Speaking Conversation with Amy or Staff
   function openSpeakingModal(context = 'practice') {
+    if(isStage3Map(state.map)){school.act({id:'s3_ringo'});return;}
     if (context === 'staff') {
       interactWithStaff();
     } else {
@@ -1152,7 +1174,7 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '저는 괜찮아요.',
           targetKey: 'i_am_okay',
           guideClip: 'phrase_i_am_okay',
-          rewardHint: '랜덤 블록·하트 각 1~2개 · 완전한 문장: 검 확률 20%',
+          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
           onPass: () => {
             const r = grantSpeakRewardOnce(state, 'npc-speak-traveler', 15, '여행객과 안부 인사하기');
             rewardGrantedNow = r.granted;
@@ -1192,7 +1214,7 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '좋은 아침이에요!',
           targetKey: 'good_morning',
           guideClip: 'phrase_good_morning',
-          rewardHint: '랜덤 블록·하트 각 1~2개 · 완전한 문장: 검 확률 20%',
+          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
           onPass: () => {
             const r = grantSpeakRewardOnce(state, 'npc-speak-pilot', 15, '기장님과 아침 인사하기');
             rewardGrantedNow = r.granted;
@@ -1232,7 +1254,7 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '나는 길동입니다.',
           targetKey: 'i_am_gildong',
           guideClip: 'phrase_i_am_gildong',
-          rewardHint: '랜덤 블록·하트 각 1~2개 · 완전한 문장: 검 확률 20%',
+          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
           onPass: () => {
             const r = grantSpeakRewardOnce(state, 'npc-speak-guard', 15, '심사관에게 자기소개하기');
             rewardGrantedNow = r.granted;
@@ -1272,7 +1294,7 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '네, 주세요!',
           targetKey: 'yes_please',
           guideClip: 'phrase_yes_please',
-          rewardHint: '랜덤 블록·하트 각 1~2개 · 완전한 문장: 검 확률 20%',
+          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
           onPass: () => {
             const r = grantSpeakRewardOnce(state, 'npc-speak-cafe', 15, '카페 점원에게 정중히 대답하기');
             rewardGrantedNow = r.granted;
@@ -1312,7 +1334,7 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '고마워!',
           targetKey: 'thank_you',
           guideClip: 'phrase_thank_you',
-          rewardHint: '랜덤 블록·하트 각 1~2개 · 완전한 문장: 검 확률 20%',
+          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
           onPass: () => {
             const r = grantSpeakRewardOnce(state, 'npc-speak-kid', 15, '꼬마 친구에게 감사 인사하기');
             rewardGrantedNow = r.granted;
@@ -1355,7 +1377,7 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '실례합니다. 물어봐도 될까요?',
           targetKey: 'full',
           guideClip: 'sentence_ask',
-          rewardHint: '랜덤 블록·하트 각 1~2개 · 완전한 문장: 검 확률 20%',
+          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
           onPass: method => {
             recordPracticeCompletion(state, method);
             const r = grantSpeakRewardOnce(state, 'npc-speak-amy', 20, '에이미와 질문 대화 연습');
@@ -1619,9 +1641,16 @@ export async function startMagicEnglishStage1App() {
     }
 
 
+    if(state.stage3){
+      const title=document.createElement('h3');title.textContent='Stage 3 · C 단어 도감';
+      const section=document.createElement('div');section.className='me-dex-word-grid';
+      for(const [id,w]of Object.entries(STAGE3_WORDS)){const card=document.createElement('div');card.className='me-dex-word-card'+(state.stage3.words[id]?' collected':'');const text=document.createElement('p');text.textContent=`${w.word} ${w.phonetic} · ${w.korean} — ${w.sentence}`;const listen=document.createElement('button');listen.type='button';listen.textContent='🔊 문장 듣기';listen.onclick=()=>speakEnglishPhrase(w.sentence);const practice=document.createElement('button');practice.type='button';practice.dataset.practiceWord=id;practice.textContent='🎙️ Speak 연습';card.append(text,listen,practice);section.append(card);}
+      wrap.querySelector('.me-modal-footer').before(title,section);
+    }
     wrap.querySelector('#dex-listen-letter-a').onclick = () => speakEnglishPhrase('letter_a');
+    if(state.alphabetPieces.includes('C')){const summary=wrap.querySelector('.me-dex-badge-board-top strong');if(summary)summary.textContent=`알파벳 조각 보관함 (${earnedCount} / 26) · A · B · C`; }
     for (const cell of wrap.querySelectorAll('.me-dex-badge-cell.earned')) {
-      cell.onclick = () => speakEnglishPhrase('letter_a');
+      cell.onclick = () => speakEnglishPhrase(cell.dataset.letter==='A'?'letter_a':`The letter ${cell.dataset.letter}.`);
     }
     for (const btn of wrap.querySelectorAll('[data-word-clip]')) {
       btn.onclick = () => speakEnglishPhrase(btn.dataset.wordClip);
@@ -1655,6 +1684,12 @@ export async function startMagicEnglishStage1App() {
 
   // Ringo's English Scroll (16쪽 링고의 영어 두루마리 & 길동의 실수 노트)
   function openRingoScrollModal() {
+    if(isStage3Map(state.map)){
+      interactiveModal.replaceChildren();const box=document.createElement('div');box.className='me-scroll-modal';const h=document.createElement('h2');h.textContent='링고의 C 두루마리 · 작게라도 말해 봐!';box.append(h);
+      for(const w of Object.values(STAGE3_WORDS)){const p=document.createElement('p');p.textContent=`C c · /k/ — ${w.word} ${w.phonetic} · ${w.korean}`;const b=document.createElement('button');b.type='button';b.textContent=w.sentence;b.onclick=()=>speakEnglishPhrase(w.sentence);box.append(p,b);}
+      const p=document.createElement('p');p.textContent='C의 이름은 씨. 이번 단어의 첫소리는 /k/야. 틀려도 괜찮아. 묻고, 읽고, 함께 말해 보자!';const img=document.createElement('img');img.src='assets/stage3/page16.jpg';img.alt='C 복습 두루마리';img.style.maxWidth='100%';const close=document.createElement('button');close.textContent='닫기';close.onclick=()=>{cancelActiveVoice();interactiveModal.close();};box.append(p,img,close);interactiveModal.append(box);if(!interactiveModal.open)interactiveModal.showModal();return;
+    }
+
     held.clear();
     interactiveModal.replaceChildren();
     interactiveModal.setAttribute('aria-label', '링고의 영어 두루마리 복습 코너');
@@ -2032,14 +2067,15 @@ export async function startMagicEnglishStage1App() {
       return;
     }
 
-    // Check if facing the companion following Dingo(Hwalbin)
-    if (isHwalbinFollowing() && followerState.x === tx && followerState.y === ty) {
-      if(ensureLearningState(state).failures>=5){say('활빈','너의 목소리가 안 들려. 마이크를 한번 확인해 볼래?',null,[['확인했어',()=>{state.learning.failures=0;persist();}]]);}else openRepeatConversation({id:'npc_hwalbin',label:'활빈'});
+    // Map interactions take priority if a follower is temporarily standing in a doorway.
+    const facedObject=objs.find(o=>o.x===tx&&o.y===ty);
+    if (!facedObject && isHwalbinFollowing() && followerState.x === tx && followerState.y === ty) {
+      if(ensureLearningState(state).failures>=5){say('활빈','너의 목소리가 안 들려. 마이크를 한번 확인해 볼래?',null,[['확인했어',()=>{state.learning.failures=0;persist();}]]);}else if(isStage3Map(state.map))school.act({id:'s3_hwalbin'});else openRepeatConversation({id:'npc_hwalbin',label:'활빈'});
       return;
     }
 
     const target =
-      objs.find(o => o.x === tx && o.y === ty) ||
+      facedObject ||
       (map.collision[ty]?.[tx] === 'COUNTER'
         ? objs.find(o => o.x === tx + d[0] && o.y === ty + d[1])
         : null);
@@ -2057,7 +2093,7 @@ export async function startMagicEnglishStage1App() {
     if (target.kind === 'npc' && ensureLearningState(state).failures >= 5) {
       say(target.label || '친구','너의 목소리가 안 들려. 마이크가 켜져 있는지 한번 확인해 볼래?',null,[['확인했어! 다시 이야기하기',()=>{state.learning.failures=0;persist();}],['나중에 이야기하기',()=>{}]]);return;
     }
-    if (state.map !== 'AirportHall') {stage2Act(target);return;}
+    if (state.map !== 'AirportHall') {schoolAct(target);return;}
     if (target.kind === 'npc' && REPEAT_DIALOGUES[target.id]) {
       const visits=ensureLearningState(state).visits;
       const functional=target.id==='npc_staff'&&!state.staffSpeech.completed || ['npc_amy','npc_ringo'].includes(target.id)&&!state.practice.completed || target.id==='npc_hwalbin'&&!isHwalbinFollowing();
@@ -2179,7 +2215,7 @@ export async function startMagicEnglishStage1App() {
     }
 
     const portal=walkingPortal(state,nx,ny);
-    if(portal&&!portal.ready){held.clear();if(portal.id!=='airport_exit')stage2Act(portal);return;}
+    if(portal&&!portal.ready){held.clear();if(portal.id!=='airport_exit')schoolAct(portal);return;}
     if (!map.isPassable(state, nx, ny)&&!portal?.ready) {
       if (nx === 17 && ny === 5 && !state.staffSpeech.completed) {
         say(
@@ -2254,7 +2290,7 @@ export async function startMagicEnglishStage1App() {
     $('#trainer-name').textContent = user?.name || '홍길동';
 
     const goalEl = $('#current-goal-banner');
-    if (goalEl) goalEl.textContent = ['BusStop','BusInterior','NextStop'].includes(state.map) ? stage2Goal(state) : currentStageGoal(state);
+    if (goalEl) goalEl.textContent = isStage3Map(state.map) ? stage3Goal(state) : ['BusStop','BusInterior','NextStop'].includes(state.map) ? stage2Goal(state) : currentStageGoal(state);
 
     const listEl = $('#stage1-checklist');
     if (listEl) {
@@ -2313,12 +2349,21 @@ export async function startMagicEnglishStage1App() {
     }
 
     const stage2Active=['BusStop','BusInterior','NextStop'].includes(state.map);
+    const stageNumber=isStage3Map(state.map)?3:stage2Active?2:1;
+    document.querySelector('.brand .edition').textContent=`STAGE ${stageNumber} · ALPHABET ${'ABC'[stageNumber-1]}`;
+    $('#mode-link-magic').textContent=`★ 마법영어 Stage ${stageNumber}`;
+    $('#trainer-menu-title').textContent=`마법영어 STAGE ${stageNumber} 기록`;
+    $('#open-practice-menu').textContent=stageNumber===3?'🎙️ Class · Cat · Come 말하기 연습':'🎙️ 영어 문장 말하기 연습';
+    document.querySelector('.intro .eyebrow').textContent=stageNumber===3?'MAGIC ENGLISH · EPISODE 3 · ALPHABET C (CLASS · CAT · COME)':stageNumber===2?'MAGIC ENGLISH · EPISODE 2 · ALPHABET B (BUS · BAG · BIG)':'MAGIC ENGLISH · EPISODE 1 · ALPHABET A (AIRPLANE · APPLE · ASK)';
+    document.querySelector('.intro h1').innerHTML=stageNumber===3?'미국 학교와 C의 교실!<br><span>우리 목소리로 코코를 구하자!</span>':stageNumber===2?'사라진 보따리와<br><span>B의 버스!</span>':'조선의 영웅 홍길동,<br><span>미국 공항에 떨어지다!</span>';
+    document.querySelector('.intro .lead').textContent=stageNumber===3?'틀려도 괜찮아. 작게라도 말해 보자! Class · Cat · Come을 배우고 친구들과 함께 사일런트 섀도의 봉인을 풀어 주세요.':stageNumber===2?'Bus · Bag · Big를 찾아 문장으로 말하고, 큰 파란 버스에서 보따리를 되찾아 주세요.':'공항에서 Airplane · Apple · Ask를 조사하고 영어 문장으로 활빈과 A 조각을 찾아 주세요.';
+
     document.querySelector('.chapter-number').textContent=stage2Active?'02':'01';
     document.querySelector('.chapter .eyebrow').textContent=stage2Active?'STAGE 2 · ALPHABET B':'STAGE 1 · ALPHABET A';
     document.querySelector('.chapter h2').textContent=stage2Active?'사라진 보따리와 B의 버스':'활빈 찾기와 첫 영어 말하기';
     document.querySelector('.partner .eyebrow').textContent='ADVENTURE · BLOCK REWARDS';
     $('#partner').textContent=(isHwalbinFollowing()?'💛 활빈과 동행 중 · ':'활빈을 찾아주세요 · ')+`알파벳 조각: ${state.alphabetPieces.join(' · ') || '아직 없음'}`;
-    $('#party').textContent='대화 성공: 랜덤 블록·하트 각 1개 · 완전한 문장: 각 2개 · 조각: 돌 1개 · Stage 완료: 나무·흙·돌 각 5개';
+    $('#party').textContent='대화 성공: 블록 1개·하트 0.5개 · 완전한 문장: 블록 2개·하트 1개 · 조각: 돌 1개 · Stage 완료: 나무·흙·돌 각 5개';
     const pending=ensureLearningState(state).pending.length;
     if(pending)$('#party').textContent+=` · 보상 ${pending}건 전달 대기`;
     const label=document.querySelector('.console-bottom span:nth-child(2)');if(label)label.textContent=stage2Active?'MAGIC ENGLISH · STAGE 2':'MAGIC ENGLISH · STAGE 1';
@@ -2345,10 +2390,24 @@ export async function startMagicEnglishStage1App() {
         wordsEl.append(button);
       }
     }
+    if(isStage3Map(state.map)){
+      document.title='마법영어 Stage 3 · 미국 학교와 C의 교실!';
+      $('#battle-hint').textContent='교실을 탐색하고 Class · Cat · Come 문장으로 코코를 구해 주세요!';
+      wordsEl.setAttribute('aria-label','발견한 C 단어');
+      document.querySelector('.chapter-number').textContent='03';
+      document.querySelector('.chapter .eyebrow').textContent='STAGE 3 · ALPHABET C';
+      document.querySelector('.chapter h2').textContent='미국 학교와 C의 교실!';
+      if(label)label.textContent=stage3Test?'C 스테이지 · 테스트 모험':'MAGIC ENGLISH · STAGE 3';
+      listEl.replaceChildren();
+      for(const item of STAGE3_CHECKLIST){const li=document.createElement('li');li.id=`check-${item.id}`;li.className=item.isDone(state)?'done':'';const mark=document.createElement('span');mark.className='check';const content=document.createElement('div'),title=document.createElement('b'),sub=document.createElement('small');title.textContent=item.title;sub.textContent=item.subtitle;content.append(title,sub);li.append(mark,content);listEl.append(li);}
+      wordsEl.replaceChildren();
+      for(const [id,w]of Object.entries(STAGE3_WORDS)){const b=document.createElement('button');b.type='button';b.className='me-word-chip'+(ensureStage3(state).words[id]?' found':'');b.textContent=`${w.word} ${w.phonetic} · ${w.korean}`;b.onclick=()=>school.act({id:id==='class'?'s3_class':id==='cat'?'s3_cat':'s3_ringo'});wordsEl.append(b);}
+    }
   }
 
   function drawSprite(spriteName, x, y, dir = 'down', pose = null) {
-    const image = images[spriteName] || images.me_gildong;
+    if(drawStage3Actor(ctx,spriteName,x,y,performance.now()))return;
+    const image = images[({me_teacher:'me_staff',me_tommy:'me_kid'})[spriteName]||spriteName] || images.me_gildong;
     if (!image) return;
     const { frame, flip, mirrorLegs } = pose || walkingPose(dir, false);
     ctx.save();
@@ -2371,7 +2430,7 @@ export async function startMagicEnglishStage1App() {
     requestAnimationFrame(drawLoop);
     if(pendingWalkPortal&&!dialog&&!menuOpen&&!cutsceneLocked&&!anyModalOpen()&&!playerWalk.sample({map:state.map,x:state.x,y:state.y},now).walking){
       const portal=pendingWalkPortal;pendingWalkPortal=null;held.clear();
-      if(portal.map===state.map){if(portal.id==='airport_exit')enterStage2();else stage2Act(portal);}
+      if(portal.map===state.map){if(portal.id==='airport_exit')enterStage2();else schoolAct(portal);}
     }
     if (saveCorruptedError) return;
 
@@ -2391,11 +2450,13 @@ export async function startMagicEnglishStage1App() {
       map.width <= 10 ? (160 - map.width * 16) / 2 : -Math.max(0, Math.min(map.width * 16 - 160, x * 16 - 72))
     );
     const oy = Math.round(
-      map.height <= 9 ? (144 - map.height * 16) / 2 : -Math.max(0, Math.min(map.height * 16 - 144, y * 16 - 64))
+      map.height <= 9 ? (144 - map.height * 16) / 2 : -Math.max(0, Math.min(map.height * 16 - 144, y * 16 - (state.map === 'SchoolYard' ? 104 : 64)))
     );
 
     if (state.map === 'JoseonMarket') {
       renderJoseonMarketMap(ctx, ox, oy, state, now);
+    } else if (isStage3Map(state.map)) {
+      renderStage3Map(ctx,ox,oy,state,currentMap(),now);
     } else if (state.map !== 'AirportHall') {
       renderStage2Map(ctx, ox, oy, state, currentMap());
     } else {
@@ -2403,13 +2464,14 @@ export async function startMagicEnglishStage1App() {
       const exitOpen=!!state.rewardReceipts[STAGE1_REWARD_ID];ctx.fillStyle=exitOpen?'#426c52':'#875b3e';ctx.fillRect(ox+160,oy+16,16,16);if(!exitOpen){ctx.fillStyle='#f0ce5c';ctx.fillRect(ox+172,oy+24,2,2);}
     }
 
-    const baseObjectsMap = {
+    const roamingLife=schoolLives[state.map]?.life||airportLife;
+    const baseObjectsMap = schoolLives[state.map]?.base || {
       AirportHall: airportObjects,
       BusStop: busStopObjects,
       NextStop: nextStopObjects,
     }[state.map];
     if (baseObjectsMap) {
-      airportLife.update(now, {
+      roamingLife.update(now, {
         paused: Boolean(dialog || cutsceneLocked || menuOpen || anyModalOpen()),
         objects: baseObjectsMap(state),
         collision: map.collision,
@@ -2421,7 +2483,7 @@ export async function startMagicEnglishStage1App() {
     const actors = objects
       .filter(o => o.sprite)
       .map(o => ({
-        ...(baseObjectsMap ? airportLife.sample(o, now) : o),
+        ...(isStage3Map(state.map)?sampleStage3Actor(baseObjectsMap?roamingLife.sample(o,now):o,state):baseObjectsMap?roamingLife.sample(o,now):o),
         dir: ['up', 'down', 'left', 'right'].includes(o.direction) ? o.direction : 'down',
       }));
 
@@ -2483,7 +2545,7 @@ export async function startMagicEnglishStage1App() {
         el.textContent = o.badge;
         el.style.position = 'absolute';
         el.style.left = ((ox + ax * 16 + 8) / 160) * 100 + '%';
-        el.style.top = ((oy + ay * 16 - 3) / 144) * 100 + '%';
+        el.style.top = ((oy + ay * 16 - 3 + (o.labelOffsetY || 0)) / 144) * 100 + '%';
         mapLabelsOverlay.append(el);
       }
       if (followerSample) {
@@ -2545,8 +2607,9 @@ export async function startMagicEnglishStage1App() {
     if (isHwalbinFollowing()) {
       syncFollowerToPlayer();
     }
-    toast('저장된 마법영어 Stage 1 모험을 이어서 시작해요!');
+    toast('저장된 마법영어 모험을 이어서 시작해요!');
   } else {
+    if(stage3Test){state.stage='stage1_complete';state.map='SchoolYard';state.x=10;state.y=11;state.facing='up';state.alphabetPieces=['A','B'];state.rewardReceipts[STAGE1_REWARD_ID]={id:STAGE1_REWARD_ID};state.rewardReceipts['hwalbin-rescued']={id:'hwalbin-rescued'};const b=ensureStage2(state);Object.assign(b,{completed:true,bagRecovered:true,fragmentB:true,bossDefeated:true,driver:true,boarded:true,alighted:true});for(const key of ['bus','bag','big']){b.words[key]=true;b.signs[key]=true;}ensureStage3(state);}
     persist();
   }
 
@@ -2630,7 +2693,7 @@ export async function startMagicEnglishStage1App() {
   $('#touch-action').onclick = act;
 
   const saveHandler = () => {
-    if (persist()) toast('마법영어 Stage 1 모험과 블록 세계를 저장했어요!');
+    if (persist()) toast('마법영어 모험을 저장했어요!');
   };
   $('#save-button').onclick = saveHandler;
   $('#save-menu').onclick = saveHandler;
@@ -2680,6 +2743,7 @@ export async function startMagicEnglishStage1App() {
 
   $('#close-menu').onclick = () => toggleMenu(false);
   $('#restart').onclick = () => {
+    if(stage3Test){toggleMenu(false);say('C 테스트 다시 시작','테스트 모험만 처음부터 다시 시작할까요?',null,[['C 테스트 다시 시작',()=>{localStorage.removeItem(saveKey);location.reload();}],['계속하기',()=>{}]]);return;}
     toggleMenu(false);
     say(
       '마법영어 Stage 1 처음부터 다시 시작',
@@ -2705,6 +2769,7 @@ export async function startMagicEnglishStage1App() {
   window.__MAGIC_ENGLISH_STAGE1__ = {
     getState: () => state,
     getAirportObjects:()=>AIRPORT_MAP.getObjects(state),
+    getMapObjects:()=>currentMap().getObjects(state),
     getFollowerState: () => ({ ...followerState, following: isHwalbinFollowing() }),
     saveKey,
     openWordDiscoveryModal,

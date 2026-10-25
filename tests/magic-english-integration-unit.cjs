@@ -48,3 +48,31 @@ test('new milestone rewards stay within the five basics and already-promised iro
  const fragment=await f.request('rewards',{userId:'child001',type:'fragment',stage:1});assert.deepEqual(fragment.body.reward.blocks,[{blockId:3,quantity:1}]);const clear=await f.request('rewards',{userId:'child001',type:'clear',stage:1});assert(clear.body.reward.blocks.every(b=>[1,2,3,5,6].includes(b.blockId)));
  const legacy={...fragment.body.reward,blocks:[{blockId:33,quantity:1}]};f.values.set(prefix+'stage1:fragment:v2',legacy);const retry=await f.request('rewards',{userId:'child001',type:'fragment',stage:1});assert.equal(retry.body.created,false);assert.deepEqual(retry.body.reward.blocks,[{blockId:33,quantity:1}]);
 });
+
+test('Stage 3 verifies C speech claims, Coco rescue prerequisites and introduction before one-time clear rewards',async()=>{
+ const f=fixture(),userId='stage3-child';
+ assert.equal((await f.request('rewards',{userId,stage:3,type:'fragment'})).status,400);
+ const {STAGE3_REQUIRED,STAGE3_PRACTICE}=await import('../magic-english/magic-english-stage3-learning.js');
+ for(const key of STAGE3_REQUIRED){f.setTranscript(STAGE3_PRACTICE[key].text);const answer=await f.request('assess-pronunciation?word='+key+'&userId='+userId+'&attemptId=test-'+key.replaceAll('_','-'),wav());assert.equal(answer.status,200);assert(answer.body.passed);assert.equal((await f.request('rewards',{userId,type:'speech',token:answer.body.rewardToken})).status,200);}
+ f.setTranscript('Come here!');assert.equal((await f.request('assess-pronunciation?word=s3_call_coco&userId='+userId+'&attemptId=missing-coco',wav())).body.passed,false);
+ const fragment=await f.request('rewards',{userId,stage:3,type:'fragment'});assert.equal(fragment.status,200);assert.deepEqual(fragment.body.reward.blocks,[{blockId:3,quantity:1}]);assert.equal((await f.request('rewards',{userId,stage:3,type:'clear'})).status,400);
+ for(const key of ['s3_introduction','s3_meet']){f.setTranscript(STAGE3_PRACTICE[key].text);const answer=await f.request('assess-pronunciation?word='+key+'&userId='+userId+'&attemptId=test-'+key.replaceAll('_','-'),wav());await f.request('rewards',{userId,type:'speech',token:answer.body.rewardToken});}
+ const clear=await f.request('rewards',{userId,stage:3,type:'clear'});assert.equal(clear.status,200);assert.equal(clear.body.reward.blocks.reduce((n,b)=>n+b.quantity,0),15);assert.equal((await f.request('rewards',{userId,stage:3,type:'clear'})).body.created,false);
+});
+
+test('C daily conversations use Stage 1 signed speech rewards, hearts, weapon chance and duplicate protection',async()=>{
+ const f=fixture(),userId='daily-child';
+ const {STAGE3_DAILY_TOPICS,STAGE3_DAILY_PRACTICE}=await import('../magic-english/magic-english-stage3-daily.js');
+ const rewards=[];let firstClaim;
+ for(const [i,row]of STAGE3_DAILY_TOPICS.art.entries()){
+  const target=row.key,p=STAGE3_DAILY_PRACTICE[target];let attemptId;
+  for(let n=0;n<1000;n++){const id='daily-'+i+'-'+n;if(require('node:crypto').createHmac('sha256','unit-signing').update('weapon-drop:'+userId+':'+id).digest().readUInt32BE(0)%100<20){attemptId=id;break;}}
+  f.setTranscript(p.text);const speech=await f.request('assess-pronunciation?word='+target+'&userId='+userId+'&attemptId='+attemptId,wav());assert.equal(speech.status,200);assert.equal(speech.body.quantity,2);assert(speech.body.rewardToken);assert(speech.body.weaponReward);
+  const claim={userId,type:'speech',token:speech.body.rewardToken};firstClaim??=claim;const saved=await f.request('rewards',claim);assert.equal(saved.body.created,true);assert(saved.body.reward.blocks.every(b=>[1,2,3,5,6].includes(b.blockId)));rewards.push(saved.body.reward);
+ }
+ assert.equal((await f.request('rewards',firstClaim)).body.created,false);
+ const {createInventory,applyRewards}=await import('../magic-english/block-world/inventory.js');const received=applyRewards(createInventory(),rewards,userId);assert.equal(received.applied,5);assert.equal(received.inventory.hearts,5);assert.equal(Object.values(received.inventory.counts).reduce((a,b)=>a+b,0),10);assert.equal(applyRewards(received.inventory,rewards,userId).applied,0);
+ assert.equal((await f.request('rewards',{userId,type:'fragment',stage:3})).status,400,'daily conversations cannot unlock the story reward');
+ f.setTranscript('Coco is cute cat');const partial=await f.request('assess-pronunciation?word=s3_daily_cute&userId='+userId+'&attemptId=daily-partial',wav());assert.equal(partial.body.quantity,1);assert.equal(partial.body.weaponReward,undefined);const partialReward=await f.request('rewards',{userId,type:'speech',token:partial.body.rewardToken});assert.equal(applyRewards(received.inventory,[partialReward.body.reward],userId).inventory.hearts,5.5);
+ f.setTranscript('paper');const failed=await f.request('assess-pronunciation?word=s3_daily_paper&userId='+userId+'&attemptId=daily-word',wav());assert.equal(failed.body.passed,false);assert.equal(failed.body.rewardToken,undefined);
+});

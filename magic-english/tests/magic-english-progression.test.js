@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {mkdtemp,rm} from 'node:fs/promises';
 import os from 'node:os';import path from 'node:path';import http from 'node:http';
-import {assessLearningSpeech,REPEAT_DIALOGUES} from '../magic-english-learning.js';
+import {assessLearningSpeech,REPEAT_DIALOGUES,SPEECH_TARGETS} from '../magic-english-learning.js';
 import {createStage2Maps,ensureStage2,STAGE2_WORDS} from '../magic-english-stage2.js';
 import {AirportLife} from '../magic-english-airport-life.js';
 import {dialogueCharacter} from '../character-voices.js';
@@ -11,9 +11,9 @@ import {createInitialMagicEnglishState,parseMagicEnglishState} from '../magic-en
 const require=createRequire(import.meta.url);const {createMagicRewards}=require('../tools/magic-english-rewards.cjs');
 test('recognition distinguishes missing, meaningful words and complete sentences',()=>{
  assert.equal(assessLearningSpeech('', 'help_please').quantity,0);
- assert.equal(assessLearningSpeech('please','help_please').quantity,1);
+ assert.equal(assessLearningSpeech('please','help_please').quantity,0);
  assert.equal(assessLearningSpeech('My friend! Help, please.','help_please').quantity,2);
- assert.equal(assessLearningSpeech('Apple','apple').quantity,1);
+ assert.equal(assessLearningSpeech('Apple','apple').quantity,0);
  assert.equal(assessLearningSpeech('am','i_am_gildong').passed,false);
  assert.equal(assessLearningSpeech('Where is the bus?','where_bus').quantity,2);
  for(const variants of Object.values(REPEAT_DIALOGUES))assert(new Set(variants.map(v=>v.join('|'))).size>=3);
@@ -34,7 +34,7 @@ test('signed speech rewards, milestone prerequisites, idempotency, profile isola
  const post=body=>fetch(base+'/api/magic-english/rewards',{method:'POST',body:JSON.stringify(body)});
  assert.equal((await post({userId:'child',type:'clear',stage:2})).status,400);
  for(const target of ['airplane','apple','ask','help_please','bus','bag','big','where_bus','my_bag','big_bus']){
- const result=rewards.assessment(assessLearningSpeech(({help_please:'My friend. Help, please!',where_bus:'Where is the bus?',my_bag:'My bag!',big_bus:'Big bus!'})[target]||target,target),'child',target.replaceAll('_','-'));
+ const result=rewards.assessment(assessLearningSpeech(SPEECH_TARGETS[target],target),'child',target.replaceAll('_','-'));
  const body={userId:'child',type:'speech',token:result.rewardToken};assert.equal((await post(body)).status,200);assert.equal((await (await post(body)).json()).created,false);
  assert.equal((await post({...body,userId:'other'})).status,400);
  }

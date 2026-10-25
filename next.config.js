@@ -46,6 +46,7 @@ module.exports = {
       '/[userId]/island': ['./public/index.html'],
       '/tralalerio': ['./public/tralalerio/index.html'],
       '/[userId]/tralalerio': ['./public/tralalerio/index.html'],
+      '/magic-english/test/stage3': ['./public/magic-english/index.html'],
       '/magic-english': ['./public/magic-english/index.html'],
       '/[userId]/magic-english': ['./public/magic-english/index.html'],
       '/magic-english/block-world': ['./public/magic-english/block-world/index.html'],

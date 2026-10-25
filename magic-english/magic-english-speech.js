@@ -1,3 +1,4 @@
+import {STAGE3_AUDIO_MANIFEST} from './assets/audio/stage3/manifest.js';
 import {CHARACTER_AUDIO_MANIFEST} from './character-audio-manifest.js';
 import {prepareSpeechSamples} from './magic-english-audio-input.js';
 import {CHARACTER_VOICES, clipCharacter} from './character-voices.js';
@@ -348,7 +349,7 @@ function voiceContext(){const Context=window.AudioContext||window.webkitAudioCon
 function prepareVoiceBytes(textOrClipId,character='amy'){
  const clip=resolveElevenLabsClip(textOrClipId),text=clip?.text||textOrClipId,key=JSON.stringify([character,text]);
  if(voiceBytes.has(key))return voiceBytes.get(key);
- const cast=CHARACTER_VOICES[character],asset=CHARACTER_AUDIO_MANIFEST[key]||(clip?.voice===cast?.voice?clip.src:null);
+ const cast=CHARACTER_VOICES[character],asset=STAGE3_AUDIO_MANIFEST[key]||CHARACTER_AUDIO_MANIFEST[key]||(clip?.voice===cast?.voice?clip.src:null);
  const promise=(async()=>{const response=asset?await fetch(asset):await fetch('/api/magic-english/character-voice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,text})});if(!response.ok)throw Error('배역 음성을 재생할 수 없어요.');return response.arrayBuffer();})();
  voiceBytes.set(key,promise);promise.catch(()=>voiceBytes.delete(key));return promise;
 }
@@ -497,7 +498,7 @@ export function createSpeechRecognizer(dependencies={}) {
     if(phase!=='idle')return false;
     cancelActiveVoice();const run={id:++sequence,callbacks,finished:false,processing:false,stream:null,recorder:null};session=run;phase='requesting';callbacks.onPreparing?.();
     if(typeof window!=='undefined'&&typeof window.__MOCK_SPEECH_RECOGNIZER__==='function'){
-      phase='recording';callbacks.onStart?.();window.__MOCK_SPEECH_RECOGNIZER__({emitResult:transcript=>finish(run,null,undefined,transcript),emitError:(code,message)=>finish(run,{code,message})});return true;
+      phase='recording';callbacks.onStart?.();window.__MOCK_SPEECH_RECOGNIZER__({emitResult:(transcript,assessment)=>finish(run,null,assessment,transcript),emitError:(code,message)=>finish(run,{code,message})});return true;
     }
     if(!supported()){finish(run,{code:'not-supported',message:'마이크를 사용할 수 없어요. HTTPS 주소와 마이크 권한을 확인해 주세요.'});return false;}
     try{

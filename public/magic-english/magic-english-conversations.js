@@ -22,12 +22,12 @@ CONVERSATION_FOLLOWUPS.it_is_big=CONVERSATION_FOLLOWUPS.big;
 export const CONVERSATION_TARGETS=Object.fromEntries(Object.values(CONVERSATION_FOLLOWUPS).flat().map(([,text,key,korean])=>[key,{text,korean,required:text.toLowerCase().replace(/[^a-z\s]/g,'').split(' ').filter(w=>!['a','an','the','some','please'].includes(w))}]));
 export function conversationPages(pages,speaker='에이미'){
  let result=pages.map(practiceStep),count=result.filter(p=>p?.type==='speak').length;
- if(count===1){const index=result.findIndex(p=>p?.type==='speak'),first=result[index],rows=CONVERSATION_FOLLOWUPS[first.targetKey]||CONVERSATION_FOLLOWUPS.thank_you;
+ if(count===1&&!result.some(p=>p?.noFollowup)){const index=result.findIndex(p=>p?.type==='speak'),first=result[index],rows=CONVERSATION_FOLLOWUPS[first.targetKey]||CONVERSATION_FOLLOWUPS.thank_you;
  const prior=result.slice(0,index).findLast(p=>p?.type==='npc');let partner=prior?.speaker||speaker;if(/홍길동|단서|발견|말하기|조사/.test(partner))partner='에이미';
  const {onPass,...start}=first,extra=[];
- for(const [question,phrase,key,korean]of rows){extra.push({type:'npc',speaker:partner,text:question,voiceClip:question},{type:'speak',speaker:'홍길동 · 영어로 답하기',prompt:'친구의 질문을 듣고 영어로 대답해 보세요!',targetPhrase:phrase,targetKey:key,guideClip:phrase,meaningKo:korean,rewardHint:'대화 성공: 랜덤 블록·하트 1~2개',conversationGenerated:true});}
+ for(const [question,phrase,key,korean]of rows){extra.push({type:'npc',speaker:partner,text:question,voiceClip:question},{type:'speak',speaker:'홍길동 · 영어로 답하기',prompt:'친구의 질문을 듣고 영어로 대답해 보세요!',targetPhrase:phrase,targetKey:key,guideClip:phrase,meaningKo:korean,rewardHint:'대화 성공: 랜덤 블록 1~2개·하트 0.5~1개',conversationGenerated:true});}
  extra.at(-1).onPass=onPass;
  result.splice(index,1,start,...extra);count=1+rows.length;
  }
- let turn=0;return result.map(p=>p?.type==='speak'?{...p,conversationTurn:++turn,conversationTotal:count}:p);
+ let turn=0;return result.map(p=>{if(p?.type!=='speak')return p;turn++;return {...p,conversationTurn:p.conversationTurn??turn,conversationTotal:p.conversationTotal??count};});
 }

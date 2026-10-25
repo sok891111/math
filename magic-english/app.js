@@ -1,4 +1,4 @@
-import {startMagicEnglishStage1App} from './magic-english-stage1.js?v=20261025-stage1';
+import {startMagicEnglishStage1App} from './magic-english-stage1.js?v=20261025-stage3';
 import {applyAdminGrants} from './admin-grants.js?v=20261025-third1';
 import {createEvolutionUI} from './evolution-ui.js?v=20261018-boss-math32';
 import {createTownMapUI} from './town-map.js?v=20261025-third1';

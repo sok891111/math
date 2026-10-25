@@ -13,6 +13,7 @@ export class AirportLife {
     this.nextAt=now+1200+this.random()*800;
     const roamingIds=[
       'npc_traveler','npc_pilot','npc_kid_traveler','npc_cafe','npc_guard',
+      's3_hall_student','s3_class_student','s3_yard_student','s3_coco',
       's2_nono','s2_ungeori','s2_copycat','s2_commuter','s2_student',
     ];
     const roamers=objects.filter(o=>roamingIds.includes(o.id));
@@ -31,6 +32,7 @@ export class AirportLife {
         if(Math.abs(x-home.x)>radius||Math.abs(y-home.y)>1||collision[y]?.[x]!=='FLOOR')return false;
         if(actual.some(o=>o.id!==home.id&&o.x===x&&o.y===y))return false;
         if(player.x===x&&player.y===y||follower?.x===x&&follower?.y===y)return false;
+        if(home.id.startsWith('s3_'))return !objects.some(o=>o.id!==home.id&&Math.abs(o.x-x)+Math.abs(o.y-y)<=1)&&!(x>=15||y<=3||y>=12);
         if(isStage2)return !STAGE2_RESERVED_TILES.has(x+','+y);
         // Reserve the exit, locked room and information-desk approach.
         return !(y<=2&&x>=8||x>=13&&y<=8);
