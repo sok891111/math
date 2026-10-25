@@ -35,7 +35,7 @@ test('every live question type submits its selected correct answer after a saved
  const maps=JSON.parse(fs.readFileSync(new URL('../assets/maps.json',import.meta.url))),data=JSON.parse(fs.readFileSync(new URL('../assets/battle-data.json',import.meta.url)));
  for(const boss of [false,true])for(const type of MATH_TYPES)for(const capture of [false,true]){
   const g=new Game(maps,data,{random:()=>.5});g.startAdventure();g.state.party[0]=createPokemon(data,'pikachu',50,()=>.5);g.startEncounter(boss?'mew':'mc_zombie',3);g.battle.s.animationPending=false;const pool=mathTypesForBattle(g);if(!pool.includes(type))continue;
-  const roll=rollForQuestionType(g,pool,type),rolls=capture?[roll,.4]:[0,roll,.4];const c=capture?requestCapture(g,model,facto,()=>rolls.shift()):requestMath(g,0,model,facto,()=>rolls.shift());assert.equal(c.type,type);c.input=questionFor(c,model,facto).answer.slice();
+  if(capture)g.battle.enemy.hp=1;const roll=rollForQuestionType(g,pool,type),rolls=capture?[roll,.4]:[0,roll,.4];const c=capture?requestCapture(g,model,facto,()=>rolls.shift()):requestMath(g,0,model,facto,()=>rolls.shift());assert.equal(c.type,type);c.input=questionFor(c,model,facto).answer.slice();
   const h=new Game(maps,data,{random:()=>.5});assert.ok(h.restore(g.serialize()),type+' restore');const result=submitMath(h,model,facto);assert.ok(result.ok,type+(capture?' capture':' attack'));assert.ok(result.resolved);if(capture)assert.equal(h.battle.s.result,'caught');else assert.ok(h.battle.s.animationEvents.some(e=>e.actor==='player'&&e.critical));assert.equal(h.battle.s.mathChallenge,undefined);
  }
 });

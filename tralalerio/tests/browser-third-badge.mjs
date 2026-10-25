@@ -18,7 +18,7 @@ for(const driver of [chromium,webkit]){
    await closeDialogue();await page.locator('#save-button').click();const saved=JSON.parse(await state());assert.deepEqual([saved.map,saved.x,saved.y],[g.state.map,g.state.x,g.state.y]);await mirror();}
   async function talk(){await page.keyboard.press('z');await closeDialogue();await mirror();}
   await walk(h=>h.state.map==='IlexForest');
-  for(const [pos,facing]of [[1,null],[2,'down'],[8,'down'],[9,'left']]){await walk(h=>h.target()?.script===`FarfetchdPosition${pos}`&&(!facing||h.state.facing===facing));await talk();}
+  await walk(h=>h.target()?.script==='FarfetchdPosition1');await talk();assert.equal(g.state.flags.farfetchdPosition,10);
   assert.ok(g.state.flags.herdedFarfetchd);await page.reload();await page.locator('#loading').waitFor({state:'hidden'});await mirror();
   await walk(h=>h.target()?.script==='IlexForestCharcoalMasterScript');await talk();assert.equal(g.state.items.HM01,1);
   await walk(h=>h.target()?.cutTree);await talk();assert.ok(g.state.flags.ilexCut);

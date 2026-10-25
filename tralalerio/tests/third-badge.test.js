@@ -4,9 +4,9 @@ const maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.re
 function game(){const g=new Game(maps,data,{random:()=>.99});g.startAdventure();Object.assign(g.state.flags,{eggDelivered:true,violet:true,zephyr:true,eggGift:true,azalea:true,kurtHelp:true,slowpokeWell:true,hive:true,azaleaRival:true});for(const id of Object.keys(data.trainers))if(id!==WHITNEY)g.state.flags['trainer:'+id]=true;return g;}
 function walk(g,predicate){follow(g,routeTo(g,predicate));assert.ok(predicate(g));}
 function talk(g,script){const o=g.objects().find(o=>o.script===script);assert.ok(o,script);return storyInteraction(g,o);}
-test('walk original maps: Azalea gate, directional Farfetchd puzzle, Cut, Route34, Goldenrod and gym',()=>{
+test('walk original maps: Azalea gate, one-talk Farfetchd return, Cut, Route34, Goldenrod and gym',()=>{
  const g=game();g.enter(maps.IlexForestAzaleaGate,6,4);walk(g,h=>h.state.map==='IlexForest');assert.equal(g.objects().filter(o=>/^FarfetchdPosition/.test(o.script)).length,1);assert.equal(g.passable(8,25),false);
- for(const [pos,facing]of [[1,null],[2,'down'],[8,'down'],[9,'left']]){walk(g,h=>h.target()?.script===`FarfetchdPosition${pos}`&&(!facing||h.state.facing===facing));talk(g,`FarfetchdPosition${pos}`);const h=game();assert.ok(h.restore(g.serialize()));assert.equal(h.state.flags.farfetchdPosition,g.state.flags.farfetchdPosition);}
+ walk(g,h=>h.target()?.script==='FarfetchdPosition1');talk(g,'FarfetchdPosition1');assert.equal(g.state.flags.farfetchdPosition,10);const h=game();assert.ok(h.restore(g.serialize()));assert.equal(h.state.flags.farfetchdPosition,10);
  assert.ok(g.state.flags.herdedFarfetchd);walk(g,h=>h.target()?.script==='IlexForestCharcoalMasterScript');storyInteraction(g,g.target());assert.equal(g.state.items.HM01,1);walk(g,h=>!!h.target()?.cutTree);storyInteraction(g,g.target());assert.equal(g.passable(8,25),true);
  for(const id of ['Route34IlexForestGate','Route34','GoldenrodCity','GoldenrodGym'])walk(g,h=>h.state.map===id);assert.ok(g.state.flags.goldenrod);walk(g,h=>h.target()?.trainer===WHITNEY);assert.ok(game().restore(g.serialize()));
 });

@@ -43,15 +43,12 @@ export function thirdInteraction(game,o){
  const s=game.state,f=s.flags,id=s.map,script=o.script||'',texts=game.map.texts;
  if(o.cutTree){if(!f.hive||!f.cutGift)return reply('작은 나무',['인섹트배지와 비전머신 풀베기가 필요해요. 숲에서 파오리를 찾아 주인을 도와주세요.']);f.ilexCut=true;return reply('풀베기',['풀베기로 작은 나무를 잘랐다! 북쪽으로 가는 길이 열렸어요.']);}
  if(id==='IlexForest'){
-  const pos=Number(script.replace('FarfetchdPosition',''));
   if(/^FarfetchdPosition\d+$/.test(script)){
-   if(pos===10)return reply('파오리',['꽥! 주인에게 돌아왔어요. 옆의 숯 장인에게 말을 걸어 보세요.']);
-   const route=FARFETCHD_ROUTES[pos];f.farfetchdPosition=route[s.facing]||route.next;
-   if(f.farfetchdPosition===10)f.herdedFarfetchd=true;
-   return reply('파오리',f.herdedFarfetchd?['꽥! 파오리가 주인에게 돌아갔어요! 숯 장인에게 말을 걸어 주세요.']:['꽥! 파오리가 다른 곳으로 달아났어요. 다가가는 방향을 바꾸어 주인 쪽으로 몰아 보세요.']);
+   f.farfetchdPosition=10;f.herdedFarfetchd=true;
+   return reply('파오리',['꽥! 파오리가 주인 곁으로 날아갔어요! 숯 장인에게 말을 걸어 주세요.']);
   }
   if(script==='IlexForestCharcoalMasterScript')return gift(s,'cutGift','HM01','숯 장인',['파오리를 찾아 주어서 정말 고맙다! 비전머신01 풀베기를 주마.','인섹트배지와 풀베기가 있으면 숲 가운데 작은 나무를 잘라 북쪽으로 갈 수 있단다.'],['풀베기로 작은 나무를 베어 보렴.']);
-  if(script==='IlexForestCharcoalApprenticeScript')return reply('숯 장인의 제자',f.herdedFarfetchd?['파오리를 찾아 줘서 고마워! 우리 스승님께 말을 걸어 봐.']:['숯을 만드는 파오리가 도망갔어! 다가가는 방향에 따라 달아나는 길이 달라져.','숲 남동쪽에서 파오리를 찾아 서쪽의 주인에게 돌아오게 도와줘.']);
+  if(script==='IlexForestCharcoalApprenticeScript')return reply('숯 장인의 제자',f.herdedFarfetchd?['파오리를 찾아 줘서 고마워! 우리 스승님께 말을 걸어 봐.']:['숯을 만드는 파오리가 도망갔어! 말을 걸면 주인에게 돌아올 거야.','숲 남동쪽에서 파오리를 찾아 서쪽의 주인에게 돌아오게 도와줘.']);
   if(script==='IlexForestHeadbuttGuyScript')return gift(s,'headbuttGift','TM02','박치기 청년',['기술머신02 박치기를 받았다!'],texts.Text_HeadbuttOutro||['나무에도 포켓몬이 살고 있단다.']);
  }
  if(script==='Route34IlexForestGateTeacherScript')return gift(s,'sweetScentGift','TM12','숲 게이트의 선생님',texts.Route34IlexForestGateTeacherText||['기술머신12 달콤한향기를 받았다!'],texts.Route34IlexForestGateTeacher_GotSweetScent||['향기를 따라 포켓몬이 찾아오지.']);

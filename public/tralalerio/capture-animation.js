@@ -3,6 +3,7 @@ import {CAPTURE_FRAMES as F} from './capture-source.js?v=20261016-capture3';
 const fps=60,clamp=x=>Math.max(0,Math.min(1,x)),mix=(a,b,q)=>a+(b-a)*q;
 export function captureTimeline(event){
  let cursor=0;const phases=[];const add=(name,frames,extra={})=>{phases.push({name,start:cursor,end:cursor+frames,...extra});cursor+=frames};
+ if(event.repelled){add('throw',F.throw);add('repel',24);return {phases,frames:cursor};}
  for(const name of ['throw','open','poof','absorb','close','bounce','settle'])add(name,F[name]);
  // The original script checks every 48 frames. A passed check then starts a
  // 35-frame left/right wobble; the rest of the interval is a stationary pause.
@@ -49,7 +50,9 @@ export function createCaptureAnimator(){
     ctx.clearRect(0,0,160,96);
     target.style.opacity='1';target.style.visibility='';target.style.transform='';target.style.filter='';
     const hidden=['close','bounce','settle','wait','shake','caught'].includes(phase.name);if(hidden)target.style.visibility='hidden';
-    if(reduced){
+    if(phase.name==='repel'){
+     stamp('ballClosed',mix(x,-12,local),y-12*Math.sin(local*Math.PI)+local*50);
+    }else if(reduced){
      if(phase.name==='absorb')target.style.opacity=String(1-local);
      if(phase.name==='escape'){target.style.opacity=String(local)}
      stamp(phase.name==='escape'?'ballOpen':'ballClosed',x,ground);

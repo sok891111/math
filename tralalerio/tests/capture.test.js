@@ -5,7 +5,7 @@ import {captureTimeline} from '../capture-animation.js';
 import {CAPTURE_FRAMES,WOBBLE_PROBABILITIES,CAPTURE_SOURCE} from '../capture-source.js';
 const maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.readFileSync('assets/battle-data.json'));
 function game(){const g=new Game(maps,data,{random:()=>.5});g.chooseStarter('리아코');return g}
-function throwBall(caught=false,full=false){const g=game();if(full)while(g.state.party.length<6)g.state.party.push(createPokemon(data,'pidgey',2,()=>.5));g.startEncounter('mc_enderdragon',3);g.battle.enemy.moves=[{id:'TACKLE',pp:35}];g.battle.action('ball',0,{captureAnswer:caught});return g}
+function throwBall(caught=false,full=false){const g=game();if(full)while(g.state.party.length<6)g.state.party.push(createPokemon(data,'pidgey',2,()=>.5));g.startEncounter('mc_enderdragon',3);g.battle.enemy.hp=1;g.battle.enemy.moves=[{id:'TACKLE',pp:35}];g.battle.action('ball',0,{captureAnswer:caught});return g}
 test('capture assets and timings come from the pinned original Gold routines',()=>{
  assert.equal(CAPTURE_SOURCE.commit,'c90f31dadef17f033a8f1bdada701b26cef18241');assert.equal(WOBBLE_PROBABILITIES.length,24);assert.deepEqual(WOBBLE_PROBABILITIES.find(([limit])=>limit===100),[100,201]);assert.equal(CAPTURE_FRAMES.check,48);assert.equal(CAPTURE_FRAMES.bounce,128);
  const manifest=JSON.parse(fs.readFileSync('assets/animations/frames.json'));assert.equal(manifest.ballWobble.sourceFrameset,'PokeBall5');assert.deepEqual(manifest.ballWobble.timeline.map(f=>f.frames),[7,7,7,7,7]);assert.equal(manifest.ballPoof.sourceFrameset,'BallPoof');

@@ -1,4 +1,4 @@
-import {thirdInteraction,thirdEntry,thirdGoal} from './third-badge.js?v=20261025-third1';
+import {thirdInteraction,thirdEntry,thirdGoal} from './third-badge.js?v=20261025-escape1';
 import {secondInteraction,secondEntry,secondGoal} from './second-badge.js?v=20261025-third1';
 import {beginLabCall,LAB_CALL_PAGES} from './phone-call.js?v=20261018-table19';
 import {functionalInteraction} from './functional-npc.js?v=20261018-table19';
