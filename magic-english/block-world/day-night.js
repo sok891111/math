@@ -1,4 +1,4 @@
-export const CYCLE_SECONDS=360, NIGHT_START=.65;
+export const CYCLE_SECONDS=360, NIGHT_START=.5;
 export const normalizeTime=time=>((Number.isFinite(time)?time:.27)%1+1)%1;
 export const isNight=time=>normalizeTime(time)>=NIGHT_START;
 export function advanceTime(time,dt,enabled=true){return normalizeTime(normalizeTime(time)+(enabled?Math.max(0,dt)/CYCLE_SECONDS:0));}

@@ -1,25 +1,20 @@
-import {SENTENCE_PRACTICE,sentenceAssessment} from './magic-english-practice.js';
+import {CONVERSATION_TARGETS} from './magic-english-conversations.js';
+import {SENTENCE_PRACTICE,sentenceAssessment,assessSentencePractice} from './magic-english-practice.js';
 // Recognition measures understood text, not acoustic pronunciation accuracy.
 export const SPEECH_TARGETS = {
+ ...Object.fromEntries(Object.entries(CONVERSATION_TARGETS).map(([key,p])=>[key,p.text])),
  full:'Excuse me. Can I ask?', excuse_me:'Excuse me.', can_i_ask:'Can I ask?',
  i_am_okay:'I am okay.', good_morning:'Good morning!', i_am_gildong:'I am Gildong.',
  yes_please:'Yes, please!', thank_you:'Thank you!', help_please:'My friend. Help, please!',
  where_bus:'Where is the bus?', my_bag:'My bag!', big_bus:'Big bus!', it_is_big:'It is big.',
  ...Object.fromEntries(Object.entries(SENTENCE_PRACTICE).map(([key,practice])=>[key,practice.text])),
 };
-import {evaluateWordSimilarity60} from './magic-english-speech.js';
 const normalize=s=>String(s||'').toLowerCase().replace(/[^a-z\s]/g,' ').replace(/\s+/g,' ').trim();
 export function assessLearningSpeech(transcript,target){
- const sentence=sentenceAssessment(transcript,target);if(sentence)return sentence;
- const aliases={bus:['버스','버쓰','버즈','buzz','buss','buses','b u s'],bag:['백','배그'],big:['빅','비그']};
- const raw=String(transcript||'').replace(/[.!?,]/g,'').trim();
- const ideal=normalize(SPEECH_TARGETS[target]||target), heard=aliases[target]?.includes(raw)?target:normalize(transcript);
- const words=ideal.split(' '), tokens=heard.split(' ');
- const complete=heard===ideal;
- const meaningful=words.filter(w=>!['i','am','is','the','a','can','my','it','me'].includes(w));
- const passed=complete||meaningful.some(w=>tokens.includes(w))||(words.length===1&&!!heard&&evaluateWordSimilarity60(heard,ideal).passed);
- return {passed,quality:!passed?'unheard':complete&&words.length>1?'complete':'partial',quantity:!passed?0:complete&&words.length>1?2:1,
- message:!passed?'목소리가 잘 들리지 않았어. 다음에 다시 이야기하자!':complete&&words.length>1?'문장 전체를 말했네! 네 마음이 잘 전달됐어!':'네 말이 들렸어! 이야기해 줘서 고마워!',transcript:heard,target};
+ const sentence=CONVERSATION_TARGETS[target]?assessSentencePractice(transcript,target,CONVERSATION_TARGETS[target]):sentenceAssessment(transcript,target);if(sentence)return sentence;
+ const phrase=SPEECH_TARGETS[target];
+ if(!phrase)return {passed:false,quality:'unheard',quantity:0,message:'친구의 질문을 듣고 문장으로 대답해 보자!',target};
+ return assessSentencePractice(transcript,target,{text:phrase,required:normalize(phrase).split(' ').filter(w=>!['a','an','the'].includes(w))});
 }
 export function ensureLearningState(state){
  state.learning??={}; state.learning.failures??=0; state.learning.visits??={}; state.learning.sequence??=0; state.learning.pending??=[];

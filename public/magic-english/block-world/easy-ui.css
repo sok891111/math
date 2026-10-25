@@ -80,3 +80,8 @@ body:not(.easy-mode) #adult-menu{border:0;margin:0;padding:0}body:not(.easy-mode
 @media(max-width:600px){#return-to-adventure .return-label{display:none}.easy-mode .hud-actions{gap:6px}.easy-mode .hud-actions button{min-width:46px;padding:8px}#empty-block-guide{border-radius:20px;padding:24px}#empty-block-guide .empty-block-icon{margin-bottom:12px}}
 @media(max-height:500px){#empty-block-guide{padding:20px}#empty-block-guide .empty-block-icon{display:none}#empty-block-guide p{margin-bottom:12px}#empty-block-guide button{min-height:48px;padding:12px}}
 @media(max-width:600px){.easy-mode .hud-actions #save-status{display:none}.easy-mode .hud-actions{flex-shrink:0}.easy-mode .world-label{min-width:0}.easy-mode .world-label strong{max-width:26vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+
+#heart-hud{position:absolute;top:126px;left:24px;background:#fff8eeef;color:#832f38;padding:10px 16px;border:2px solid #bf6c72;border-radius:14px;font-size:clamp(18px,2.5vw,24px);font-weight:800;pointer-events:none}
+#heart-guide{margin:auto;width:min(620px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;padding:32px;border:3px solid #b96e75;border-radius:28px;background:#fff8e8;color:#253b36;text-align:center;box-shadow:0 20px 90px #102d3466}
+#heart-guide::backdrop{background:#102c36b8;backdrop-filter:blur(5px)}
+#heart-guide h2{font-size:clamp(24px,4vw,34px)}#heart-guide p{font-size:clamp(20px,3vw,26px);line-height:1.6}#heart-guide button{display:block;width:100%;min-height:64px;font-size:clamp(18px,3vw,25px);white-space:normal}#heart-guide small{display:block;margin-top:20px;font-size:17px}

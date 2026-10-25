@@ -1,3 +1,4 @@
+import {heartCount,tickHearts,spendHearts} from './hearts.js';
 import {advanceTime,isNight} from './day-night.js';
 import {LOOT_ITEMS,collectLoot} from './loot.js';
 import {WEAPONS,isWeapon,validEquipment} from './weapons.js';
@@ -24,7 +25,7 @@ function toast(message){$('#toast').textContent=message;$('#toast').classList.ad
 function status(message){$('#save-status').textContent=message;}
 function fail(error){console.error(error);setPanel('error-panel');$('#error-message').textContent='이 브라우저에서 WebGL을 사용할 수 있는지 확인해 주세요. '+errorMessage(error);}
 function clearInput(){keys.clear();easy.release();easyPointers.clear();toggleSprint=false;touchMove.x=touchMove.z=0;velocity.x=velocity.z=0;heldButton=null;lookPointer=null;joyPointer=null;$('#stick').style.transform='';for(const b of document.querySelectorAll('[data-easy-direction]'))b.classList.remove('pressed');}
-function setPanel(id){mode=id||'playing';active=!id&&started;updateAdventureGuide();clearInput();$('#overlay').hidden=!id;for(const panel of document.querySelectorAll('#overlay > section'))panel.hidden=panel.id!==id;if(id){if(document.pointerLockElement)document.exitPointerLock();requestAnimationFrame(()=>[...($('#'+id)?.querySelectorAll('button,input,select,summary')||[])].find(el=>el.getClientRects().length&&el.tagName!=='INPUT')?.focus({preventScroll:true}));}}
+function setPanel(id){mode=id||'playing';active=!id&&started&&heartCount(stock)>0;updateAdventureGuide();clearInput();$('#overlay').hidden=!id;for(const panel of document.querySelectorAll('#overlay > section'))panel.hidden=panel.id!==id;if(id){if(document.pointerLockElement)document.exitPointerLock();requestAnimationFrame(()=>[...($('#'+id)?.querySelectorAll('button,input,select,summary')||[])].find(el=>el.getClientRects().length&&el.tagName!=='INPUT')?.focus({preventScroll:true}));}}
 async function resume(){if(!started)return;setPanel(null);canvas.focus();if(!isEasy()&&!document.body.classList.contains('touch')){try{await canvas.requestPointerLock?.();}catch{toast('화면을 드래그하면 시점을 움직일 수 있어요.');}}}
 function pause(){if(!started)return;persist();setPanel('pause-panel');}
 function ask(title,copy,action){$('#confirm-title').textContent=title;$('#confirm-copy').textContent=copy;confirmAction=action;setPanel('confirm-panel');}
@@ -124,8 +125,8 @@ function physics(dt){
  $('#movement-mode').textContent=water?'수영':player.crouch?'웅크리기':sprint?'달리기':'걷기';return length>.05;
 }
 function frame(now){
- const dt=Math.min((now-lastFrame)/1000,.04);lastFrame=now;
- if(view&&world&&player){let moving=false;if(active){const wasNight=isNight(view.time);view.time=advanceTime(view.time,dt,settings.cycle);const night=isNight(view.time);if(wasNight!==night){markDirty();toast(night?'🌙 밤이 되었어요! 검을 들고 몬스터를 찾아봐요.':'☀️ 아침이에요! 이제 마음껏 만들어 봐요.');}const clock=document.getElementById('daynight-clock');if(clock){const label=night?'🌙 밤 · 몬스터가 나타나요':'☀️ 낮 · 자유롭게 만들어요';if(clock.textContent!==label)clock.textContent=label;}if(animals.update(dt,player,{night}))markDirty();for(const event of animals.events.splice(0)){view.burst({...event,id:7});sound('break');toast('크리퍼가 펑! 연기 속으로 사라졌어요.');}if(isEasy())moving=easyPhysics(dt);else{view.setBuildPreview(null);moving=physics(dt);selected=target();animalTarget=Boolean(tool)?animals.target(player):null;}if(!isEasy()&&heldButton&&now-lastAction>180){act(heldButton);lastAction=now;}if(now-saveAt>5000){if(settings.cycle)markDirty();persist();saveAt=now;}}if(active)swing=Math.max(0,swing-dt*(Boolean(tool)?2.2:4));if(!active)view.setBuildPreview(null);view.renderAnimals(animals,dt,active);view.render(player,dt,moving,swing,active&&!tool?selected:null,isEasy()&&started);$('#target-label').textContent=active&&Boolean(tool)?(animalTarget?ANIMALS[animalTarget.animal.type].name+' '+('♥'.repeat(animalTarget.animal.hp)):''):active&&selected?BLOCKS[selected.id].name:'';$('#crosshair').classList.toggle('has-animal',!!tool&&!!animalTarget);$('#coordinates').textContent=`${player.x.toFixed(0)} / ${player.y.toFixed(0)} / ${player.z.toFixed(0)}`;}
+ const elapsed=Math.max(0,(now-lastFrame)/1000),dt=Math.min(elapsed,.04);lastFrame=now;
+ if(view&&world&&player){if(active){stock=tickHearts(stock,elapsed);markDirty();}updateHeartGate();let moving=false;if(active){const wasNight=isNight(view.time);view.time=advanceTime(view.time,dt,settings.cycle);const night=isNight(view.time);if(wasNight!==night){markDirty();toast(night?'🌙 밤이 되었어요! 검을 들고 몬스터를 찾아봐요.':'☀️ 아침이에요! 이제 마음껏 만들어 봐요.');}const clock=document.getElementById('daynight-clock');if(clock){const label=night?'🌙 밤 · 몬스터가 나타나요':'☀️ 낮 · 자유롭게 만들어요';if(clock.textContent!==label)clock.textContent=label;}if(animals.update(dt,player,{night}))markDirty();for(const event of animals.events.splice(0)){if(event.damage){stock=spendHearts(stock,event.damage);markDirty();persist(true);toast(event.type==='player-hit'?'좀비에게 공격받았어요! ❤️ −1':'크리퍼가 펑! ❤️ −2');}if(event.type==='creeper-puff'){view.burst({...event,id:7});sound('break');}}updateHeartGate();if(active){if(isEasy())moving=easyPhysics(dt);else{view.setBuildPreview(null);moving=physics(dt);selected=target();animalTarget=Boolean(tool)?animals.target(player):null;}if(!isEasy()&&heldButton&&now-lastAction>180){act(heldButton);lastAction=now;}if(now-saveAt>5000){if(settings.cycle)markDirty();persist();saveAt=now;}}}if(active)swing=Math.max(0,swing-dt*(Boolean(tool)?2.2:4));if(!active)view.setBuildPreview(null);view.renderAnimals(animals,dt,active);view.render(player,dt,moving,swing,active&&!tool?selected:null,isEasy()&&started);$('#target-label').textContent=active&&Boolean(tool)?(animalTarget?ANIMALS[animalTarget.animal.type].name+' '+('♥'.repeat(animalTarget.animal.hp)):''):active&&selected?BLOCKS[selected.id].name:'';$('#crosshair').classList.toggle('has-animal',!!tool&&!!animalTarget);$('#coordinates').textContent=`${player.x.toFixed(0)} / ${player.y.toFixed(0)} / ${player.z.toFixed(0)}`;}
  requestAnimationFrame(frame);
 }
 function exportWorld(){if(!started)return;persist(true);const url=URL.createObjectURL(new Blob([JSON.stringify(snapshot())],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=worldName.replace(/[\\/:*?"<>|]/g,'_')+'.block-world.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('세계 파일을 내보냈어요.');}
@@ -146,7 +147,7 @@ function changeControls(controls){
 function applySettings(){if(!view)return;updateModeUI();view.camera.fov=settings.fov;view.camera.updateProjectionMatrix();view.drawDistance=settings.distance;view.cycle=settings.cycle;$('#fov').value=settings.fov;$('#sensitivity').value=settings.sensitivity;$('#distance').value=settings.distance;$('#sound').checked=settings.sound;$('#day-cycle').checked=settings.cycle;$('#fov-value').value=settings.fov+'°';$('#sensitivity-value').value=settings.sensitivity+'%';try{localStorage.setItem(SETTINGS,JSON.stringify(settings));}catch{/* World saving reports storage errors separately. */}}
 
 const rewardClient=new RewardClient(profile||'demo',items=>{
- if(!started)return;try{const result=applyRewards(stock,items,profile||'demo');if(!result.applied){$('#reward-status').textContent='모험 보상 연결됨';return;}const previous=stock;stock=result.inventory;markDirty();if(!persist(true)){stock=previous;$('#reward-status').textContent='저장 실패 · 보상은 다음에 다시 받아요';return;}renderBars();if(mode==='inventory-panel')renderInventory();$('#reward-status').textContent='새 모험 보상을 받았어요';toast(items.some(item=>item.items?.length)?'⚔️ 완전한 문장 보상! 블록과 새 검을 받았어요!':'모험 보상으로 블록을 받았어요!');}catch(error){$('#reward-status').textContent=errorMessage(error);}
+ if(!started)return;try{const result=applyRewards(stock,items,profile||'demo');if(!result.applied){$('#reward-status').textContent='모험 보상 연결됨';return;}const previous=stock;stock=result.inventory;markDirty();if(!persist(true)){stock=previous;$('#reward-status').textContent='저장 실패 · 보상은 다음에 다시 받아요';return;}renderBars();updateHeartGate();if(mode==='inventory-panel')renderInventory();$('#reward-status').textContent='새 모험 보상을 받았어요';toast(items.some(item=>item.items?.length)?'⚔️ 완전한 문장 보상! 블록·하트·새 검을 받았어요!':'모험 보상으로 블록과 하트를 받았어요!');}catch(error){$('#reward-status').textContent=errorMessage(error);}
 },()=>{$('#reward-status').textContent='오프라인 · 보유 블록으로 계속 놀아요';});
 
 $('#create-form').addEventListener('submit',event=>{event.preventDefault();if(saved||started||readError)ask('새 세계를 만들까요?','현재 세계를 교체합니다. 교체 전 기록을 백업하지만, 보관할 세계는 먼저 파일로 내보내 주세요.',()=>{if(storeBackup())loadWorld();});else loadWorld();});
@@ -209,7 +210,7 @@ const returnPath=adventureURL(new URLSearchParams(location.search).get('returnTo
 const returnURL=new URL(returnPath,location.origin);returnURL.searchParams.set('arrival','adventure');
 const returnToAdventure=createTravel({save:()=>persist(true),animate:async label=>{clearInput();active=false;if(document.pointerLockElement)document.exitPointerLock();await departure(label);},navigate:url=>location.assign(url)});
 let returningToAdventure=false;
-async function goBack(){if(returningToAdventure)return;returningToAdventure=true;const moved=await returnToAdventure(returnURL.pathname+returnURL.search,'📖 마법영어 모험으로 돌아가는 중…');if(!moved){returningToAdventure=false;if(started&&mode==='playing')active=true;}}
+async function goBack(){if(returningToAdventure)return;returningToAdventure=true;const moved=await returnToAdventure(returnURL.pathname+returnURL.search,'📖 마법영어 모험으로 돌아가는 중…');if(!moved){returningToAdventure=false;if(started&&mode==='playing'&&heartCount(stock)>0)active=true;}}
 const backButton=document.createElement('button');backButton.id='return-to-adventure';backButton.innerHTML='📖 <span class="return-label">모험</span>';backButton.setAttribute('aria-label','마법영어 모험으로 돌아가기');backButton.title='마법영어 모험으로 돌아가기';backButton.onclick=goBack;document.querySelector('.hud-actions').prepend(backButton);
 const emptyGuide=document.createElement('dialog');emptyGuide.id='empty-block-guide';emptyGuide.setAttribute('aria-labelledby','empty-block-title');emptyGuide.setAttribute('aria-describedby','empty-block-copy');
 emptyGuide.innerHTML='<div class="empty-block-icon" aria-hidden="true">🪵 ✨ 📖</div><h2 id="empty-block-title">블록을 모두 사용했어요!</h2><p id="empty-block-copy">블록을 모으기 위해<br>마법영어 모험으로 돌아가자!</p><button id="collect-more-blocks" class="primary">📖 모험으로 돌아가 블록 모으기</button><button id="stay-in-world" class="text-button">조금 더 둘러볼게요</button>';
@@ -218,9 +219,10 @@ function dismissEmptyGuide(){emptyNoticeAcknowledged=true;emptyGuide.close();}
 emptyGuide.querySelector('#stay-in-world').onclick=dismissEmptyGuide;
 emptyGuide.addEventListener('keydown',event=>event.stopPropagation());
 emptyGuide.addEventListener('cancel',event=>{event.preventDefault();dismissEmptyGuide();});
-emptyGuide.addEventListener('close',()=>{if(!returningToAdventure&&started&&mode==='playing'){active=true;clearInput();canvas.focus();}});
+emptyGuide.addEventListener('close',()=>{if(!returningToAdventure&&started&&mode==='playing'&&heartCount(stock)>0){active=true;clearInput();canvas.focus();}});
 document.body.append(emptyGuide);updateAdventureGuide();
 function updateAdventureGuide(){
+ updateHeartGate();if(started&&!heartCount(stock))return;
  const guide=document.getElementById('empty-block-guide');
  if(!blocksEmpty(stock)){emptyNoticeAcknowledged=false;if(guide?.open)guide.close();}
  else if(guide&&shouldShowEmptyNotice({started,active,empty:true,acknowledged:emptyNoticeAcknowledged,ready:performance.now()>=emptyNoticeReadyAt,open:guide.open})){
@@ -230,3 +232,12 @@ function updateAdventureGuide(){
 }
 
 {const clock=document.createElement('div');clock.id='daynight-clock';clock.setAttribute('role','status');clock.style.cssText='position:absolute;top:82px;left:24px;padding:7px 12px;border-radius:12px;background:#243c36b0;color:white;font-size:16px;font-weight:750;';document.getElementById('hud').append(clock);}
+
+const heartHud=document.createElement('div');heartHud.id='heart-hud';heartHud.setAttribute('role','status');document.getElementById('hud').append(heartHud);
+const heartGuide=document.createElement('dialog');heartGuide.id='heart-guide';heartGuide.setAttribute('aria-labelledby','heart-guide-title');heartGuide.innerHTML='<div style="font-size:56px">❤️ 📖</div><h2 id="heart-guide-title">모험 하트를 모으러 가자!</h2><p>블록 세계에서 쓸 하트가 없어요.<br>마법영어에서 친구와 이야기하고<br>퀘스트를 깨면 하트를 받을 수 있어요!</p><button class="primary">📖 모험으로 돌아가 하트 모으기</button><small>하트 1개로 20초 동안 놀 수 있어요.</small>';heartGuide.querySelector('button').onclick=()=>void goBack();heartGuide.addEventListener('cancel',event=>event.preventDefault());heartGuide.addEventListener('keydown',event=>event.stopPropagation());document.body.append(heartGuide);
+function updateHeartGate(){
+ const hud=document.getElementById('heart-hud'),guide=document.getElementById('heart-guide');if(!guide||!started)return;
+ const count=heartCount(stock),text=`❤️ ${count} · 다음 소모 ${Math.max(1,Math.ceil(20-(stock.heartElapsed||0)))}초`;if(hud&&hud.textContent!==text)hud.textContent=text;
+ if(count===0){if(active){active=false;clearInput();persist(true);}document.getElementById('empty-block-guide')?.close();if(document.pointerLockElement)document.exitPointerLock();if(!guide.open&&!returningToAdventure)guide.showModal();}
+ else if(guide.open){guide.close();if(mode==='playing'&&!returningToAdventure){active=true;clearInput();canvas.focus();}}
+}
