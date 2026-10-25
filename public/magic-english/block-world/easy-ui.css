@@ -96,3 +96,4 @@ body:not(.easy-mode) #adult-menu{border:0;margin:0;padding:0}body:not(.easy-mode
 @keyframes heart-hurt-blink{0%,35%{filter:brightness(2.5)}70%,100%{filter:brightness(1)}}
 @media(prefers-reduced-motion:reduce){#hurt-overlay.hit{animation-duration:.25s}#heart-hud.hurt .heart-cell{animation:none}}
 .easy-mode #hotbar .slot em{display:block;font-size:15px}
+.heart-cell.half{background:linear-gradient(90deg,#f04c43 0 50%,#283032 50% 100%)}

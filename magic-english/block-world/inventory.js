@@ -22,7 +22,7 @@ export function rewardSignature(reward){return JSON.stringify({blocks:reward.blo
 export function validateInventory(value){
  if(!plain(value)||value.version!==1||!plain(value.counts)||!plain(value.placed)||!plain(value.receipts))throw Error('블록 보관함 기록이 올바르지 않습니다.');
  if(value.heartCapacity!==undefined&&(!Number.isInteger(value.heartCapacity)||value.heartCapacity<10||value.heartCapacity>MAX_BALANCE))throw Error('하트 칸이 올바르지 않습니다.');
- if(value.hearts!==undefined&&(!Number.isInteger(value.hearts)||value.hearts<0||value.hearts>MAX_BALANCE))throw Error('하트 수량이 올바르지 않습니다.');
+ if(value.hearts!==undefined&&(!Number.isFinite(value.hearts)||!Number.isInteger(value.hearts*2)||value.hearts<0||value.hearts>MAX_BALANCE))throw Error('하트 수량이 올바르지 않습니다.');
  if(value.heartElapsed!==undefined&&(!Number.isFinite(value.heartElapsed)||value.heartElapsed<0||value.heartElapsed>=20))throw Error('하트 시간이 올바르지 않습니다.');
  if(value.loot!==undefined){if(!plain(value.loot))throw Error('아이템 보관함이 올바르지 않습니다.');for(const [id,count]of Object.entries(value.loot))if(!Object.hasOwn(LOOT_ITEMS,id)||!Number.isInteger(count)||count<0||count>MAX_BALANCE)throw Error('아이템 수량이 올바르지 않습니다.');}
  if(value.weapons!==undefined){if(!plain(value.weapons))throw Error('무기 보관함이 올바르지 않습니다.');for(const [id,count]of Object.entries(value.weapons))if(!isWeapon(id)||!Number.isInteger(count)||count<0||count>MAX_BALANCE)throw Error('무기 수량이 올바르지 않습니다.');}
@@ -32,7 +32,7 @@ export function validateInventory(value){
  return value;
 }
 export function createInventory(saved=null,legacyEdits=[]){
- if(saved){validateInventory(saved);return {version:1,heartCapacity:Math.max(10,saved.heartCapacity||0,saved.hearts||0),hearts:saved.hearts||0,heartElapsed:saved.heartElapsed||0,...(saved.loot?{loot:{...saved.loot}}:{}),...(saved.weapons?{weapons:{...saved.weapons}}:{}),counts:{...saved.counts},placed:{...saved.placed},receipts:{...saved.receipts}};}
+ if(saved){validateInventory(saved);return {version:1,heartCapacity:Math.max(10,saved.heartCapacity||0,Math.ceil(saved.hearts||0)),hearts:saved.hearts||0,heartElapsed:saved.heartElapsed||0,...(saved.loot?{loot:{...saved.loot}}:{}),...(saved.weapons?{weapons:{...saved.weapons}}:{}),counts:{...saved.counts},placed:{...saved.placed},receipts:{...saved.receipts}};}
  const placed={};for(const [index,id]of legacyEdits)if(validId(id))placed[index]=id;return {version:1,hearts:0,heartCapacity:10,heartElapsed:0,counts:{...STARTER_COUNTS},placed,receipts:{}};
 }
 export const countBlock=(inventory,id)=>inventory.counts[id]||0;
@@ -63,6 +63,6 @@ export function applyRewards(inventory,items,userId){
   if(Object.keys(result.receipts).length>=MAX_REWARDS)throw Error('보상 영수증 한도에 도달했습니다.');const counts={...result.counts};for(const {blockId,quantity}of reward.blocks){const total=(counts[blockId]||0)+quantity;if(total>MAX_BALANCE)throw Error('블록 보관함 한도를 초과합니다.');counts[blockId]=total;}
   const weapons={...(result.weapons||{})};for(const {itemId,quantity}of reward.items||[]){weapons[itemId]=(weapons[itemId]||0)+quantity;if(weapons[itemId]>MAX_BALANCE)throw Error('무기 보관함 한도에 도달했습니다.');}
   const hearts=(result.hearts||0)+rewardHearts(reward);if(hearts>MAX_BALANCE)throw Error('하트 보관함 한도를 초과합니다.');
-  result={...result,hearts,heartCapacity:Math.max(10,result.heartCapacity||0,hearts),...(Object.keys(weapons).length?{weapons}:{}),counts,receipts:{...result.receipts,[key]:signature}};applied++;
+  result={...result,hearts,heartCapacity:Math.max(10,result.heartCapacity||0,Math.ceil(hearts)),...(Object.keys(weapons).length?{weapons}:{}),counts,receipts:{...result.receipts,[key]:signature}};applied++;
  }return {inventory:result,applied};
 }
