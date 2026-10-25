@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 4,
   "difficultyVersion": 7,
   "commonGrade": 3,
   "hardGrade": 4,
@@ -9,8 +9,8 @@
     "mc_wither"
   ],
   "rareMinLevel": 10,
-  "rareEncounterWeight": 50,
-  "totalEncounterWeight": 5000,
+  "rareEncounterWeight": 100,
+  "totalEncounterWeight": 10000,
   "pokemonShare": 0.6,
   "minecraftShare": 0.4,
   "featuredSpecies": [
@@ -22,7 +22,7 @@
         "Route32",
         "DarkCaveVioletEntrance"
       ],
-      "weight": 1000
+      "weight": 2000
     },
     {
       "id": "mc_megaply",
@@ -32,7 +32,7 @@
         "Route32",
         "DarkCaveVioletEntrance"
       ],
-      "weight": 400
+      "weight": 800
     },
     {
       "id": "mc_giantfly",
@@ -42,7 +42,16 @@
         "Route32",
         "DarkCaveVioletEntrance"
       ],
-      "weight": 100
+      "weight": 200
     }
-  ]
+  ],
+  "legendarySpecies": [
+    "mc_enderdragon",
+    "mew",
+    "koraidon",
+    "zamazenta",
+    "eternatus"
+  ],
+  "legendaryEncounterWeight": 50,
+  "legendaryLevelOffset": 10
 }

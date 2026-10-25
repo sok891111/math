@@ -35,7 +35,10 @@
     "test:creative-learning": "node tests/creative-facto-model.cjs && node tests/creative-battle-model.cjs && node tests/creative-learning-profile.cjs",
     "test:creative-building": "node tests/creative-building.cjs",
     "test:tralalerio": "npm --prefix tralalerio test",
-    "test:tralalerio-browser": "npm --prefix tralalerio run test:browser"
+    "test:tralalerio-browser": "npm --prefix tralalerio run test:browser",
+    "test:tralalerio-third": "npm --prefix tralalerio run test:third",
+    "test:tralalerio-early": "npm --prefix tralalerio run test:early",
+    "test:tralalerio-variety": "npm --prefix tralalerio run test:variety"
   },
   "devDependencies": {
     "playwright": "1.63.0"

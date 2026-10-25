@@ -4,6 +4,9 @@ export function renderLearning({q,c,board,tools,button,render,place}){
  const grid=shape=>{const el=node('div','','shape-preview');shape.forEach(v=>el.append(node('span','',v?'on':'')));return el;};
  board.append(node('p',q.prompt,'learning-prompt'));
  if(q.reference)renderReference(q,board);
+ if(q.pyramid){const pyramid=node('div','','arithmetic-pyramid');pyramid.setAttribute('aria-label','이웃한 아래 두 수의 합으로 만드는 수 피라미드');for(const row of q.pyramid){const line=node('div','','pyramid-row');for(const value of row){const cell=node('span',String(value),'pyramid-number'+(value==='?'?' target':''));if(value==='…')cell.setAttribute('aria-label','중간 수는 스스로 계산');line.append(cell);}pyramid.append(line);}board.append(pyramid);}
+ if(q.operationChain){const line=node('div','','arithmetic-chain');line.append(node('b','처음 ?','chain-node'));for(const {op,value}of q.operationChain.operations)line.append(node('span',`${op} ${value} →`,'chain-operation'));line.append(node('b',`마지막 ${q.operationChain.final}`,'chain-node'));board.append(line);}
+
  if(q.numberCards){const row=node('div','','number-card-row');q.numberCards.forEach(value=>row.append(node('span',String(value),'number-reasoning-card')));board.append(row);}
  if(q.source){
   const row=node('div','','learning-shapes');row.append(grid(q.source));

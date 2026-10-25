@@ -114,6 +114,123 @@
           "move": "GIGA_IMPACT"
         }
       ]
+    },
+    "zamazenta": {
+      "name": "자마젠타",
+      "base": {
+        "hp": 92,
+        "attack": 120,
+        "defense": 115,
+        "specialAttack": 80,
+        "specialDefense": 115,
+        "speed": 138
+      },
+      "types": [
+        "FIGHTING"
+      ],
+      "catchRate": 10,
+      "baseExp": 335,
+      "growth": "SLOW",
+      "femaleThreshold": null,
+      "legendary": true,
+      "boss": true,
+      "learnset": [
+        {
+          "level": 1,
+          "move": "BITE"
+        },
+        {
+          "level": 1,
+          "move": "QUICK_ATTACK"
+        },
+        {
+          "level": 1,
+          "move": "METAL_CLAW"
+        },
+        {
+          "level": 11,
+          "move": "SLASH"
+        },
+        {
+          "level": 33,
+          "move": "IRON_HEAD"
+        },
+        {
+          "level": 55,
+          "move": "CRUNCH"
+        },
+        {
+          "level": 77,
+          "move": "CLOSE_COMBAT"
+        },
+        {
+          "level": 88,
+          "move": "GIGA_IMPACT"
+        }
+      ]
+    },
+    "eternatus": {
+      "name": "무한다이노",
+      "base": {
+        "hp": 140,
+        "attack": 85,
+        "defense": 95,
+        "specialAttack": 145,
+        "specialDefense": 95,
+        "speed": 130
+      },
+      "types": [
+        "POISON",
+        "DRAGON"
+      ],
+      "catchRate": 255,
+      "baseExp": 345,
+      "growth": "SLOW",
+      "femaleThreshold": null,
+      "legendary": true,
+      "boss": true,
+      "learnset": [
+        {
+          "level": 1,
+          "move": "AGILITY"
+        },
+        {
+          "level": 1,
+          "move": "POISON_TAIL"
+        },
+        {
+          "level": 8,
+          "move": "TOXIC"
+        },
+        {
+          "level": 16,
+          "move": "VENOSHOCK"
+        },
+        {
+          "level": 32,
+          "move": "CROSS_POISON"
+        },
+        {
+          "level": 40,
+          "move": "DRAGON_PULSE"
+        },
+        {
+          "level": 48,
+          "move": "FLAMETHROWER"
+        },
+        {
+          "level": 56,
+          "move": "DYNAMAX_CANNON"
+        },
+        {
+          "level": 72,
+          "move": "RECOVER"
+        },
+        {
+          "level": 88,
+          "move": "ETERNABEAM"
+        }
+      ]
     }
   },
   "moves": {
@@ -296,6 +413,96 @@
       "pp": 5,
       "accuracy": 100,
       "chance": 0
+    },
+    "METAL_CLAW": {
+      "name": "메탈클로",
+      "effect": "ATTACK_UP_HIT",
+      "type": "STEEL",
+      "power": 50,
+      "pp": 35,
+      "accuracy": 95,
+      "chance": 10
+    },
+    "IRON_HEAD": {
+      "name": "아이언헤드",
+      "effect": "FLINCH_HIT",
+      "type": "STEEL",
+      "power": 80,
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 30
+    },
+    "CRUNCH": {
+      "name": "깨물어부수기",
+      "effect": "DEFENSE_DOWN_HIT",
+      "type": "DARK",
+      "power": 80,
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 20
+    },
+    "POISON_TAIL": {
+      "name": "포이즌테일",
+      "effect": "POISON_HIT",
+      "type": "POISON",
+      "power": 50,
+      "pp": 25,
+      "accuracy": 100,
+      "chance": 10
+    },
+    "TOXIC": {
+      "name": "맹독",
+      "effect": "POISON",
+      "type": "POISON",
+      "power": 0,
+      "pp": 10,
+      "accuracy": 90,
+      "chance": 0
+    },
+    "VENOSHOCK": {
+      "name": "베놈쇼크",
+      "effect": "NORMAL_HIT",
+      "type": "POISON",
+      "power": 65,
+      "pp": 10,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "CROSS_POISON": {
+      "name": "크로스포이즌",
+      "effect": "POISON_HIT",
+      "type": "POISON",
+      "power": 70,
+      "pp": 20,
+      "accuracy": 100,
+      "chance": 10
+    },
+    "DRAGON_PULSE": {
+      "name": "용의파동",
+      "effect": "NORMAL_HIT",
+      "type": "DRAGON",
+      "power": 85,
+      "pp": 10,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "DYNAMAX_CANNON": {
+      "name": "다이맥스포",
+      "effect": "NORMAL_HIT",
+      "type": "DRAGON",
+      "power": 100,
+      "pp": 5,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "ETERNABEAM": {
+      "name": "무한다이빔",
+      "effect": "NORMAL_HIT",
+      "type": "DRAGON",
+      "power": 160,
+      "pp": 5,
+      "accuracy": 90,
+      "chance": 0
     }
   },
   "dex": [
@@ -314,6 +521,39 @@
       ],
       "description": "힘찬 다리로 대지를 박차고 달린다. 강인한 몸으로 상대에게 힘껏 돌진하는 고대의 포켓몬이다.",
       "image": "assets/battle/koraidon-front.png"
+    },
+    {
+      "id": "zamazenta",
+      "number": 253,
+      "national": 889,
+      "name": "자마젠타",
+      "kind": "pokemon",
+      "category": "강자포켓몬",
+      "height": 2.9,
+      "weight": 210.0,
+      "types": [
+        "FIGHTING"
+      ],
+      "description": "가라르를 지켜 온 전설의 포켓몬. 다부진 몸으로 공격을 받아 내며 동료를 지킨다.",
+      "legendary": true,
+      "image": "assets/battle/zamazenta-front.png"
+    },
+    {
+      "id": "eternatus",
+      "number": 254,
+      "national": 890,
+      "name": "무한다이노",
+      "kind": "pokemon",
+      "category": "거대포켓몬",
+      "height": 20.0,
+      "weight": 950.0,
+      "types": [
+        "POISON",
+        "DRAGON"
+      ],
+      "description": "가슴의 코어에 에너지를 모으는 거대한 전설의 포켓몬. 독과 드래곤의 힘으로 싸운다.",
+      "legendary": true,
+      "image": "assets/battle/eternatus-front.png"
     }
   ]
 }

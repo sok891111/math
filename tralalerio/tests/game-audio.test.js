@@ -1,7 +1,7 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {musicForState,synthesizeChannel} from '../game-audio.js';
 const manifest=JSON.parse(fs.readFileSync('assets/audio/manifest.json')),maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.readFileSync('assets/battle-data.json'));
-test('all 46 maps have original score assignments and channels have valid notes and loop points',()=>{
- assert.deepEqual(Object.keys(manifest.maps).sort(),Object.keys(maps).sort());assert.equal(Object.keys(manifest.tracks).length,30);
+test('all playable maps have original score assignments and channels have valid notes and loop points',()=>{
+ assert.deepEqual(Object.keys(manifest.maps).sort(),Object.keys(maps).sort());assert.equal(Object.keys(manifest.tracks).length,31);
  for(const [id,t] of Object.entries(manifest.tracks)){const score=JSON.parse(fs.readFileSync('assets/audio/'+t.file));assert.equal(score.id,id);assert.ok(score.channels.length>=2);for(const ch of score.channels){assert.ok(ch.events.length>0);assert.ok(ch.duration>0&&ch.duration<300);assert.ok(ch.loopStart===null||ch.loopStart>=0&&ch.loopStart<ch.duration);for(const e of ch.events){assert.ok(e[0]>=0&&e[1]>0);if(ch.channel!==4)assert.ok(e[2]>0&&e[2]<22050);}}}
  assert.equal(manifest.maps.VioletCity,'Music_VioletCity');assert.equal(manifest.maps.Route32,manifest.maps.Route30);assert.equal(manifest.maps.VioletPokecenter1F,'Music_PokemonCenter');
 });

@@ -1,12 +1,12 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {execFileSync} from 'node:child_process';import {Game,DIRECTIONS} from '../engine.js';import {pickEncounter} from '../battle.js';
 const maps=JSON.parse(fs.readFileSync('assets/maps.json')),data=JSON.parse(fs.readFileSync('assets/battle-data.json')),source=JSON.parse(fs.readFileSync('assets/encounter-source.json'));
-const locations=['Route29','Route30','Route31','Route46','DarkCaveVioletEntrance','SproutTower2F','SproutTower3F','Route32','Route33','UnionCave1F','UnionCaveB1F','UnionCaveB2F','SlowpokeWellB1F','SlowpokeWellB2F'];
+const locations=['Route29','Route30','Route31','Route46','DarkCaveVioletEntrance','SproutTower2F','SproutTower3F','Route32','Route33','UnionCave1F','UnionCaveB1F','UnionCaveB2F','SlowpokeWellB1F','SlowpokeWellB2F','IlexForest','Route34'];
 export function grassPair(g,id){g.enter(maps[id],0,0);for(const t of Object.keys(data.trainers))g.state.flags['trainer:'+t]=true;g.state.flags.eggDelivered=true;g.state.flags.labCall=true;const tile=data.encounters[id].terrain==='floor'?'FLOOR':'TALL_GRASS';for(let y=1;y<g.map.height-1;y++)for(let x=1;x<g.map.width-1;x++)for(const [dir,[dx,dy]]of Object.entries(DIRECTIONS)){if(g.passable(x,y)&&g.passable(x+dx,y+dy)&&g.map.collision[y][x]===tile&&g.map.collision[y+dy][x+dx]===tile)return{x,y,dir};}throw Error('No safe wild pair: '+id);}
-test('all fourteen implemented Gold land habitats have original time slots and rates plus 40% Minecraft',()=>{
+test('all sixteen implemented Gold land habitats have original time slots and rates plus 40% Minecraft',()=>{
  assert.deepEqual(Object.keys(data.encounters).sort(),locations.slice().sort());assert.equal(data.encounters.SproutTower1F,undefined);
- for(const id of locations){const table=data.encounters[id],gold=source.tables[id];assert.deepEqual(table.rates,gold.rates);assert.equal(table.terrain,gold.terrain);assert.deepEqual(table.weights.slice(0,7).map(w=>w/29),source.originalWeights);
+ for(const id of locations){const table=data.encounters[id],gold=source.tables[id];assert.deepEqual(table.rates,gold.rates);assert.equal(table.terrain,gold.terrain);assert.deepEqual(table.weights.slice(0,7).map(w=>w*100/table.weights.slice(0,7).reduce((a,b)=>a+b,0)),source.originalWeights);
   for(const [period,hour]of [['morning',7],['day',12],['night',22]]){
-   assert.deepEqual(table[period].slice(0,7),gold[period]);assert.equal(table[period].length,40);assert.equal(table[period].filter(x=>x.species.startsWith('mc_')).length,31);
+   assert.deepEqual(table[period].slice(0,7),gold[period]);assert.equal(table[period].length,42);assert.equal(table[period].filter(x=>x.species.startsWith('mc_')).length,31);
    const sampled=Array.from({length:500},(_,i)=>pickEncounter(table,hour,()=>(i+.5)/500));assert.equal(sampled.filter(x=>x.species.startsWith('mc_')).length,200);
    assert.ok(table[period].every(x=>data.species[x.species]));
   }

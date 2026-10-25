@@ -10,6 +10,8 @@ specs=[('PlayersHouse2F','내 방','players_room','PLAYERS_HOUSE_2F'),('PlayersH
 extra={'Route29Route46Gate':'29·46번 도로 게이트','Route46':'46번 도로','Route30':'30번 도로','Route30BerryHouse':'열매 할아버지의 집','MrPokemonsHouse':'포켓몬 할아버지의 집','Route31':'31번 도로','Route31VioletGate':'도라지 게이트','VioletCity':'도라지시티','VioletMart':'도라지 프렌들리숍','VioletGym':'도라지 체육관','EarlsPokemonAcademy':'포켓몬 학원','VioletNicknameSpeechHouse':'별명 이야기의 집','VioletPokecenter1F':'도라지 포켓몬센터','VioletKylesHouse':'교환하는 집','SproutTower1F':'모다피탑 1층','SproutTower2F':'모다피탑 2층','SproutTower3F':'모다피탑 3층','DarkCaveVioletEntrance':'어둠의 동굴 · 도라지 입구'}
 # Second badge main route and its interiors use the original Gold layouts.
 extra.update({'Route32':'32번 도로','Route32Pokecenter1F':'32번 도로 포켓몬센터','UnionCave1F':'연결동굴 1층','UnionCaveB1F':'연결동굴 지하 1층','UnionCaveB2F':'연결동굴 지하 2층','Route33':'33번 도로','AzaleaTown':'고동마을','AzaleaGym':'고동 체육관','AzaleaMart':'고동 프렌들리숍','AzaleaPokecenter1F':'고동 포켓몬센터','KurtsHouse':'강집의 집','CharcoalKiln':'숯 굽는 집','SlowpokeWellB1F':'야돈우물 지하 1층','SlowpokeWellB2F':'야돈우물 지하 2층','IlexForestAzaleaGate':'고동·너도밤나무숲 게이트'})
+# Third badge: the Gold forest puzzle, Route 34 and Goldenrod's main services.
+extra.update({'IlexForest':'너도밤나무숲','Route34IlexForestGate':'너도밤나무숲·34번 도로 게이트','Route34':'34번 도로','GoldenrodCity':'금빛시티','GoldenrodGym':'금빛 체육관','GoldenrodPokecenter1F':'금빛 포켓몬센터','GoldenrodBikeShop':'금빛 자전거 가게','GoldenrodFlowerShop':'금빛 꽃집','GoldenrodDeptStore1F':'금빛 백화점 1층','GoldenrodDeptStore2F':'금빛 백화점 2층','RadioTower1F':'라디오타워 1층','DayCare':'키우미집'})
 mapdefs=(R/'data/maps/maps.asm').read_text();attrs_text=(R/'data/maps/attributes.asm').read_text()
 for name,label in extra.items():
  tileset=re.search(r'map '+name+r', TILESET_(\w+)',mapdefs)[1].lower()

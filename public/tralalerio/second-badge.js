@@ -1,5 +1,5 @@
 // Main Gold story through Azalea: guards, Kurt, the well, Bugsy and the rival.
-export const CENTERS=['CherrygrovePokecenter1F','VioletPokecenter1F','Route32Pokecenter1F','AzaleaPokecenter1F'];
+export const CENTERS=['CherrygrovePokecenter1F','VioletPokecenter1F','Route32Pokecenter1F','AzaleaPokecenter1F','GoldenrodPokecenter1F'];
 export function secondObjectVisible(game,o){const s=game.state,id=s.map,f=s.flags;
  if(id==='AzaleaTown'){
   if(o.script==='ObjectEvent')return false;

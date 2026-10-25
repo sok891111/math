@@ -1398,6 +1398,204 @@
           "species": "slowpoke"
         }
       ]
+    },
+    "IlexForest": {
+      "constant": "ILEX_FOREST",
+      "rates": {
+        "morning": 10,
+        "day": 10,
+        "night": 10
+      },
+      "terrain": "floor",
+      "morning": [
+        {
+          "level": 5,
+          "species": "caterpie"
+        },
+        {
+          "level": 6,
+          "species": "metapod"
+        },
+        {
+          "level": 6,
+          "species": "caterpie"
+        },
+        {
+          "level": 5,
+          "species": "paras"
+        },
+        {
+          "level": 5,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "paras"
+        },
+        {
+          "level": 6,
+          "species": "paras"
+        }
+      ],
+      "day": [
+        {
+          "level": 5,
+          "species": "caterpie"
+        },
+        {
+          "level": 6,
+          "species": "caterpie"
+        },
+        {
+          "level": 5,
+          "species": "metapod"
+        },
+        {
+          "level": 6,
+          "species": "metapod"
+        },
+        {
+          "level": 5,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "paras"
+        },
+        {
+          "level": 6,
+          "species": "paras"
+        }
+      ],
+      "night": [
+        {
+          "level": 5,
+          "species": "oddish"
+        },
+        {
+          "level": 6,
+          "species": "oddish"
+        },
+        {
+          "level": 6,
+          "species": "zubat"
+        },
+        {
+          "level": 5,
+          "species": "paras"
+        },
+        {
+          "level": 5,
+          "species": "zubat"
+        },
+        {
+          "level": 6,
+          "species": "paras"
+        },
+        {
+          "level": 6,
+          "species": "paras"
+        }
+      ]
+    },
+    "Route34": {
+      "constant": "ROUTE_34",
+      "rates": {
+        "morning": 25,
+        "day": 25,
+        "night": 25
+      },
+      "terrain": "grass",
+      "morning": [
+        {
+          "level": 10,
+          "species": "drowzee"
+        },
+        {
+          "level": 11,
+          "species": "rattata"
+        },
+        {
+          "level": 12,
+          "species": "drowzee"
+        },
+        {
+          "level": 10,
+          "species": "abra"
+        },
+        {
+          "level": 13,
+          "species": "rattata"
+        },
+        {
+          "level": 10,
+          "species": "ditto"
+        },
+        {
+          "level": 10,
+          "species": "ditto"
+        }
+      ],
+      "day": [
+        {
+          "level": 10,
+          "species": "drowzee"
+        },
+        {
+          "level": 11,
+          "species": "rattata"
+        },
+        {
+          "level": 12,
+          "species": "drowzee"
+        },
+        {
+          "level": 10,
+          "species": "abra"
+        },
+        {
+          "level": 13,
+          "species": "rattata"
+        },
+        {
+          "level": 10,
+          "species": "ditto"
+        },
+        {
+          "level": 10,
+          "species": "ditto"
+        }
+      ],
+      "night": [
+        {
+          "level": 10,
+          "species": "drowzee"
+        },
+        {
+          "level": 11,
+          "species": "rattata"
+        },
+        {
+          "level": 12,
+          "species": "drowzee"
+        },
+        {
+          "level": 10,
+          "species": "abra"
+        },
+        {
+          "level": 13,
+          "species": "rattata"
+        },
+        {
+          "level": 10,
+          "species": "ditto"
+        },
+        {
+          "level": 10,
+          "species": "ditto"
+        }
+      ]
     }
   }
 }

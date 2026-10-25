@@ -3,6 +3,9 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js && node ../tests/tralalerio-minecraft.mjs",
-    "test:browser": "node tools/run-browser-tests.cjs"
+    "test:browser": "node tools/run-browser-tests.cjs",
+    "test:third": "node --test tests/third-badge.test.js tests/game.test.js tests/game-audio.test.js tests/trainer-encounter.test.js tests/gold-encounters.test.js tests/evolution.test.js tests/pc.test.js tests/boss-math-policy.test.js tests/admin-grants.test.js",
+    "test:early": "node --test tests/early-arithmetic.test.js tests/math-answer-integrity.test.js tests/boss-math-policy.test.js",
+    "test:variety": "node --test tests/math-schedule.test.js tests/early-arithmetic.test.js tests/math-answer-integrity.test.js tests/boss-math-policy.test.js"
   }
 }

@@ -20,6 +20,8 @@ for id in sorted(needed):
   s=(r/'data/pokemon/base_stats'/f'{id}.asm').read_text();raw=list(map(int,re.search(r'db\s+(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)',s).groups()))
   data['species'][id]={'name':names[id],'base':dict(zip(['hp','attack','defense','speed','specialAttack','specialDefense'],raw)),'types':list(dict.fromkeys(re.search(r'db (\w+), (\w+) ; type',s).groups())),'catchRate':int(re.search(r'db (\d+) ; catch rate',s)[1]),'baseExp':int(re.search(r'db (\d+) ; base exp',s)[1]),'growth':re.search(r'db GROWTH_(\w+)',s)[1],'learnset':[{'level':int(l),'move':m} for l,m in re.findall(r'db (\d+), (\w+)',block(id))]}
  data['species'][id]['evolutions']=rules(id)
+ gender=re.search(r'db (GENDER_\w+)',(r/'data/pokemon/base_stats'/f'{id}.asm').read_text())
+ if gender:data['species'][id]['femaleThreshold']={'GENDER_F0':0,'GENDER_F12_5':2,'GENDER_F25':4,'GENDER_F50':8,'GENDER_F75':12,'GENDER_F100':16,'GENDER_UNKNOWN':None}[gender[1]]
  for side in ['front','back']:
   folder=r/'gfx/pokemon'/id;file=folder/(('front_gold.png' if (folder/'front_gold.png').exists() else 'front.png') if side=='front' else 'back.png');im=Image.open(file).convert('RGBA');bg=im.getpixel((0,0));im.putdata([(0,0,0,0) if p==bg else p for p in im.getdata()]);im.save(out/'battle'/f'{id}-{side}.png')
 moveids={l['move'] for sp in data['species'].values() for l in sp['learnset']}

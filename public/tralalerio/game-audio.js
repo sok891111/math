@@ -51,7 +51,7 @@ export function createGameAudio(getGame,{storage=window.localStorage}={}){
  function reflect(){button.textContent=muted?'소리 켜기':'소리 끄기';button.setAttribute('aria-pressed',String(!muted));if(master&&context)master.gain.setTargetAtTime(muted||healing?0:volume,context.currentTime,.04);document.dispatchEvent(new CustomEvent('game-audio-setting',{detail:{muted,volume}}));}
  function save(){try{storage.setItem('tralalerio-audio',JSON.stringify({muted,volume}))}catch{}reflect();}
  fetch(BASE+'effects.json?v=20261018-silentwarp22').then(r=>r.json()).then(raw=>effects=raw).catch(()=>{});
- const prepare=()=>manifestPromise??=(fetch(BASE+'manifest.json?v=20261018-silentwarp22').then(r=>{if(!r.ok)throw Error('music manifest');return r.json()}).then(m=>{manifest=m;return m}).catch(()=>null));
+ const prepare=()=>manifestPromise??=(fetch(BASE+'manifest.json?v=20261025-third1').then(r=>{if(!r.ok)throw Error('music manifest');return r.json()}).then(m=>{manifest=m;return m}).catch(()=>null));
  function stop(){ticket++;for(const n of nodes){try{n.stop()}catch{}n.disconnect();}nodes=[];current=null;controls.dataset.track='';}
  async function score(id){
   if(cache.has(id)){const value=cache.get(id);cache.delete(id);cache.set(id,value);return value;}

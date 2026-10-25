@@ -35,13 +35,17 @@ for id,m in maps.items():
   name,party=team(group,key);tid=id+':'+o['script'];o['trainer']=tid
   trainers[tid]={'id':tid,'name':name,'group':group,'party':party,'reward':party[-1]['level']*({'FALKNER':100,'SAGE':32,'BIRD_KEEPER':24,'YOUNGSTER':16,'BUG_CATCHER':16}.get(group,20))}
   seen=re.search(r'trainer \w+, \w+, \w+, (\w+)',block)
-  intro=seen[1] if seen else {'FALKNER':'FalknerIntroText','BUGSY':'BugsyText_INeverLose','SAGE':'SageLiSeenText'}.get(group)
+  intro=seen[1] if seen else {'FALKNER':'FalknerIntroText','BUGSY':'BugsyText_INeverLose','WHITNEY':'WhitneyBeforeText','SAGE':'SageLiSeenText'}.get(group)
+  if not intro:
+   first_text=re.search(r'writetext (\w+)',block)
+   intro=first_text[1] if first_text else None
   if intro and intro in m['texts']:trainers[tid]['introPages']=m['texts'][intro]
-  if group in ['FALKNER','BUGSY']:
-   trainers[tid]['badge']='zephyr' if group=='FALKNER' else 'hive'
-   trainers[tid]['badgeName']='윙배지' if group=='FALKNER' else '인섹트배지'
-   trainers[tid]['tm']='TM31' if group=='FALKNER' else 'TM49'
-   trainers[tid]['tmName']='진흙뿌리기' if group=='FALKNER' else '연속자르기'
+  if group in ['FALKNER','BUGSY','WHITNEY']:
+   trainers[tid]['badge']={'FALKNER':'zephyr','BUGSY':'hive','WHITNEY':'plain'}[group]
+   trainers[tid]['badgeName']={'FALKNER':'윙배지','BUGSY':'인섹트배지','WHITNEY':'레귤러배지'}[group]
+   trainers[tid]['tm']={'FALKNER':'TM31','BUGSY':'TM49','WHITNEY':'TM45'}[group]
+   trainers[tid]['tmName']={'FALKNER':'진흙뿌리기','BUGSY':'연속자르기','WHITNEY':'헤롱헤롱'}[group]
+  if group=='WHITNEY':trainers[tid]['deferredBadge']=True
   if group=='SAGE' and key=='LI':trainers[tid]['gift']='FLASH'
 name,party=team('RIVAL1','RIVAL1_2_CYNDAQUIL');trainers['AzaleaRival']={'id':'AzaleaRival','name':'빨간 머리 친구','group':'RIVAL1','party':party,'reward':1080,'introPages':maps['AzaleaTown']['texts'].get('AzaleaTownRivalBeforeText',['또 만났군! 승부다!'])}
 name,party=team('RIVAL1','RIVAL1_1_CHIKORITA');trainers['CherrygroveRival']={'id':'CherrygroveRival','name':'빨간 머리 친구','group':'RIVAL1','party':party,'reward':300}
@@ -54,7 +58,7 @@ for id,m in maps.items():
  if not table:continue
  slots,rates=table['slots'],table['rates'];needed.update(s['species'] for s in slots)
  attribute=re.search(r'\bmap '+re.escape(id)+r', \w+, (\w+),',map_attributes)
- terrain='floor' if attribute and attribute[1] in ['CAVE','DUNGEON'] else 'grass'
+ terrain='floor' if id=='IlexForest' or attribute and attribute[1] in ['CAVE','DUNGEON'] else 'grass'
  # Integer weights preserve Gold's exact 30/30/20/10/5/4/1 relative rates within the 40% Pokemon pool.
  data['encounters'][id]={'rateByte':rates['day'],'rates':rates,'terrain':terrain,'weights':[60,60,40,20,10,8,2]+[15]*12+[10]*12}
  source_tables[id]={'constant':m['constant'],'rates':rates,'terrain':terrain}
@@ -104,6 +108,12 @@ for trainer in trainers.values():
  trainer['dvs']=dvs[trainer['group']]
  key=trainer['group'].replace('_','')
  if key in rewards:trainer['reward']=rewards[key]*4*trainer['party'][-1]['level']
-data['trainers']=trainers;data['scope']='Second badge maps and source trainer teams; original Gold base stats and wild slots with 60% Minecraft encounters.'
+gender_values={'GENDER_F0':0,'GENDER_F12_5':2,'GENDER_F25':4,'GENDER_F50':8,'GENDER_F75':12,'GENDER_F100':16,'GENDER_UNKNOWN':None}
+for id,sp in data['species'].items():
+ source=R/'data/pokemon/base_stats'/f'{id}.asm'
+ if source.exists():
+  gender=re.search(r'db (GENDER_\w+)',source.read_text())
+  if gender:sp['femaleThreshold']=gender_values[gender[1]]
+data['trainers']=trainers;data['scope']='Third badge main route through Ilex Forest and Goldenrod; original Gold layouts, parties and wild slots; Pokemon 60 / Minecraft 40.'
 (O/'battle-data.json').write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')));(O/'maps.json').write_text(json.dumps(maps,ensure_ascii=False,separators=(',',':')))
 print('First badge:',len(maps),'maps,',len(trainers),'trainers,',len(needed),'original species referenced')

@@ -1,15 +1,17 @@
-import {NUMBER_REASONING_LABELS,numberReasoningQuestion} from './number-reasoning-puzzles.js?v=20261018-table19';
+import {EARLY_ARITHMETIC_LABELS,earlyArithmetic} from './early-arithmetic-puzzles.js?v=20261025-reasoning5';
+import {NUMBER_REASONING_LABELS,numberReasoningQuestion} from './number-reasoning-puzzles.js?v=20261025-reasoning5';
 import {REFERENCE_LABELS,referenceQuestion} from './facto-reference-puzzles.js?v=20261018-table19';
-import {ANALYSIS_LABELS,analysisQuestion} from './story-analysis-puzzles.js?v=20261018-subtract27';
-import {learningHints} from './learning-hints.js?v=20261018-table19';
+import {ANALYSIS_LABELS,analysisQuestion} from './story-analysis-puzzles.js?v=20261025-variety1';
+import {learningHints} from './learning-hints.js?v=20261025-reason2';
 import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './minecraft-stories.js?v=20261018-table19';
 // Original generated questions based on public learning objectives, not workbook pages.
-export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:'모양 완성',array_rule:'배열 규칙',table_count:'표 읽기',place_value:'십 묶음과 낱개',add_single:'두 자리와 한 자리 덧셈',add_tens:'몇십 더하기',add_two:'두 자리 덧셈',add_carry_single:'받아올림 한 자리 덧셈',add_carry_two:'받아올림 두 자리 덧셈',add_story:'이야기 덧셈',subtract_single:'한 자리 뺄셈',subtract_story:'한 자리 이야기 뺄셈',times_table:'구구단 · 2~6단',calc_puzzle:'계산 탐험',...STORY_LABELS,...ANALYSIS_LABELS,...REFERENCE_LABELS,...NUMBER_REASONING_LABELS};
+export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:'모양 완성',array_rule:'배열 규칙',table_count:'표 읽기',place_value:'십 묶음과 낱개',add_single:'두 자리와 한 자리 덧셈',add_tens:'몇십 더하기',add_two:'두 자리 덧셈',add_carry_single:'받아올림 한 자리 덧셈',add_carry_two:'받아올림 두 자리 덧셈',add_story:'이야기 덧셈',subtract_single:'한 자리 뺄셈',subtract_story:'한 자리 이야기 뺄셈',times_table:'구구단 · 2~6단',calc_puzzle:'계산 탐험',...STORY_LABELS,...ANALYSIS_LABELS,...REFERENCE_LABELS,...NUMBER_REASONING_LABELS,...EARLY_ARITHMETIC_LABELS};
 export const LEARNING_TYPES=Object.keys(LEARNING_LABELS).filter(type=>!['place_value','shape_match','shape_complete'].includes(type));
 const shuffle=(a,r)=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 export function learningQuestion(type,grade,r){
- if(['subtract_single','subtract_story'].includes(type))grade=1;
- if(Object.hasOwn(NUMBER_REASONING_LABELS,type))return numberReasoningQuestion(type,r);
+ if(Object.hasOwn(EARLY_ARITHMETIC_LABELS,type))return earlyArithmetic(type,grade,r);
+ if(['subtract_single','subtract_story'].includes(type))grade=Math.max(1,Math.min(2,grade));
+ if(Object.hasOwn(NUMBER_REASONING_LABELS,type))return numberReasoningQuestion(type,grade,r);
  if(Object.hasOwn(REFERENCE_LABELS,type))return referenceQuestion(type,grade,r);
  if(Object.hasOwn(ANALYSIS_LABELS,type))return analysisQuestion(type,grade,r);
  if(STORY_TYPES.includes(type))return minecraftStory(type,grade,r);
@@ -63,7 +65,7 @@ export function learningQuestion(type,grade,r){
     if(mode===1){b=1+pick(9);a=10*tens+pick(10);q.operands=[a,b];q.equation=`${a} → ${a+b} → ?`;result=a+2*b;
      q.prompt=`화살표를 지날 때마다 ${b}만큼 늘어나.`;q.models=[];
     }
-    if(mode===2){q.equation=`${a} + ${b} = ${result+1}`;q.prompt='친구의 계산에 실수가 있어! 바른 답 조각으로 고쳐 줘.';}
+    if(mode===2){q.equation=`${a} + ${b} = ${result===99?98:result+1}`;q.prompt='친구의 계산에 실수가 있어! 바른 답 조각으로 고쳐 줘.';}
     if(mode===3){q.prompt=minecraftCombineText(a,b);q.story=true;q.equation=null;q.models=[];}
    }
    const [left,right]=q.operands,onesTotal=left%10+right%10;

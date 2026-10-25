@@ -1,22 +1,33 @@
-import {TYPE_LEVELS,SUBTRACTION_TYPES,levelForType,planGymAttack} from './math-levels.js?v=20261018-subtract27';
+import {chooseScheduledType} from './math-schedule.js?v=20261025-variety1';
+import {ADDITION_VERSION,additionType,additionWithinLimit,additionChecks} from './addition-policy.js?v=20261025-early1';
+import {mirrorQuestion,MIRROR_VERSION} from './mirror-puzzles.js?v=20261025-reason2';
+import {balanceQuestion,BALANCE_VERSION} from './balance-puzzles.js?v=20261025-reason2';
+import {TYPE_LEVELS,SUBTRACTION_TYPES,levelForType,planGymAttack} from './math-levels.js?v=20261025-reasoning5';
 import {rotationQuestion} from './rotation-puzzles.js?v=20261018-table19';
 import {canStoreCapture} from './pc.js?v=20261018-table19';
 import {advancedAnalogy} from './analogy-puzzles.js?v=20261018-table19';
-import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261018-subtract27';
+import {LEARNING_TYPES,LEARNING_LABELS,learningQuestion,validateLearning} from './learning-puzzles.js?v=20261025-reasoning5';
 export const MATH_TYPES=['pattern','mirror','logic','sequence','analogy','rotate','bond','balance','latin',...LEARNING_TYPES.filter(type=>type!=='shape_complete')].filter(type=>!['bond','add_single','add_tens'].includes(type));
 export const MATH_LABELS={pattern:'반복 규칙',mirror:'거울 대칭',path:'길 찾기',logic:'논리 배치',sequence:'수의 규칙',classify:'분류',analogy:'변환 규칙',rotate:'도형 회전',tower:'블록 세기',bond:'수 모으기',balance:'무게 비교',latin:'숫자 격자',...LEARNING_LABELS};
 export const DIFFICULTY_VERSION=7;
-export const BOSS_MATH_SPECIES=['mew','mewtwo','articuno','zapdos','moltres','raikou','entei','suicune','lugia','ho_oh','celebi','koraidon','mc_enderdragon','mc_wither'];
-export function isBossMathSpecies(species,data){return !!(BOSS_MATH_SPECIES.includes(species)||data?.challengePolicy?.rareSpecies?.includes(species)||data?.species?.[species]?.boss===true);}
+export const BOSS_MATH_SPECIES=['mew','mewtwo','articuno','zapdos','moltres','raikou','entei','suicune','lugia','ho_oh','celebi','koraidon','zamazenta','eternatus','mc_enderdragon','mc_wither'];
+export function isBossMathSpecies(species,data){return !!(BOSS_MATH_SPECIES.includes(species)||data?.challengePolicy?.rareSpecies?.includes(species)||data?.species?.[species]?.boss===true||data?.species?.[species]?.legendary===true);}
 export function isBossMathBattle(game){const b=game.battle,t=game.battleData.trainers?.[b?.s.trainer];return !!(t?.badge||t?.boss||isBossMathSpecies(b?.enemy.species,game.battleData));}
 export function mathGrade(map,level=1,species=null,data=null){return isBossMathSpecies(species,data)?5:3;}
 export function challengeGrade(game,seed){return isBossMathBattle(game)?5:seed>=3435973836?4:3;}
 const ordinaryLevels=type=>(TYPE_LEVELS[type]||[]).filter(n=>n<=4&&(n>=3||SUBTRACTION_TYPES.includes(type)));
 export function mathTypesForBattle(game){const boss=isBossMathBattle(game);return MATH_TYPES.filter(t=>boss?TYPE_LEVELS[t].includes(5):ordinaryLevels(t).length>0);}
 function battleGrade(type,preferred,boss){if(boss)return 5;const levels=ordinaryLevels(type);return levels.reduce((best,n)=>Math.abs(n-preferred)<Math.abs(best-preferred)?n:best,levels[0]);}
-function selection(game,rng){const typeRoll=rng(),seed=Math.floor(rng()*4294967296)>>>0,preferred=challengeGrade(game,seed),available=mathTypesForBattle(game),unused=available.filter(t=>t!==game.state.lastMathType),pool=unused.length?unused:available,type=pool[Math.floor(typeRoll*pool.length)];return {type,seed,grade:battleGrade(type,preferred,isBossMathBattle(game))};}
+function selection(game,rng){const typeRoll=rng(),seed=Math.floor(rng()*4294967296)>>>0,boss=isBossMathBattle(game),preferred=challengeGrade(game,seed),available=mathTypesForBattle(game),type=chooseScheduledType(game.state,available,SUBTRACTION_TYPES,typeRoll,boss?'boss':'ordinary');return {type,seed,grade:!boss&&SUBTRACTION_TYPES.includes(type)?(seed<2576980378?1:2):battleGrade(type,preferred,boss)};}
+
 export function seededRandom(seed){let n=seed>>>0;return ()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296}}
-export function questionFor(challenge,model,facto){const r=seededRandom(challenge.seed);return challenge.type==='rotate'?rotationQuestion(challenge.grade,r,facto):challenge.type==='analogy'?advancedAnalogy(challenge.grade,r):LEARNING_TYPES.includes(challenge.type)||['place_value','shape_match','shape_complete'].includes(challenge.type)?learningQuestion(challenge.type,challenge.grade,r):facto.types.includes(challenge.type)?gradedFacto(challenge.type,challenge.grade,r,facto):model.puzzle(challenge.type,challenge.grade,r)}
+export function questionFor(challenge,model,facto){
+ const r=seededRandom(challenge.seed);
+ const make=()=>challenge.type==='mirror'?mirrorQuestion(challenge.grade,r):challenge.type==='balance'&&challenge.grade>=4?balanceQuestion(challenge.grade,r):challenge.type==='rotate'?rotationQuestion(challenge.grade,r,facto):challenge.type==='analogy'?advancedAnalogy(challenge.grade,r):LEARNING_TYPES.includes(challenge.type)||['place_value','shape_match','shape_complete'].includes(challenge.type)?learningQuestion(challenge.type,challenge.grade,r):facto.types.includes(challenge.type)?gradedFacto(challenge.type,challenge.grade,r,facto):model.puzzle(challenge.type,challenge.grade,r);
+ for(let attempt=0;attempt<128;attempt++){const q=make();if(additionWithinLimit(q)){if(additionType(q.type)){q.additionVersion=ADDITION_VERSION;q.additionChecks=additionChecks(q);}return q;}}
+ throw Error('Addition question exceeds the supported number range');
+}
+
 export function validateQuestion(q,input,model,facto){
  if(!Array.isArray(input)||input.some(n=>!Number.isInteger(n)))return {ok:false,reason:'빈칸을 모두 채워 주세요.'};
  if(q.type==='rotate'){const chosen=q.options?.[input[0]],expected=facto.rotate(q.source,q.turns);return {ok:input.length===1&&!!chosen&&chosen.every((n,i)=>n===expected[i]),reason:q.hint};}
@@ -30,7 +41,7 @@ export function requestCapture(game,model,facto,rng=Math.random){
  if(b.s.mathChallenge)return b.s.mathChallenge.kind==='capture'?b.s.mathChallenge:null;
  const {type,seed,grade}=selection(game,rng);
  const c={version:1,kind:'capture',type,seed,grade,difficultyVersion:DIFFICULTY_VERSION,targetSpecies:b.enemy.species,playerSpecies:p.species,input:[],attempts:0,hints:0};
- if(c.type==='analogy'){c.grade=Math.max(2,c.grade);c.analogyVersion=2;}if(c.type==='rotate')c.rotationVersion=2;c.input=emptyInput(questionFor(c,model,facto));b.s.mathChallenge=c;return c;
+ if(c.type==='analogy'){c.grade=Math.max(2,c.grade);c.analogyVersion=2;}if(c.type==='equal_sum'&&c.grade===5)c.equalSumVersion=2;if(c.type==='rotate')c.rotationVersion=2;if(additionType(c.type))c.additionVersion=ADDITION_VERSION;if(c.type==='mirror')c.mirrorVersion=MIRROR_VERSION;if(c.type==='balance')c.balanceVersion=BALANCE_VERSION;c.input=emptyInput(questionFor(c,model,facto));b.s.mathChallenge=c;return c;
 }
 export function requestMath(game,index,model,facto,rng=Math.random){
  const b=game.battle,p=b?.player;if(b?.s.mathChallenge?.kind==='capture')return null;if(!b||b.s.result||b.s.waitingSwitch||b.s.animationPending||!p.moves[index]||p.moves[index].pp===0&&p.moves.some(m=>m.pp>0))return null;
@@ -40,7 +51,7 @@ export function requestMath(game,index,model,facto,rng=Math.random){
   if(!ordinary&&!plan?.lethal){b.action('move',index,{plannedRolls:plan?.rolls});return null;}
   const {type,seed,grade}=selection(game,rng);c={version:1,type,seed,grade,difficultyVersion:DIFFICULTY_VERSION,moveIndex:index,moveId:p.moves[index].id,playerSpecies:p.species,input:[],attempts:0,hints:0};
   if(plan){c.plannedRolls=plan.rolls;c.gymFinisher=plan.lethal;}
-  if(c.type==='analogy')c.analogyVersion=2;if(c.type==='rotate')c.rotationVersion=2;c.input=emptyInput(questionFor(c,model,facto));b.s.mathChallenge=c;
+  if(c.type==='analogy')c.analogyVersion=2;if(c.type==='equal_sum'&&c.grade===5)c.equalSumVersion=2;if(c.type==='rotate')c.rotationVersion=2;if(additionType(c.type))c.additionVersion=ADDITION_VERSION;if(c.type==='mirror')c.mirrorVersion=MIRROR_VERSION;if(c.type==='balance')c.balanceVersion=BALANCE_VERSION;c.input=emptyInput(questionFor(c,model,facto));b.s.mathChallenge=c;
  }
 
  c.moveIndex=index;c.moveId=p.moves[index].id;c.playerSpecies=p.species;return c;
@@ -64,12 +75,14 @@ export function skipMath(game){const b=game.battle,c=b?.s.mathChallenge;if(!c)re
 // Keep valid old saves, but replace retired/easy pending questions before displaying them.
 export function upgradeChallenge(game,model,facto){
  const c=game.battle?.s.mathChallenge;if(!c||game.mathLab===true)return false;
+ const oldAddition=additionType(c.type)&&c.additionVersion!==ADDITION_VERSION;
+ const oldReasoning=oldAddition||c.type==='equal_sum'&&c.grade===5&&c.equalSumVersion!==2||c.type==='mirror'&&c.mirrorVersion!==MIRROR_VERSION||c.type==='balance'&&c.balanceVersion!==BALANCE_VERSION;
  const removed=['path','tower','shape_complete','bond','add_single','add_tens'].includes(c.type),oldRotation=c.type==='rotate'&&c.rotationVersion!==2;
  const retiredShape=c.type==='shape_match',retired=c.type==='place_value',retiredClassify=c.type==='classify',analogy=retiredClassify||c.type==='analogy'&&(c.analogyVersion!==2||c.grade<2);
- const boss=isBossMathBattle(game),allowed=mathTypesForBattle(game),outsidePolicy=!allowed.includes(c.type)||(boss?c.grade!==5:c.grade>4),minimum=boss?5:3,harder=c.difficultyVersion!==DIFFICULTY_VERSION||outsidePolicy||(c.type==='table_count'&&c.grade!==3||SUBTRACTION_TYPES.includes(c.type)&&c.grade!==1),version=c.difficultyVersion!==DIFFICULTY_VERSION;
- if(!removed&&!oldRotation&&!retired&&!analogy&&!retiredShape&&!harder&&!version)return false;
+ const boss=isBossMathBattle(game),allowed=mathTypesForBattle(game),outsidePolicy=!allowed.includes(c.type)||(boss?c.grade!==5:c.grade>4),minimum=boss?5:SUBTRACTION_TYPES.includes(c.type)?1:3,harder=c.difficultyVersion!==DIFFICULTY_VERSION||outsidePolicy||(c.type==='table_count'&&c.grade!==3||SUBTRACTION_TYPES.includes(c.type)&&!TYPE_LEVELS[c.type].includes(c.grade)),version=c.difficultyVersion!==DIFFICULTY_VERSION;
+ if(!removed&&!oldRotation&&!retired&&!analogy&&!retiredShape&&!harder&&!version&&!oldReasoning)return false;
  c.difficultyVersion=DIFFICULTY_VERSION;
- if(!removed&&!oldRotation&&!retired&&!analogy&&!retiredShape&&!harder)return true;
+ if(!removed&&!oldRotation&&!retired&&!analogy&&!retiredShape&&!harder&&!oldReasoning)return true;
  c.grade=levelForType(c.type,minimum);
  if(retired)c.type='add_carry_single';
  if(retiredShape||c.type==='shape_complete')c.type='array_rule';
@@ -79,7 +92,7 @@ export function upgradeChallenge(game,model,facto){
  if(c.type==='add_tens')c.type='add_two';
  if(analogy){c.type='analogy';c.grade=Math.max(2,c.grade);c.analogyVersion=2;}
  if(!allowed.includes(c.type))c.type='logic';c.grade=battleGrade(c.type,minimum,boss);
- if(c.type==='rotate')c.rotationVersion=2;c.input=emptyInput(questionFor(c,model,facto));c.hints=0;c.attempts=0;return true;
+ if(c.type==='equal_sum'&&c.grade===5)c.equalSumVersion=2;if(c.type==='rotate')c.rotationVersion=2;if(additionType(c.type))c.additionVersion=ADDITION_VERSION;if(c.type==='mirror')c.mirrorVersion=MIRROR_VERSION;if(c.type==='balance')c.balanceVersion=BALANCE_VERSION;c.input=emptyInput(questionFor(c,model,facto));c.hints=0;c.attempts=0;return true;
 }
 
 function gradedFacto(type,grade,r,facto){

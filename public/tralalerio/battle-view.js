@@ -1,11 +1,11 @@
 import {messageVisual} from './battle-presentation.js?v=20261018-table19';
 import {isHpLossMessage} from './hp-messages.js?v=20261018-table19';
 import {isMathReward,isCaptureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261018-table19';
-import {requestMath,requestCapture} from './math-challenge.js?v=20261018-boss-math32';
-import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261018-boss-math32';
+import {requestMath,requestCapture} from './math-challenge.js?v=20261025-reasoning5';
+import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261025-reasoning5';
 import {createSendoutAnimator} from './sendout-animation.js?v=20261018-fly31';
 import {createCaptureAnimator,showCaughtBall} from './capture-animation.js?v=20261018-fly31';
-import {createBattleAnimator,animationAssets} from './battle-animation.js?v=20261018-fly31';
+import {createBattleAnimator,animationAssets} from './battle-animation.js?v=20261025-galar5';
 const typeNames={NORMAL:'노말',FIRE:'불꽃',WATER:'물',GRASS:'풀',FLYING:'비행',DARK:'악',PSYCHIC_TYPE:'에스퍼',POISON:'독',BUG:'벌레',ELECTRIC:'전기',GROUND:'땅',ROCK:'바위',FIGHTING:'격투',ICE:'얼음',DRAGON:'드래곤',GHOST:'고스트',STEEL:'강철'};
 const statusNames={burn:'화상',poison:'독',paralysis:'마비',sleep:'잠듦',freeze:'얼음'};
 export function createBattleView(getGame,onChange,onSave,onFinish,onNewCapture=()=>{},onEvolution=()=>{}){
@@ -29,7 +29,7 @@ export function createBattleView(getGame,onChange,onSave,onFinish,onNewCapture=(
  const title=el('p','battle-prompt',b.s.waitingSwitch?'다음 포켓몬을 골라 주세요.':`${name(b.player)}는 무엇을 할까?`);bottom.append(title);const actions=el('div','battle-grid');bottom.append(actions);
  const doAction=(type,value)=>{if(busy)return;if(type==='move'||type==='ball'){const challenge=type==='ball'?requestCapture(game(),window.CreativeBattle,window.FactoPuzzles):requestMath(game(),value,window.CreativeBattle,window.FactoPuzzles);if(challenge){phase='math';onSave();render();mathUI.open();return;}onSave();if(b.s.animationPending)playTurn();else{messageIndex=0;phase='logs';onChange();render()}return;}b.action(type,value);onSave();if(b.s.animationPending){playTurn();return}messageIndex=0;phase='logs';onChange();render()};
  if(b.s.waitingSwitch||phase==='party'){game().state.party.forEach((p,i)=>actions.append(button(`${name(p)} Lv.${p.level}`,()=>doAction('switch',i),p.hp<=0||i===b.s.playerIndex,`HP ${p.hp}/${p.stats.hp}`)));if(!b.s.waitingSwitch)actions.append(button('돌아가기',()=>{phase='root';render()}));}
- else if(phase==='moves'){b.player.moves.forEach((m,i)=>{const d=game().battleData.moves[m.id];actions.append(button(d.name,()=>doAction('move',i),m.pp===0&&b.player.moves.some(m=>m.pp>0),`${typeNames[d.type]||d.type} · 위력 ${d.power} · PP ${m.pp}/${d.pp}`))});if(b.player.moves.every(m=>m.pp===0)){title.textContent='PP가 없다! 발버둥을 사용합니다.'}actions.append(button('돌아가기',()=>{phase='root';render()}));}
+ else if(phase==='moves'){b.player.moves.forEach((m,i)=>{const d=game().battleData.moves[m.id];actions.append(button(d.name,()=>doAction('move',i),(b.lockedMoveIndex('player')!==null&&b.lockedMoveIndex('player')!==i)||m.pp===0&&b.player.moves.some(m=>m.pp>0),`${typeNames[d.type]||d.type} · 위력 ${d.power} · PP ${m.pp}/${d.pp}`))});if(b.player.moves.every(m=>m.pp===0)){title.textContent='PP가 없다! 발버둥을 사용합니다.'}actions.append(button('돌아가기',()=>{phase='root';render()}));}
  else if(phase==='bag'){actions.append(button('상처약',()=>doAction('potion'),!game().state.potions||b.player.hp===b.player.stats.hp,`${game().state.potions}개 · HP 20 회복`),button('몬스터볼',()=>doAction('ball'),!!b.s.trainer||!game().state.balls,`${game().state.balls}개 · 수학 문제를 풀어 포획`),button('돌아가기',()=>{phase='root';render()}));}
  else actions.append(button('싸운다',()=>{phase='moves';render()},false,'기술 선택'),button('가방',()=>{phase='bag';render()},false,`상처약 ${game().state.potions} · 볼 ${game().state.balls}`),button('포켓몬',()=>{phase='party';render()},false,`${game().state.party.length}마리`),button('도망간다',()=>doAction('run'),!!b.s.trainer,'전투에서 벗어나기'));
  focusFirst();

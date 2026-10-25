@@ -1,7 +1,8 @@
-import {LEVEL_LABELS} from './math-levels.js?v=20261018-subtract27';
-import {puzzleHintSteps} from './learning-hints.js?v=20261018-table19';
-import {renderLearning} from './learning-ui.js?v=20261018-level-evolution29';
-import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261018-boss-math32';
+import {MIRROR_AXES} from './mirror-puzzles.js?v=20261025-reason2';
+import {LEVEL_LABELS} from './math-levels.js?v=20261025-reasoning5';
+import {puzzleHintSteps} from './learning-hints.js?v=20261025-reason2';
+import {renderLearning} from './learning-ui.js?v=20261025-reasoning5';
+import {MATH_LABELS,upgradeChallenge,questionFor,emptyInput,submitMath,skipMath} from './math-challenge.js?v=20261025-reasoning5';
 export function createMathPuzzleUI({getGame,onSave,onSolved}){
  const model=window.CreativeBattle,facto=window.FactoPuzzles;
  const dialog=document.createElement('dialog');dialog.className='math-dialog';dialog.setAttribute('aria-labelledby','math-title');
@@ -28,9 +29,7 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
    const slots=document.createElement('div');slots.className='math-slots';c.input.forEach((n,i)=>{const b=button(n===null?'?':model.runes[n]?.symbol||'?',()=>{c.input[i]=null;cursor=i;render()},'math-slot');b.dataset.drop='pattern';b.dataset.slot=i;b.setAttribute('aria-label',`예측 ${i+1}번째 빈칸`);if(n!==null){b.dataset.drag='pattern-slot';b.dataset.value=n;b.dataset.from=i}slots.append(b)});board.append(slots);
    model.runes.forEach((r,n)=>{const b=button(r.symbol+' '+r.name,()=>{const i=c.input[cursor]===null?cursor:c.input.indexOf(null);if(i<0)return;c.input[i]=n;cursor=c.input.indexOf(null);render()},'rune-tool');b.dataset.drag='pattern';b.dataset.value=n;b.setAttribute('aria-label',r.name+' 속성 연결');tools.append(b)});
   }else if(q.type==='mirror'){
-   const wrap=document.createElement('div');wrap.className='math-mirror';wrap.dataset.axis=q.axis;
-   for(const editable of [false,true]){const part=document.createElement('div');part.append(text('p',editable?'내 거울 방패':'원본의 빛'));const grid=document.createElement('div');grid.className='math-grid';grid.style.setProperty('--cols',q.cols);(editable?c.input:q.source).forEach((v,i)=>{const cell=editable?button('✦',()=>{c.input[i]=1-c.input[i];render()}):text('span','✦');cell.className='math-light'+(v?' on':'');if(editable){cell.dataset.drop='mirror';cell.dataset.slot=i;cell.setAttribute('aria-pressed',String(!!v));cell.setAttribute('aria-label',`방패 ${i+1}번째 빛`)}grid.append(cell)});part.append(grid);wrap.append(part);if(!editable)wrap.append(text('span',q.axis==='vertical'?'│':'─','math-axis'))}board.append(wrap);
-   const light=button('✦ 빛 조각',()=>{},'light-tool');light.dataset.drag='mirror';light.dataset.value=1;tools.append(light);
+   renderAdvancedMirror();
   }else if(q.type==='path'){
    const grid=document.createElement('div');grid.className='math-path';grid.style.setProperty('--cols',q.size);
    for(let i=0;i<q.size*q.size;i++){const blocked=q.blocked.includes(i),traced=c.input.includes(i);const b=button(i===q.start?'▶':i===q.goal?'⚔':blocked?'▨':q.gems.includes(i)?'◆':traced?'●':'',()=>pathTo(i),'math-path-cell'+(traced?' traced':'')+(q.gems.includes(i)?' gem':''));b.disabled=blocked;b.dataset.cell=i;b.setAttribute('aria-label',`${Math.floor(i/q.size)+1}행 ${i%q.size+1}열 ${i===q.start?'출발':i===q.goal?'도착':blocked?'막힌 돌':q.gems.includes(i)?'보석':'길'}`);grid.append(b)}board.append(grid,text('p',`남은 이동 ${q.budget-(c.input.length-1)} · 보석 ${q.gems.filter(n=>c.input.includes(n)).length}/${q.gems.length}`));
@@ -39,6 +38,14 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
    q.cards.forEach(n=>{const b=button(String(n),()=>{selected=n;render()},'logic-rune');b.dataset.drag='logic';b.dataset.value=n;b.disabled=c.input.includes(n);b.setAttribute('aria-pressed',String(selected===n));b.setAttribute('aria-label',n+' 룬 선택');tools.append(b)});
   }
   $('submit').disabled=!complete();persist();
+ }
+ function renderAdvancedMirror(){
+  const guide=text('section','','mirror-step-guide');guide.setAttribute('aria-label','거울을 사용하는 순서');guide.append(text('p',q.mode==='reverse'?'처음 → ① → ② → 마지막 (처음 모습을 복원해요)':'처음 → ① → ② → 마지막'));
+  const steps=text('div','','mirror-step-list');q.axes.forEach((axis,i)=>{const card=text('div','','mirror-step');card.append(text('b',`${i+1===1?'①':'②'} ${MIRROR_AXES[axis]}`));const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 60 60');svg.setAttribute('aria-hidden','true');const ends={vertical:[30,4,30,56],horizontal:[4,30,56,30],diagonalDown:[4,4,56,56],diagonalUp:[4,56,56,4]}[axis];svg.innerHTML=`<rect x="4" y="4" width="52" height="52" fill="none" stroke="#b6c4a3"/><line x1="${ends[0]}" y1="${ends[1]}" x2="${ends[2]}" y2="${ends[3]}" stroke="#52734e" stroke-width="3" stroke-dasharray="5 3"/>`;card.append(svg);steps.append(card);});guide.append(steps);board.append(guide);
+  const wrap=text('div','','math-mirror advanced-mirror');wrap.dataset.mode=q.mode;
+  for(const editable of [false,true]){const part=text('section','','mirror-panel');part.append(text('b',editable?q.targetLabel:q.sourceLabel));const grid=text('div','','math-grid');grid.style.setProperty('--cols',q.cols);grid.setAttribute('aria-label',editable?q.targetLabel:q.sourceLabel);
+   (editable?c.input:q.source).forEach((v,i)=>{const cell=editable?button('✦',()=>{c.input[i]=1-c.input[i];render()}):text('span','✦');cell.className='math-light'+(v?' on':'');cell.setAttribute('aria-label',`${editable?'방패':'원본'} ${Math.floor(i/q.cols)+1}행 ${i%q.cols+1}열 ${v?'켜짐':'꺼짐'}`);if(editable){cell.dataset.slot=i;cell.dataset.drop='mirror';cell.setAttribute('aria-pressed',String(!!v));}grid.append(cell);});part.append(grid);wrap.append(part);}
+  board.append(wrap,text('p','칸을 눌러 빛을 켜거나 꺼 주세요.','mirror-input-note'));
  }
  function renderAnalogy(){
   const examples=board.querySelector('.analogy-examples');
@@ -50,6 +57,10 @@ export function createMathPuzzleUI({getGame,onSave,onSolved}){
  }
  function renderBalance(){
   const scale=board.querySelector('.balance-scale');scale.replaceChildren();
+  if(q.balanceClues){scale.classList.add('advanced-balance');const group=values=>{const tray=text('div','','balance-bundle');for(const [key,symbol,label]of [['gem','◆','보석'],['star','★','별'],['weight','●','추']])if(values[key]){const chip=text('div','','balance-chip '+key);chip.append(text('span',symbol),text('b',`${label} ${values[key]}개`));tray.append(chip);}return tray;};
+   q.balanceClues.forEach((clue,i)=>{const row=text('section','','balance-clue');row.setAttribute('aria-label',`저울 ${i+1}`);row.append(text('b',`저울 ${i+1}`));const equation=text('div','','balance-equation');equation.append(group(clue.left),text('b','＝','balance-equal'),group(clue.right));row.append(equation);scale.append(row);});return;
+  }
+
   function weights(n){const group=text('div','','balance-weights');const dots=text('div','','weight-dots');dots.setAttribute('aria-hidden','true');for(let i=0;i<n;i++)dots.append(document.createElement('i'));group.append(dots,text('small',`추 ${n}개`));return group}
   const left=text('div','','balance-pan'),right=text('div','','balance-pan');
   const objects=text('div','','balance-objects'),gem=text('div','','balance-gem');gem.append(text('span','◆'),text('small','보석 1개'));objects.append(gem);if(q.extra)objects.append(weights(q.extra));
