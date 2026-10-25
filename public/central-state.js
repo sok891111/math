@@ -21,15 +21,6 @@
       let meta = JSON.parse(storage.getItem(metaKey) || 'null') || {browserId: uuid(), migrated: false, baseline: {}};
       let busy = false, started = false, retryRequested = false;
       const session = active = {id};
-      function status(message) {
-        let node = document.getElementById('central-state-status');
-        if (!node) {
-          node = document.createElement('div'); node.id = 'central-state-status'; node.setAttribute('role', 'status');
-          node.style.cssText = 'position:fixed;top:4px;right:8px;z-index:2147483646;background:#fffef0;color:#354735;padding:5px 9px;border-radius:8px;font:12px sans-serif;max-width:85vw;pointer-events:none';
-          document.body.append(node);
-        }
-        node.textContent = message;
-      }
       const persistMeta = () => storage.setItem(metaKey, JSON.stringify(meta));
       function snapshot() {
         const result = {};
@@ -76,7 +67,6 @@
             const games = Object.fromEntries(Object.entries(snapshot()).filter(([, entries]) => Object.keys(entries).length));
             enqueue(games, true);
           }
-          status(navigator.onLine ? '서버에 기록을 저장하고 있어요…' : '오프라인 · 연결되면 자동 저장해요');
           if (!navigator.onLine) throw Error('offline');
           await sendPending();
           const current = snapshot(), changes = {};
@@ -102,13 +92,11 @@
             meta.baseline[game] = await fingerprint(record.entries);
           }
           persistMeta();
-          status('서버 저장 완료 · 10분마다 자동 저장');
           // Existing game controllers restore their state only at startup.
           if (changed && started) location.reload();
           return true;
         } catch (error) {
           console.warn('[central-state]', error.message);
-          status('기기에 보관 중 · 연결되면 서버에 저장해요');
           if (!hasRecords()) throw Error('기존 서버 기록을 확인하지 못했어요. 인터넷 연결 후 새로고침해 주세요.');
           return false;
         } finally { busy = false; if (retryRequested) { retryRequested = false; queueMicrotask(() => sync().catch(() => {})); } }

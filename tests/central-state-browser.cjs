@@ -74,7 +74,7 @@ async function waitFor(check) {for(let i=0;i<100;i++){try {if(await check())retu
   assert.equal((await fetch(base+'/api/user/NoUser/state')).status,404);
   assert.equal((await fetch(endpoint,{method:'POST',headers:{origin:'https://other.example','Content-Type':'application/json'},body:'{}'})).status,403);
   // React lobby also hydrates before badge effects run.
-  const lobby=await b.newPage();await lobby.goto(base+'/'+user.id);await lobby.waitForFunction(()=>document.querySelector('#central-state-status')?.textContent.includes('서버 저장 완료'));
+  const lobby=await b.newPage();await lobby.goto(base+'/'+user.id);await lobby.waitForFunction(()=>Boolean(window.BlockCentralState));await lobby.evaluate(()=>window.BlockCentralState.start('Sync12'));assert.equal(await lobby.locator('#central-state-status').count(),0);
   console.log('PASS: real Next API, original migration backups, fresh-browser restore, 10-minute upload, offline/reconnect, shared progress, all game routes and lobby.');
  } finally {
   await browser?.close();server.kill();await new Promise(resolve=>{if(server.exitCode!==null)return resolve();server.once('exit',resolve);});fs.rmSync(dir,{recursive:true,force:true});

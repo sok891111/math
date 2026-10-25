@@ -8,7 +8,7 @@ function loadCentralState() {
       script.src = src; script.onload = resolve; script.onerror = reject;
       document.head.append(script);
     });
-    window.__centralStateLoader = load('/central-state-keys.js?v=1').then(() => load('/central-state.js?v=1'));
+    window.__centralStateLoader = load('/central-state-keys.js?v=1').then(() => load('/central-state.js?v=2'));
   }
   return window.__centralStateLoader;
 }
