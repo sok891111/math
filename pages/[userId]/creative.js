@@ -1,3 +1,4 @@
+import { centralStateHTML } from '../../lib/central-state/html.cjs';
 import fs from 'fs';
 import path from 'path';
 import { getUser } from '../../lib/stateManager';
@@ -11,6 +12,6 @@ export async function getServerSideProps({ params, res }) {
   html = html.replace('</head>', `<script>window.__BLOCK_USER__=${context};</script></head>`);
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
-  res.end(html);
+  res.end(centralStateHTML(html, user.id));
   return { props: {} };
 }

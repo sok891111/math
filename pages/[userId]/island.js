@@ -1,3 +1,4 @@
+import { centralStateHTML } from '../../lib/central-state/html.cjs';
 import fs from 'fs';
 import path from 'path';
 import { getUser } from '../../lib/stateManager';
@@ -54,7 +55,7 @@ export async function getServerSideProps({ params, res }) {
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.write(html);
+    res.write(centralStateHTML(html, user.id));
     res.end();
   } catch (e) {
     console.error('Failed to render island page:', e);

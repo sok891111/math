@@ -72,3 +72,6 @@ if(fs.existsSync(magicDir)){
 }
 
 console.log('✅ Synchronized public assets, including magic-english.');
+
+fs.copyFileSync(path.join(rootDir, 'lib/central-state/keys.cjs'), path.join(publicDir, 'central-state-keys.js'));
+fs.copyFileSync(path.join(rootDir, 'scripts/central-state-client.js'), path.join(publicDir, 'central-state.js'));

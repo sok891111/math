@@ -10,3 +10,5 @@ events_*.json
 
 .magic-english-data/
 magic-english/.block-world-data/
+
+.central-state-data/
