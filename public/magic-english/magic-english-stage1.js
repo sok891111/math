@@ -1,3 +1,4 @@
+import {speechAttemptOutcome,npcVoiceLocked} from './speech-attempts.js';
 import {chooseFarewell} from './magic-english-farewells.js';
 import {conversationPages} from './magic-english-conversations.js';
 import {SENTENCE_PRACTICE,practiceStep} from './magic-english-practice.js';
@@ -234,7 +235,7 @@ export async function startMagicEnglishStage1App() {
     speechRecognizer.cancel();
     cancelActiveVoice();
     const learning=ensureLearningState(state);learning.praised??={};
-    const pageList=conversationPages(Array.isArray(pages)?pages:[pages],speaker).filter(page=>page?.type!=='praise'||!learning.praised[page.npcId]);
+    const pageList=conversationPages(Array.isArray(pages)?pages:[pages],speaker).map(page=>page?.type==='speak'&&/공항 안내 데스크/.test(speaker)?{...page,guidePlaybackRate:.85}:page).filter(page=>page?.type!=='praise'||!learning.praised[page.npcId]);
     for(const page of pageList){if(typeof page!=='object'||!page)continue;const voice=page.type==='speak'?page.guideClip||page.targetPhrase:page.voiceClip;if(voice)void preloadCharacterVoice(voice,page.type==='speak'?'amy':dialogueCharacter(page.speaker||speaker,page.text)).catch(()=>{});}
     dialog = {
       speaker,
@@ -254,7 +255,7 @@ export async function startMagicEnglishStage1App() {
     if (mapLabelsOverlay) {
       mapLabelsOverlay.classList.toggle('dimmed', Boolean(dialog || menuOpen));
     }
-    el.hidden = !dialog;
+    el.hidden = !dialog;$('#touch-action').disabled=false;$('#dialog-next').disabled=false;
     $('#touch-action').querySelector('span').textContent=dialog?'다음·확인':'조사·대화';
     if (!dialog) return;
 
@@ -369,7 +370,7 @@ export async function startMagicEnglishStage1App() {
         rewardEl.className = 'me-dialog-reward-banner';
         el.insertBefore(rewardEl, $('#choices'));
       }
-      rewardEl.textContent = isBadgeRevealTurn ? '🏆 조각: 철·하트 각 1개 · Stage 완료: 블록 15개·하트 15개' : (typeof rawStep.rewardBanner==='string' ? rewardBannerText : rawStep.speaker?.includes('활빈') ? '💛 활빈과 함께 여행해요!' : ensureLearningState(state).lastRewardQuantity ? '🧱 블록 +'+state.learning.lastRewardQuantity+'개 · ❤️ 하트 +'+state.learning.lastRewardQuantity+'개' : rewardBannerText);
+      rewardEl.textContent = isBadgeRevealTurn ? '🏆 조각: 돌·하트 각 1개 · Stage 완료: 블록 15개·하트 15개' : (typeof rawStep.rewardBanner==='string' ? rewardBannerText : rawStep.speaker?.includes('활빈') ? '💛 활빈과 함께 여행해요!' : ensureLearningState(state).lastRewardQuantity ? '🧱 블록 +'+state.learning.lastRewardQuantity+'개 · ❤️ 하트 +'+state.learning.lastRewardQuantity+'개' : rewardBannerText);
       if(ensureLearningState(state).lastWeapon)rewardEl.textContent+=' · ⚔️ '+state.learning.lastWeapon+' 획득!';
       rewardEl.hidden = false;
     } else if (rewardEl) {
@@ -416,7 +417,7 @@ export async function startMagicEnglishStage1App() {
           ${rawStep.meaningKo?`<div class="me-turn-meaning">${rawStep.meaningKo}</div>`:''}
           ${rawStep.phonetic ? `<div class="me-turn-phonetic">${rawStep.phonetic}</div>` : ''}
         </div>
-        <div class="me-turn-status ${st.statusType}">${st.statusText}</div>
+        <div class="me-turn-status ${st.statusType}"></div>
         <div class="me-turn-actions">
           <button type="button" id="turn-listen-btn" class="me-turn-btn listen">🔊 가이드 듣기</button>
           <button type="button" id="turn-speak-btn" ${st.pending||st.settled?'disabled aria-busy="true"':''} class="me-turn-btn speak ${isRec ? 'recording' : ''}">
@@ -429,9 +430,10 @@ export async function startMagicEnglishStage1App() {
         </div>
       `;
 
+      speakBox.querySelector('.me-turn-status').textContent=st.statusText;
       speakBox.querySelector('#turn-listen-btn').onclick = e => {
         e.stopPropagation();
-        if(!speechRecognizer.isRecording()&&!st.pending)speakEnglishPhrase(rawStep.guideClip || rawStep.targetPhrase,{character:'amy'});
+        if(!speechRecognizer.isRecording()&&!st.pending)speakEnglishPhrase(rawStep.guideClip || rawStep.targetPhrase,{character:'amy',playbackRate:rawStep.guidePlaybackRate||1});
       };
 
       speakBox.querySelector('#turn-myvoice-btn').onclick = e => {
@@ -477,7 +479,13 @@ export async function startMagicEnglishStage1App() {
             if (!stillHere() || st.settled) return;
             st.pending=false;
             const outcome = serverAssessment || assessLearningSpeech(transcript,rawStep.targetKey || 'full');
-            if (!outcome.passed) {finishUnheard(turnDialog,st);return;}
+            if (!outcome.passed) {
+              const attempt=speechAttemptOutcome({...outcome,recognizedText:serverAssessment?.recognizedText??outcome.transcript??transcript},st.failedAttempts||0);
+              if(attempt.action==='unheard'){finishUnheard(turnDialog,st);return;}
+              st.failedAttempts=attempt.failures;ensureLearningState(state).failures=0;persist();
+              if(attempt.action==='retry'){st.statusType='retry';st.statusText='조금 다르게 말했네. 가이드를 듣고 다시 해볼래? ('+attempt.remaining+'번 더 할 수 있어요)';renderDialog();return;}
+              st.settled=true;speechRecognizer.cancel();cancelActiveVoice();dialog=null;cutsceneLocked=false;say('에이미','여러 번 이야기해 줘서 고마워! 이번에는 여기까지 하고, 준비되면 다시 이야기하자.');return;
+            }
             st.settled=true;
             const learning=ensureLearningState(state); learning.failures=0; learning.lastFeedback=outcome.message;learning.lastQuality=outcome.quality; learning.lastRewardQuantity=outcome.quantity || 1;learning.lastWeapon=outcome.weaponName||null;
             if(serverAssessment?.rewardToken) queueReward({id:attemptId,type:'speech',token:serverAssessment.rewardToken});
@@ -487,7 +495,7 @@ export async function startMagicEnglishStage1App() {
             rawStep.onPass?.('self'); persist();updateSidebar();renderDialog();
             setTimeout(()=>{if(stillHere())advanceDialog(true);},750);
           },
-          onError: () => {st.pending=false;if(stillHere()&&!st.settled) finishUnheard(turnDialog,st);},
+          onError: () => {st.pending=false;st.preparing=false;if(stillHere()&&!st.settled){st.statusType='retry';st.statusText='녹음이나 연결을 확인해 주세요. 준비되면 Speak를 다시 눌러 주세요.';renderDialog();}},
           onEnd: () => {
             if(!stillHere())return;st.pending=false;st.preparing=false;
             renderDialog();
@@ -497,7 +505,7 @@ export async function startMagicEnglishStage1App() {
 
       if (!st.autoPlayed) {
         st.autoPlayed = true;
-        speakEnglishPhrase(rawStep.guideClip || rawStep.targetPhrase,{character:'amy'});
+        speakEnglishPhrase(rawStep.guideClip || rawStep.targetPhrase,{character:'amy',playbackRate:rawStep.guidePlaybackRate||1});
       }
       return;
     }
@@ -508,7 +516,9 @@ export async function startMagicEnglishStage1App() {
     const voiceClipId = (isObjectNpc && rawStep.voiceClip) || detectVoiceClipForDialogPage(pageText);
     if (voiceClipId && dialog.voicePlayedIndex !== dialog.index) {
       dialog.voicePlayedIndex=dialog.index;
-      speakEnglishPhrase(voiceClipId,{character:dialogueCharacter(currentSpeaker,pageText),onError:()=>toast('목소리를 준비하지 못했어요. 잠시 후 다시 들어 보세요.')});
+      const voicedDialog=dialog,index=dialog.index;dialog.voicePlayingIndex=index;
+      const unlock=()=>{if(dialog===voicedDialog&&dialog.index===index){dialog.voicePlayingIndex=null;updateDialogVoiceLock();}};
+      void speakEnglishPhrase(voiceClipId,{character:dialogueCharacter(currentSpeaker,pageText),onEnd:unlock,onError:()=>{unlock();toast('목소리를 준비하지 못했어요. 잠시 후 다시 들어 보세요.');}}).then(played=>{if(!played)unlock();});
     }
 
     const choicesEl = $('#choices');
@@ -522,6 +532,7 @@ export async function startMagicEnglishStage1App() {
         b.type = 'button';
         b.textContent = label;
         b.onclick = () => {
+          if(npcVoiceLocked(dialog))return;
           cancelActiveVoice();
           dialog = null;
           el.hidden = true;renderDialog();
@@ -532,10 +543,12 @@ export async function startMagicEnglishStage1App() {
         choicesEl.append(b);
       }
     }
+    updateDialogVoiceLock();
   }
+  function updateDialogVoiceLock(){const locked=npcVoiceLocked(dialog);$('#dialog-next').textContent=locked?'듣는 중…':'다음 ▼';$('#dialog-next').disabled=locked;$('#touch-action').disabled=locked;for(const b of $('#choices').querySelectorAll('button'))b.disabled=locked;}
 
   function advanceDialog(forceFromSpeak = false) {
-    if (!dialog) return;
+    if (!dialog||npcVoiceLocked(dialog)) return;
     const currentStep = dialog.pages[dialog.index];
     const action=dialogueAction({dialog:currentStep,pending:!forceFromSpeak&&dialog.speakState?.stepIndex===dialog.index&&dialog.speakState?.pending,settled:forceFromSpeak||dialog.speakState?.stepIndex===dialog.index&&dialog.speakState?.settled,choices:dialog.index===dialog.pages.length-1&&Boolean(dialog.choices?.length)});
     if(action==='wait')return;
@@ -960,9 +973,9 @@ export async function startMagicEnglishStage1App() {
           speaker: '🏆 두 번째 모험 알파벳 조각 획득! · GOLDEN LETTER [B]',
           letter: 'B',
           badgeTitle: '두 번째 모험 황금 알파벳 「B」 조각 획득!',
-          text: '링고: “Ding! Correct! You got the letter B piece! Good job!\n축하합니다! 빛나는 두 번째 황금 B 조각을 얻었어요! 철 블록 1개가 내 세계로 전달돼요!”',
+          text: '링고: “Ding! Correct! You got the letter B piece! Good job!\n축하합니다! 빛나는 두 번째 황금 B 조각을 얻었어요! 돌 블록 1개가 내 세계로 전달돼요!”',
           voiceClip: 'You got the letter B piece! Good job!',
-          rewardBanner: '🎁 보스 격파 보상: 🅱️ 황금 B 조각 + 🧱 철 블록 1개 · ❤️ 하트 1개 전달!',
+          rewardBanner: '🎁 보스 격파 보상: 🅱️ 황금 B 조각 + 🧱 돌 블록 1개 · ❤️ 하트 1개 전달!',
         },
       ]);
       return;
@@ -989,7 +1002,7 @@ export async function startMagicEnglishStage1App() {
           milestone(2);
           persist();
           updateSidebar();
-          toast('Stage 2 완료! 나무·흙·철 각 5개와 하트 15개를 받았어요!');
+          toast('Stage 2 완료! 나무·흙·돌 각 5개와 하트 15개를 받았어요!');
         }
       );
       return;
@@ -1405,7 +1418,7 @@ export async function startMagicEnglishStage1App() {
           targetPhrase: 'My friend. Help, please!',
           meaningKo: '제 친구예요. 도와주세요!',
           targetKey: 'help_please',
-          guideClip: 'gildong_my_friend_help',
+          guideClip: 'My friend. Help, please!',
           rewardHint: '🔓 분실물 보관소 잠금 해제 + 나무 블록 1~2개',
           onPass: method => {
             recordStaffSpeechCompletion(state, method);
@@ -1553,7 +1566,7 @@ export async function startMagicEnglishStage1App() {
           <div class="me-reward-card">
             <span class="icon">🪙</span>
             <b>대화로 모은 블록은 내 세계에서 확인해요</b>
-            <small>조각: 철 1개 · 완료: 나무·흙·철 각 5개</small>
+            <small>조각: 돌 1개 · 완료: 나무·흙·돌 각 5개</small>
           </div>
         </div>
       `
@@ -1962,7 +1975,7 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'We found the A piece! The way is open!',
           rewardBanner: () =>
             grantResult.granted
-              ? '🎁 보스 격파 보상: 🅰️ 황금 A 조각 + 철 블록 1개 + 완료 보상 나무·흙·철 각 5개!'
+              ? '🎁 보스 격파 보상: 🅰️ 황금 A 조각 + 돌 블록 1개 + 완료 보상 나무·흙·돌 각 5개!'
               : `✓ 황금 A 조각 보유 중! (다시 말해도 블록을 받을 수 있어요!)`,
         },
 
@@ -2305,7 +2318,7 @@ export async function startMagicEnglishStage1App() {
     document.querySelector('.chapter h2').textContent=stage2Active?'사라진 보따리와 B의 버스':'활빈 찾기와 첫 영어 말하기';
     document.querySelector('.partner .eyebrow').textContent='ADVENTURE · BLOCK REWARDS';
     $('#partner').textContent=(isHwalbinFollowing()?'💛 활빈과 동행 중 · ':'활빈을 찾아주세요 · ')+`알파벳 조각: ${state.alphabetPieces.join(' · ') || '아직 없음'}`;
-    $('#party').textContent='대화 성공: 랜덤 블록·하트 각 1개 · 완전한 문장: 각 2개 · 조각: 철 1개 · Stage 완료: 나무·흙·철 각 5개';
+    $('#party').textContent='대화 성공: 랜덤 블록·하트 각 1개 · 완전한 문장: 각 2개 · 조각: 돌 1개 · Stage 완료: 나무·흙·돌 각 5개';
     const pending=ensureLearningState(state).pending.length;
     if(pending)$('#party').textContent+=` · 보상 ${pending}건 전달 대기`;
     const label=document.querySelector('.console-bottom span:nth-child(2)');if(label)label.textContent=stage2Active?'MAGIC ENGLISH · STAGE 2':'MAGIC ENGLISH · STAGE 1';

@@ -364,9 +364,32 @@ export function warmCharacterVoices(){
  void worker();void worker();
 }
 
+// Native media playback preserves pitch when slowing a guide and avoids DSP artifacts.
+export const voicePlaybackRate=options=>Math.min(1.1,Math.max(.7,Number.isFinite(options?.playbackRate)?options.playbackRate:1));
+async function playCleanVoice(text,character,options){
+ let stopped=false,url=null;const audio=new window.Audio();
+ const cleanup=()=>{if(url){URL.revokeObjectURL(url);url=null;}};
+ const handle={pause:()=>{stopped=true;audio.pause();audio.removeAttribute?.('src');cleanup();}};
+ activeAudio=handle;
+ const finish=()=>{if(stopped)return;stopped=true;cleanup();if(activeAudio===handle)activeAudio=null;options.onEnd?.();};
+ audio.onended=finish;
+ try{
+  const bytes=await prepareVoiceBytes(text,character);if(stopped||activeAudio!==handle)return false;
+  url=URL.createObjectURL(new Blob([bytes],{type:'audio/mpeg'}));audio.src=url;audio.volume=.8;audio.playbackRate=voicePlaybackRate(options);audio.preservesPitch=true;audio.webkitPreservesPitch=true;
+  await new Promise((resolve,reject)=>{audio.onerror=()=>reject(Error('가이드 음성을 재생할 수 없어요.'));Promise.resolve(audio.play()).then(resolve,reject);});
+  audio.onerror=()=>{if(!stopped){options.onError?.(Error('가이드 음성을 재생할 수 없어요.'));finish();}};
+  return !stopped;
+ }catch(error){
+  if(stopped||activeAudio!==handle)return false;handle.pause();if(activeAudio===handle)activeAudio=null;
+  // Safari may reject native autoplay after async loading; retain the unlocked audio context.
+  return playCharacterVoice(text,character,{...options,nativePlayback:false});
+ }
+}
+
 // Character dialogue never falls back to a device-selected voice.
 export async function playCharacterVoice(textOrClipId,character,options={}){
  cancelActiveVoice();const cast=CHARACTER_VOICES[character];if(!cast)return false;
+ if(cast.effect==='none'&&options.nativePlayback!==false&&typeof window.Audio==='function'){if(characterAudioContext)void characterAudioContext.resume().catch(()=>{});return playCleanVoice(textOrClipId,character,options);}
  const clip=resolveElevenLabsClip(textOrClipId),controller=new AbortController();
  const Context=window.AudioContext||window.webkitAudioContext;let context,source,oscillator,master,stopped=false;
  const stop=()=>{if(stopped)return;stopped=true;controller.abort();if(master&&context){const t=context.currentTime||0;master.gain.cancelScheduledValues?.(t);master.gain.setValueAtTime?.(master.gain.value,t);master.gain.linearRampToValueAtTime?.(0,t+.025);}setTimeout(()=>{try{source?.stop();}catch{}try{oscillator?.stop();}catch{}source?.disconnect();oscillator?.disconnect();master?.disconnect();},30);};
@@ -375,10 +398,10 @@ export async function playCharacterVoice(textOrClipId,character,options={}){
  try{
  context=voiceContext();void context.resume().catch(()=>{});
  const audio=await preloadCharacterVoice(textOrClipId,character);if(stopped||activeAudio!==handle)return false;
- source=context.createBufferSource();source.buffer=audio;
+ source=context.createBufferSource();source.buffer=audio;source.playbackRate.value=voicePlaybackRate(options);
  master=context.createGain();const t=context.currentTime||0;master.gain.value=.85;master.gain.setValueAtTime?.(0,t);master.gain.linearRampToValueAtTime?.(.85,t+.015);master.connect(context.destination);
  let destination=master;
- if(context.createDynamicsCompressor){const limiter=context.createDynamicsCompressor();limiter.threshold.value=-12;limiter.knee.value=18;limiter.ratio.value=4;limiter.attack.value=.003;limiter.release.value=.12;limiter.connect(master);destination=limiter;}
+ if(cast.effect!=='none'&&context.createDynamicsCompressor){const limiter=context.createDynamicsCompressor();limiter.threshold.value=-12;limiter.knee.value=18;limiter.ratio.value=4;limiter.attack.value=.003;limiter.release.value=.12;limiter.connect(master);destination=limiter;}
  if(cast.effect==='robot'){
  const filter=context.createBiquadFilter();filter.type='bandpass';filter.frequency.value=1600;filter.Q.value=.5;
  const gain=context.createGain();gain.gain.value=.75;oscillator=context.createOscillator();oscillator.frequency.value=45;oscillator.type='sine';const modulation=context.createGain();modulation.gain.value=.23;
@@ -465,7 +488,7 @@ export function createSpeechRecognizer(dependencies={}) {
   function cancel(){const run=session;sequence++;session=null;phase='idle';if(!run)return;run.finished=true;run.controller?.abort();release(run);try{if(run.recorder?.state!=='inactive')run.recorder?.stop();}catch{}}
   function finish(run,error,assessment,transcript=''){
     if(!current(run))return;release(run);run.finished=true;phase='idle';session=null;
-    if(error)run.callbacks.onError?.(error);else run.callbacks.onResult?.(transcript,[],assessment);
+    if(error)run.callbacks.onError?.(error);else run.callbacks.onResult?.(assessment?.recognizedText??assessment?.transcript??transcript,[],assessment);
     run.callbacks.onEnd?.();
   }
   function processing(run){if(!current(run)||run.processing)return;run.processing=true;phase='processing';run.callbacks.onProcessing?.();}

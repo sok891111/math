@@ -85,3 +85,14 @@ body:not(.easy-mode) #adult-menu{border:0;margin:0;padding:0}body:not(.easy-mode
 #heart-guide{margin:auto;width:min(620px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;padding:32px;border:3px solid #b96e75;border-radius:28px;background:#fff8e8;color:#253b36;text-align:center;box-shadow:0 20px 90px #102d3466}
 #heart-guide::backdrop{background:#102c36b8;backdrop-filter:blur(5px)}
 #heart-guide h2{font-size:clamp(24px,4vw,34px)}#heart-guide p{font-size:clamp(20px,3vw,26px);line-height:1.6}#heart-guide button{display:block;width:100%;min-height:64px;font-size:clamp(18px,3vw,25px);white-space:normal}#heart-guide small{display:block;margin-top:20px;font-size:17px}
+#heart-hud{display:grid;grid-template-columns:repeat(10,22px);gap:5px;padding:12px;background:#253b36bd;border:0;max-height:35vh;overflow:auto}
+.heart-cell{width:22px;height:22px;background:#283032;filter:drop-shadow(1px 2px 0 #18211e);clip-path:polygon(0 15%,15% 0,35% 0,50% 15%,65% 0,85% 0,100% 15%,100% 45%,50% 100%,0 45%)}
+.heart-cell.full{background:linear-gradient(135deg,#ffb2a1 0 18%,#f04c43 19% 58%,#be252e 59%)}
+#hotbar{max-width:90vw;overflow-x:auto}.food-slot{flex-shrink:0}.food-icon{font-size:34px}.easy-mode #hotbar .food-slot em{display:block;font-size:15px}
+#hurt-overlay{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,transparent 35%,#d62e3299 85%,#b0141ad9 100%)}
+#hurt-overlay.hit{animation:player-hurt-flash .5s ease-out forwards}
+#heart-hud.hurt .heart-cell{animation:heart-hurt-blink .45s ease-out}
+@keyframes player-hurt-flash{0%{opacity:.85}25%{opacity:.65}100%{opacity:0}}
+@keyframes heart-hurt-blink{0%,35%{filter:brightness(2.5)}70%,100%{filter:brightness(1)}}
+@media(prefers-reduced-motion:reduce){#hurt-overlay.hit{animation-duration:.25s}#heart-hud.hurt .heart-cell{animation:none}}
+.easy-mode #hotbar .slot em{display:block;font-size:15px}

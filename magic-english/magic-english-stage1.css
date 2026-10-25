@@ -1102,3 +1102,5 @@
 .me-turn-meaning{font-size:clamp(16px,2vw,20px);color:#506544;text-align:center;margin:8px 0;font-weight:650;}
 
 .me-conversation-progress{display:inline-block;background:#345c4a;color:#fff;border-radius:18px;padding:7px 14px;font-size:17px;font-weight:800}
+.me-turn-status.retry{background:#fff2cf;color:#6d4b20;border:1px solid #d6ae59}
+#dialog-next:disabled{opacity:.6;cursor:default}

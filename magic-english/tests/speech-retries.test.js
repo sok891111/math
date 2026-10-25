@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {speechAttemptOutcome,hasRecognizedWords,npcVoiceLocked} from '../speech-attempts.js';
+test('wrong recognized phrases receive two extra tries; a correct retry succeeds without ending the conversation',()=>{
+ const wrong={passed:false,recognizedText:'I want a banana.'};assert.deepEqual(speechAttemptOutcome(wrong,0),{action:'retry',failures:1,remaining:2});assert.deepEqual(speechAttemptOutcome(wrong,1),{action:'retry',failures:2,remaining:1});assert.equal(speechAttemptOutcome(wrong,2).action,'exhausted');assert.equal(speechAttemptOutcome({passed:true},2).action,'success');
+});
+test('only transcripts with no actual words are classified as unheard, including tagged silence',()=>{
+ for(const text of ['', ' ... ', '[silence]', '<noise>'])assert.equal(speechAttemptOutcome({passed:false,recognizedText:text}).action,'unheard');for(const text of ['banana','사과','bonjour']){assert(hasRecognizedWords(text));assert.equal(speechAttemptOutcome({passed:false,recognizedText:text,transcript:''}).action,'retry');}
+});
+test('NPC voice locks current dialogue only and both direct buttons and keyboard advancement enforce it',()=>{
+ assert(npcVoiceLocked({index:2,voicePlayingIndex:2}));assert(!npcVoiceLocked({index:3,voicePlayingIndex:2}));assert(!npcVoiceLocked(null));const source=fs.readFileSync(new URL('../magic-english-stage1.js',import.meta.url),'utf8');assert(source.includes('if (!dialog||npcVoiceLocked(dialog)) return;'));assert(source.includes("$('#dialog-next').disabled=locked"));assert(source.includes("$('#touch-action').disabled=locked"));assert(source.includes('onEnd:unlock'));assert(source.includes('st.failedAttempts=attempt.failures;ensureLearningState(state).failures=0'));assert(!source.includes('st.failedAttempts=attempt.failures;ensureLearningState(state).failures++'));assert(source.includes('if(!played)unlock()'));assert(source.includes("speakBox.querySelector('.me-turn-status').textContent=st.statusText"));
+});
