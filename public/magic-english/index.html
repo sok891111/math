@@ -1,0 +1,140 @@
+<!doctype html><html lang="ko"><head><base href="/magic-english/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e9e9da"><title>마법영어 Stage 1 — 제1화: 조선의 영웅, 미국에 떨어지다! (알파벳 A)</title><link rel="stylesheet" href="style.css?v=20261018-audiomenu23"><link rel="stylesheet" href="./math-puzzle.css?v=20261025-early1"><link rel="stylesheet" href="monster-dex.css?v=20261018-table19"><link rel="stylesheet" href="pc.css?v=20261018-table19"><link rel="stylesheet" href="town-map.css?v=20261018-cursor26"><link rel="stylesheet" href="evolution.css?v=20261018-level-evolution29"><link rel="stylesheet" href="magic-english-stage1.css?v=20261025-stage1"></head><body>
+<header>
+  <a class="brand" href="./"><span class="brand-icon">★</span> 마법영어 <span class="edition">STAGE 1 · ALPHABET A</span></a>
+  <nav class="mode-switch-bar" aria-label="모드 선택">
+    <a id="mode-link-magic" class="mode-switch-link active" href="./">★ 마법영어 Stage 1</a>
+    <a id="mode-link-block" class="mode-switch-link" href="./?view=block-world">🧱 내 블록 세계</a>
+    <a id="mode-link-pokemon" class="mode-switch-link" href="./?mode=pokemon">기존 뜨랠레리오 모험</a>
+  </nav>
+</header>
+<main>
+  <section class="intro">
+    <p class="eyebrow">MAGIC ENGLISH · EPISODE 1 · ALPHABET A (AIRPLANE · APPLE · ASK)</p>
+    <h1>조선의 영웅 홍길동,<br><span>미국 공항에 떨어지다!</span></h1>
+    <p class="lead">“모르면 묻고, 의심하기 전에 살펴라!”<br>공항에서 Airplane·Apple·Ask를 조사하고 직접 <strong>“Excuse me. Can I ask?”</strong>를 말해 활빈과 A 조각을 찾으세요.</p>
+  </section>
+
+  <div class="play-layout">
+    <section class="console" aria-label="게임">
+      <div class="console-top">
+        <span><i></i> <span id="location">조선 장터 (시간 균열 발생!)</span></span>
+        <button id="menu-button" aria-label="메뉴 열기">메뉴 <kbd>ESC</kbd></button>
+      </div>
+
+      <div class="me-goal-banner" id="goal-banner-wrap" aria-live="polite">
+        <b>현재 목표</b>
+        <span id="current-goal-banner">조선 장터에서 아이의 누명을 풀고 푸른 시간 균열(A)을 조사하세요.</span>
+      </div>
+
+      <div class="screen-wrap">
+        <canvas id="screen" width="160" height="144" tabindex="0" aria-label="게임 화면. 방향키로 이동, Z 또는 Enter로 조사·대화합니다."></canvas>
+        <div id="loading">미국 공항으로 가는 마법영어 Stage 1을 준비하고 있어요…</div>
+        <div id="dialog" role="dialog" aria-label="대화" hidden>
+          <span id="speaker"></span>
+          <p id="dialog-text"></p>
+          <div id="choices"></div>
+          <button id="dialog-next">다음 <span>▼</span></button>
+        </div>
+        <div id="menu" role="dialog" aria-label="게임 메뉴" hidden>
+          <p class="eyebrow" id="trainer-menu-title">마법영어 STAGE 1 기록</p>
+          <h2>잠깐 쉬어갈까요?</h2>
+          <p id="party"></p>
+          <button id="open-block-world-menu" type="button">🧱 내 블록 세계 열기 (16×16×8 건축)</button>
+          <button id="open-alphabet-dex-menu" type="button">📖 알파벳 조각 & 단어 도감</button>
+          <button id="open-practice-menu" type="button">🎙️ “Excuse me. Can I ask?” 말하기 연습</button>
+          <button id="open-scroll-menu" type="button">📜 링고의 영어 두루마리 & 실수 노트</button>
+          <button id="save-menu" type="button">모험 저장하기</button>
+          <button id="sound-toggle" type="button" aria-pressed="true">소리 끄기</button>
+          <button id="load-menu" type="button">저장한 모험 불러오기</button>
+          <button id="map-menu" type="button" hidden>지도 보기</button>
+          <button id="dex-menu" type="button" hidden>몬스터 도감</button>
+          <button id="party-menu" type="button" hidden>동료 · HP / PP 확인</button>
+          <button id="restart" type="button">처음부터 다시</button>
+          <button id="close-menu" type="button">계속 걷기 <kbd>ESC</kbd></button>
+        </div>
+      </div>
+
+      <div class="console-bottom"><span>★</span><span>MAGIC ENGLISH · STAGE 1</span><span>● ● ●</span></div>
+      <div class="touch-controls">
+        <div class="dpad">
+          <button data-move="up" class="up" aria-label="위로">▲</button>
+          <button data-move="left" class="left" aria-label="왼쪽">◀</button>
+          <span>✚</span>
+          <button data-move="right" class="right" aria-label="오른쪽">▶</button>
+          <button data-move="down" class="down" aria-label="아래로">▼</button>
+        </div>
+        <div class="action-buttons">
+          <button id="touch-menu">B<span>메뉴</span></button>
+          <button id="touch-action">A<span>조사·대화</span></button>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <p class="trainer-label">주인공 <strong id="trainer-name">홍길동</strong></p>
+      <div class="chapter">
+        <span class="chapter-number">01</span>
+        <div>
+          <p class="eyebrow">STAGE 1 · ALPHABET A</p>
+          <h2>활빈 찾기와 첫 영어 말하기</h2>
+        </div>
+      </div>
+
+      <div class="me-word-badges" id="stage1-word-badges" aria-label="발견한 A 단어"></div>
+
+      <div class="me-badge-case-card" id="stage1-badge-case-card" aria-label="알파벳 조각 케이스">
+        <div class="me-badge-case-head">
+          <span class="eyebrow">MAGIC LETTER JOURNAL · ALPHABET PIECES</span>
+          <span id="badge-case-count" class="me-badge-case-count">0 / 26</span>
+        </div>
+        <div class="me-badge-case-slots" id="alphabet-badge-case"></div>
+      </div>
+
+      <div class="me-side-actions" id="stage1-side-actions">
+        <button type="button" id="open-alphabet-dex-btn" class="me-primary-btn">📖 알파벳 조각 & 단어 도감 열기</button>
+        <button type="button" id="open-block-world-btn" class="me-secondary-btn">🧱 내 블록 세계로 (건축 보상)</button>
+        <button type="button" id="open-scroll-btn" class="me-secondary-btn">📜 링고의 영어 두루마리 (복습)</button>
+      </div>
+
+      <div class="partner">
+        <span class="eyebrow">STAGE 1 REWARDS & BLOCK WALLET</span>
+        <p id="partner">활빈을 찾아주세요!</p>
+      </div>
+
+      <ol class="quests" id="stage1-checklist"></ol>
+
+      <ol class="quests" id="pokemon-quests" hidden>
+        <li id="quest-mom"><span class="check"></span><div><b>엄마에게 인사하기</b><small>1층으로 내려가 이야기를 들어요.</small></div></li>
+        <li id="quest-town"><span class="check"></span><div><b>연두마을 산책하기</b><small>문밖으로 나가 공박사 연구소를 찾아요.</small></div></li>
+        <li id="quest-starter"><span class="check"></span><div><b>첫 파트너 만나기</b><small>세 친구 중 한 명과 함께 출발해요.</small></div></li>
+        <li id="quest-route"><span class="check"></span><div><b>29번 도로 지나가기</b><small>서쪽 오솔길을 따라 무궁시티로 가요.</small></div></li>
+        <li id="quest-city"><span class="check"></span><div><b>무궁시티 도착하기</b><small>바닷가 마을의 사람들과 이야기해요.</small></div></li>
+        <li id="quest-mapCard"><span class="check"></span><div><b>안내 할아버지 만나기</b><small>공항 안내소와 카페를 둘러봐요.</small></div></li>
+      </ol>
+
+      <p class="battle-hint" id="battle-hint">공항의 물건·표지를 자유롭게 조사하고 마이크로 “Excuse me. Can I ask?”를 말해 보세요!</p>
+
+      <div class="keyboard-guide">
+        <div><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd><span>걷기</span></div>
+        <div><kbd>Z</kbd><kbd>Enter</kbd><span>조사 · 대화</span></div>
+        <div><kbd>X</kbd><kbd>Esc</kbd><span>메뉴 · 닫기</span></div>
+      </div>
+
+      <button id="save-button" class="save-button">모험 저장하기 <span>↗</span></button>
+      <p class="save-note" id="save-note">마법영어 저장 기록은 기존 모험과 분리되어 저장돼요.</p>
+    </aside>
+  </div>
+
+  <footer>
+    <span>마법영어 STAGE 1 · ALPHABET A.</span>
+    <p>『마법영어』 이야기 속에서 친구를 만나 영어로 이야기하고, 흩어진 알파벳 조각을 찾아 나만의 세계를 만드는 모험입니다.</p>
+    <a href="about.html">구현 노트 ↗</a>
+  </footer>
+</main>
+<div id="toast" role="status"></div>
+<script src="creative/battle-model.js?v=20261018-level-evolution29"></script>
+<script src="creative/facto-puzzles.js?v=20261018-level-evolution29"></script>
+<script src="creative/facto-ui.js?v=20261018-level-evolution29"></script>
+<script src="creative/puzzle-hints.js"></script>
+<script type="module" src="app.js?v=20261025-stage1"></script>
+</body></html>

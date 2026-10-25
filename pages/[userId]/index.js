@@ -41,6 +41,12 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
 
   const games = [
     {
+      id: 'magic-english', title: '마법영어', path: `/${user.id}/magic-english`,
+      type: 'SPEAKING STORY ADVENTURE', meta: '영어로 말하기 · 알파벳 모험 · 내 블록 세계',
+      themeColor: '#8de4e1', themeBorder: '#4fb8ad',
+      accentBg: 'linear-gradient(135deg, #183e47 0%, #12252a 100%)', sceneClass: 'magic-english-scene',
+    },
+    {
       id: 'platformer',
       title: '크래프트 Runner',
       path: `/${user.id}/platformer`,
@@ -483,6 +489,8 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
                         <div className="pixel-blocks">🧊 🍎 🥕</div>
                         <div className="pixel-ground island-ground" />
                       </div>
+                    ) : g.id === 'magic-english' ? (
+                      <div className="hanja-preview" role="img" aria-label="마법영어 알파벳 모험"><span>🚌 A · B · C 🪄</span></div>
                     ) : g.id === 'tralalerio' ? (
                       <div className="tralalerio-preview" role="img" aria-label="뜨랠레리오 연두마을" />
                     ) : g.id === 'hanja' ? (

@@ -38,7 +38,8 @@
     "test:tralalerio-browser": "npm --prefix tralalerio run test:browser",
     "test:tralalerio-third": "npm --prefix tralalerio run test:third",
     "test:tralalerio-early": "npm --prefix tralalerio run test:early",
-    "test:tralalerio-variety": "npm --prefix tralalerio run test:variety"
+    "test:tralalerio-variety": "npm --prefix tralalerio run test:variety",
+    "test:magic-english": "node --test tests/magic-english-integration-unit.cjs magic-english/tests/magic-english-speech-session.test.js magic-english/tests/magic-english-portals.test.js magic-english/tests/magic-english-audio-input.test.js magic-english/tests/character-voices.test.js magic-english/tests/world-travel.test.js"
   },
   "devDependencies": {
     "playwright": "1.63.0"

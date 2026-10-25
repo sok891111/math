@@ -1,0 +1,36 @@
+(function(root){
+ 'use strict';
+ const types=['sequence','classify','analogy','rotate','tower','bond','balance','latin'];
+ const names={sequence:'수놀이 · 에너지 이어주기',classify:'같은 친구 찾기 · 조각 모으기',analogy:'변신 놀이 · 변신 조각',rotate:'모양 놀이 · 빛 방패',tower:'세어 보기 · 블록 모으기',bond:'수 모으기 · 에너지 채우기',balance:'무게 놀이 · 보석의 힘',latin:'숫자 찾기 · 빈칸 채우기'};
+ const pools={forest:['pattern','sequence','classify','analogy'],cave:['mirror','rotate','tower','analogy'],ruins:['path','bond','balance','sequence'],end:['logic','latin','balance','classify']};
+ function shuffle(a,r){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+ function rotate(a,n=1){for(let k=0;k<n;k++)a=Array.from({length:9},(_,i)=>a[(2-i%3)*3+Math.floor(i/3)]);return a;}
+ function subsets(cards,count,target){const out=[];for(let mask=1;mask<2**cards.length;mask++){const selected=cards.filter((_,i)=>mask&(1<<i));if(selected.length===count&&selected.reduce((a,b)=>a+b.value,0)===target)out.push(selected.map(c=>c.id));}return out;}
+ function generate(type,grade,r=Math.random){const pick=n=>Math.floor(r()*n),g=Math.min(3,grade);let q={type,grade:g,label:names[type],instruction:'조각을 빈칸으로 끌어 놓아 봐. 눌러서 선택·배치할 수도 있어.'};
+  if(type==='sequence'){
+   const inc=g===1?[1]:g===2?[2]:(pick(2)?[1,2]:[2,1]);let n=1+pick(3),values=[n];for(let i=0;i<6;i++){n+=inc[i%inc.length];values.push(n);}q={...q,shown:values.slice(0,5),answer:values.slice(5),title:'에너지 숫자의 규칙을 찾아 흐름을 이어 줘!',hint:inc.length===1?'이웃한 수가 얼마나 커졌는지 살펴봐. 같은 수만큼 계속 커져.':'커지는 차이를 차례대로 읽어 봐. 차이의 묶음이 반복되고 있어.'};q.choices=shuffle([...new Set([...q.answer,q.answer[0]-1,q.answer[1]+1,q.answer[0]+2])],r).map(value=>({value,label:String(value)}));
+  }else if(type==='classify'){
+   const color=pick(3),shape=pick(3),large=pick(2),rule=g===1?['color']:g===2?['color','shape']:(pick(2)?['color','large']:['shape','large']);const symbols=['◆','▲','●'],colors=['초록','주황','파랑'],shapes=['마름모','세모','동그라미'];let cards=[];
+   for(let i=0;i<6;i++){const matches=i<2;const c={id:i,color:matches?color:pick(3),shape:matches?shape:pick(3),large:matches?large:pick(2)};if(!matches){for(const k of rule)c[k]=({color,shape,large})[k];const changed=rule[(i-2)%rule.length];c[changed]=changed==='large'?1-c.large:(c[changed]+1+pick(2))%3;}cards.push(c);}cards=shuffle(cards,r);const answer=cards.filter(c=>rule.every(k=>c[k]===({color,shape,large})[k])).map(c=>c.id);q={...q,cards,answer,subset:true,ruleText:rule.map(k=>k==='color'?colors[color]:k==='shape'?shapes[shape]:large?'큰 조각':'작은 조각').join(' · '),title:'조건에 맞는 조각만 모아 몬스터의 약점을 찾아!',instruction:'조건에 맞는 조각을 모두 누르거나 탐지함으로 끌어 놓아 봐.',hint:'한 가지 조건씩 비교해 봐. 색과 모양을 따로 살피면 헷갈리지 않아.'};
+  }else if(type==='analogy'){
+   const colorOnly=g===1||(g===3&&pick(2)===0),dc=colorOnly?1+pick(2):0,ds=colorOnly?0:1+pick(2),convert=id=>((Math.floor(id/3)+dc)%3)*3+(id%3+ds)%3,source=pick(9);q={...q,pairs:[[0,convert(0)],[4,convert(4)],[8,convert(8)]],source,answer:[convert(source)],choices:shuffle([{value:convert(source),token:convert(source)},...shuffle(Array.from({length:9},(_,i)=>i).filter(i=>i!==convert(source)&&(g===3||(colorOnly?i%3===source%3:Math.floor(i/3)===Math.floor(source/3)))),r).slice(0,g===3?4:2).map(i=>({value:i,token:i}))],r),title:'변환 장치의 비밀을 찾아 마지막 조각을 완성해!',instruction:colorOnly?'모양은 그대로! 색이 어떻게 바뀌는지 보고 빈칸을 채워 봐요.':'색은 그대로! 모양이 어떻게 바뀌는지 보고 빈칸을 채워 봐요.',hint:colorOnly?'모양은 그대로야. 색이 어떻게 바뀌는지 살펴봐.':'색은 그대로야. 모양이 어떻게 바뀌는지 살펴봐.'};
+  }else if(type==='rotate'){
+   const patterns=g===1?[[1,0,0,1,0,0,0,0,0],[1,1,0,0,0,0,0,0,0]]:g===2?[[1,0,0,1,0,0,1,1,0],[1,1,1,0,1,0,0,0,0]]:[[1,1,0,0,1,0,0,1,1],[0,1,0,1,1,0,0,0,0],[1,0,1,1,1,0,0,1,0]],source=rotate(patterns[pick(patterns.length)],pick(4)),turns=1,answer=rotate(source,turns);q={...q,source,turns,answer,paint:true,title:'그림을 오른쪽으로 한 번 돌려 방패를 만들어!',instruction:'“그림 돌려보기”를 눌러 확인하고, 같은 모양을 오른쪽 방패에 만들어 줘.',hint:'그림을 직접 돌려 보고 빛이 어디로 옮겨가는지 살펴봐.'};
+  }else if(type==='tower'){
+   const heights=Array.from({length:g+1},()=>1+pick(3)),answer=heights.reduce((a,b)=>a+b,0);q={...q,heights,answer:[answer],choices:shuffle([...new Set([answer,answer-1,answer+1,answer+g+1])],r).map(value=>({value,label:value+'개'})),title:'블록 탑의 에너지를 모두 모아 공격을 충전해!',instruction:'위아래로 쌓인 블록을 모두 세어 총개수 조각을 놓아 줘.',hint:'각 탑의 블록 개수를 따로 센 뒤 모아 봐. 아래에 있는 블록도 빠뜨리지 않아.'};
+  }else if(type==='bond'){
+   const count=g===3?3:2,values=shuffle(Array.from({length:g+3},(_,i)=>i<(g===1?4:5)?i+1:1+pick(5)),r),cards=values.map((value,id)=>({id,value})),chosen=shuffle(cards,r).slice(0,count),target=chosen.reduce((a,c)=>a+c.value,0);q={...q,cards,count,target,subset:true,answer:chosen.map(c=>c.id),title:`에너지 조각 ${count}개로 ${target}의 힘을 만들어!`,instruction:`조각 ${count}개를 모아 합이 ${target}이 되도록 연결해 줘.`,hint:'큰 조각을 먼저 고르면 나머지에 필요한 힘이 얼마인지 생각해 봐. 다른 조합도 가능해.'};
+  }else if(type==='balance'){
+   const hidden=1+pick(g===1?5:8),count=1,extra=g===1?0:1+pick(g===2?2:4);q={...q,count,extra,total:hidden*count+extra,answer:[hidden],choices:shuffle([...new Set([hidden,hidden+1,Math.max(0,hidden-1),hidden+2])],r).map(value=>({value,label:String(value)})),title:'양쪽 무게가 같아! 보석은 추 몇 개와 같을까?',instruction:'동그란 추 하나는 1이야. 추를 세어 보석과 같은 무게를 찾아 줘.',hint:extra?`오른쪽 추 ${hidden+extra}개에서 왼쪽의 추 ${extra}개를 먼저 짝지어 빼 봐. 남은 추를 세면 보석의 무게야.`:'보석과 오른쪽 추의 무게가 같아. 추를 하나씩 세어 봐.'};
+  }else if(type==='latin'){
+   const n=3,values=shuffle(Array.from({length:n},(_,i)=>i+1),r),rows=shuffle(Array.from({length:n},(_,i)=>i),r),cols=shuffle(Array.from({length:n},(_,i)=>i),r),grid=rows.flatMap(row=>cols.map(col=>values[(row+col)%n])),holes=shuffle(Array.from({length:n},(_,row)=>row*n+pick(n)),r).slice(0,g).sort((a,b)=>a-b);q={...q,n,grid,holes,answer:holes.map(i=>grid[i]),choices:values.map(value=>({value,label:String(value)})),title:'룬 격자의 빈칸을 채워 보호막을 풀어!',instruction:`가로줄과 세로줄에 1~${n}이 한 번씩만 나타나야 해.`,hint:'빈칸이 있는 가로줄에서 빠진 수를 찾아봐. 세로줄에도 같은 수가 이미 있는지 확인해.'};
+  }else throw Error('Unknown FACTO puzzle '+type);
+  return q;
+ }
+ function validate(q,input){if(!Array.isArray(input)||new Set(input).size!==input.length&&q.subset)return {ok:false,reason:'같은 조각을 두 번 사용할 수 없어.'};
+  if(q.type==='bond'){const chosen=q.cards.filter(c=>input.includes(c.id));return {ok:input.every(id=>q.cards.some(c=>c.id===id))&&chosen.length===q.count&&chosen.reduce((a,c)=>a+c.value,0)===q.target,reason:'조각 개수와 힘의 합을 모두 확인해 봐.'};}
+  const ok=q.subset?input.length===q.answer.length&&q.answer.every(n=>input.includes(n)):input.length===q.answer.length&&input.every((n,i)=>n===q.answer[i]);return {ok,reason:q.type==='latin'?'가로줄과 세로줄의 빠진 수를 다시 살펴봐.':q.type==='classify'?'조건에 맞는 조각을 빠짐없이 골랐는지 확인해 봐.':q.hint};
+ }
+ function select(route,history=[],r=Math.random){const pool=pools[route]||pools.forest,unused=pool.filter(type=>!history.slice(-2).includes(type)),available=unused.length?unused:pool.filter(type=>type!==history.at(-1));const counts=available.map(type=>history.slice(-12).filter(t=>t===type).length),min=Math.min(...counts),balanced=available.filter((_,i)=>counts[i]===min);return balanced[Math.floor(r()*balanced.length)];}
+ const api={types,names,pools,generate,validate,select,rotate,subsets};if(typeof module==='object'&&module.exports)module.exports=api;else root.FactoPuzzles=api;
+})(typeof window==='undefined'?globalThis:window);

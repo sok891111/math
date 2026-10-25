@@ -1,0 +1,736 @@
+{
+  "version": 1,
+  "maps": {
+    "SproutTower1F": "LANDMARK_SPROUT_TOWER",
+    "SproutTower2F": "LANDMARK_SPROUT_TOWER",
+    "SproutTower3F": "LANDMARK_SPROUT_TOWER",
+    "RadioTower1F": "LANDMARK_RADIO_TOWER",
+    "UnionCave1F": "LANDMARK_UNION_CAVE",
+    "UnionCaveB1F": "LANDMARK_UNION_CAVE",
+    "UnionCaveB2F": "LANDMARK_UNION_CAVE",
+    "SlowpokeWellB1F": "LANDMARK_SLOWPOKE_WELL",
+    "SlowpokeWellB2F": "LANDMARK_SLOWPOKE_WELL",
+    "IlexForest": "LANDMARK_ILEX_FOREST",
+    "DarkCaveVioletEntrance": "LANDMARK_DARK_CAVE",
+    "Route46": "LANDMARK_ROUTE_46",
+    "AzaleaPokecenter1F": "LANDMARK_AZALEA_TOWN",
+    "CharcoalKiln": "LANDMARK_AZALEA_TOWN",
+    "AzaleaMart": "LANDMARK_AZALEA_TOWN",
+    "KurtsHouse": "LANDMARK_AZALEA_TOWN",
+    "AzaleaGym": "LANDMARK_AZALEA_TOWN",
+    "Route33": "LANDMARK_ROUTE_33",
+    "AzaleaTown": "LANDMARK_AZALEA_TOWN",
+    "Route32": "LANDMARK_ROUTE_32",
+    "VioletCity": "LANDMARK_VIOLET_CITY",
+    "VioletMart": "LANDMARK_VIOLET_CITY",
+    "VioletGym": "LANDMARK_VIOLET_CITY",
+    "EarlsPokemonAcademy": "LANDMARK_VIOLET_CITY",
+    "VioletNicknameSpeechHouse": "LANDMARK_VIOLET_CITY",
+    "VioletPokecenter1F": "LANDMARK_VIOLET_CITY",
+    "VioletKylesHouse": "LANDMARK_VIOLET_CITY",
+    "Route32Pokecenter1F": "LANDMARK_ROUTE_32",
+    "Route34": "LANDMARK_ROUTE_34",
+    "GoldenrodCity": "LANDMARK_GOLDENROD_CITY",
+    "GoldenrodGym": "LANDMARK_GOLDENROD_CITY",
+    "GoldenrodBikeShop": "LANDMARK_GOLDENROD_CITY",
+    "GoldenrodFlowerShop": "LANDMARK_GOLDENROD_CITY",
+    "GoldenrodPokecenter1F": "LANDMARK_GOLDENROD_CITY",
+    "GoldenrodDeptStore1F": "LANDMARK_GOLDENROD_CITY",
+    "GoldenrodDeptStore2F": "LANDMARK_GOLDENROD_CITY",
+    "IlexForestAzaleaGate": "LANDMARK_ROUTE_34",
+    "Route34IlexForestGate": "LANDMARK_ROUTE_34",
+    "DayCare": "LANDMARK_ROUTE_34",
+    "Route29": "LANDMARK_ROUTE_29",
+    "NewBarkTown": "LANDMARK_NEW_BARK_TOWN",
+    "ElmsLab": "LANDMARK_NEW_BARK_TOWN",
+    "PlayersHouse1F": "LANDMARK_NEW_BARK_TOWN",
+    "PlayersHouse2F": "LANDMARK_NEW_BARK_TOWN",
+    "PlayersNeighborsHouse": "LANDMARK_NEW_BARK_TOWN",
+    "ElmsHouse": "LANDMARK_NEW_BARK_TOWN",
+    "Route29Route46Gate": "LANDMARK_ROUTE_29",
+    "Route30": "LANDMARK_ROUTE_30",
+    "Route31": "LANDMARK_ROUTE_31",
+    "CherrygroveCity": "LANDMARK_CHERRYGROVE_CITY",
+    "CherrygroveMart": "LANDMARK_CHERRYGROVE_CITY",
+    "CherrygrovePokecenter1F": "LANDMARK_CHERRYGROVE_CITY",
+    "CherrygroveGymSpeechHouse": "LANDMARK_CHERRYGROVE_CITY",
+    "GuideGentsHouse": "LANDMARK_CHERRYGROVE_CITY",
+    "CherrygroveEvolutionSpeechHouse": "LANDMARK_CHERRYGROVE_CITY",
+    "Route30BerryHouse": "LANDMARK_ROUTE_30",
+    "MrPokemonsHouse": "LANDMARK_ROUTE_30",
+    "Route31VioletGate": "LANDMARK_ROUTE_31"
+  },
+  "landmarks": [
+    {
+      "id": "LANDMARK_NEW_BARK_TOWN",
+      "name": "연두마을",
+      "x": 140,
+      "y": 100,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_29",
+      "name": "29번 도로",
+      "x": 128,
+      "y": 100,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_CHERRYGROVE_CITY",
+      "name": "무궁시티",
+      "x": 100,
+      "y": 100,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_30",
+      "name": "30번 도로",
+      "x": 100,
+      "y": 80,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_31",
+      "name": "31번 도로",
+      "x": 96,
+      "y": 60,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_VIOLET_CITY",
+      "name": "도라지시티",
+      "x": 84,
+      "y": 60,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_SPROUT_TOWER",
+      "name": "모다피의 탑",
+      "x": 85,
+      "y": 58,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_32",
+      "name": "32번 도로",
+      "x": 84,
+      "y": 92,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_RUINS_OF_ALPH",
+      "name": "알프의 유적",
+      "x": 76,
+      "y": 76,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_UNION_CAVE",
+      "name": "연결동굴",
+      "x": 84,
+      "y": 124,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_33",
+      "name": "33번 도로",
+      "x": 82,
+      "y": 124,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_AZALEA_TOWN",
+      "name": "고동마을",
+      "x": 68,
+      "y": 124,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_SLOWPOKE_WELL",
+      "name": "야돈 우물",
+      "x": 70,
+      "y": 122,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ILEX_FOREST",
+      "name": "너도밤나무 숲",
+      "x": 52,
+      "y": 120,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_34",
+      "name": "34번 도로",
+      "x": 52,
+      "y": 112,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_GOLDENROD_CITY",
+      "name": "금빛시티",
+      "x": 52,
+      "y": 92,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_RADIO_TOWER",
+      "name": "라디오타워",
+      "x": 50,
+      "y": 92,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_35",
+      "name": "35번 도로",
+      "x": 52,
+      "y": 76,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_NATIONAL_PARK",
+      "name": "자연 공원",
+      "x": 52,
+      "y": 60,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_36",
+      "name": "36번 도로",
+      "x": 64,
+      "y": 60,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_37",
+      "name": "37번 도로",
+      "x": 68,
+      "y": 52,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ECRUTEAK_CITY",
+      "name": "인주시티",
+      "x": 68,
+      "y": 44,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_TIN_TOWER",
+      "name": "방울탑",
+      "x": 70,
+      "y": 42,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_BURNED_TOWER",
+      "name": "불탄 탑",
+      "x": 66,
+      "y": 42,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_38",
+      "name": "38번 도로",
+      "x": 52,
+      "y": 44,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_39",
+      "name": "39번 도로",
+      "x": 36,
+      "y": 48,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_OLIVINE_CITY",
+      "name": "담청시티",
+      "x": 36,
+      "y": 60,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_LIGHTHOUSE",
+      "name": "담청등대",
+      "x": 38,
+      "y": 62,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_40",
+      "name": "40번 도로",
+      "x": 28,
+      "y": 64,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_WHIRL_ISLANDS",
+      "name": "소용돌이 섬",
+      "x": 28,
+      "y": 92,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_41",
+      "name": "41번 도로",
+      "x": 28,
+      "y": 100,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_CIANWOOD_CITY",
+      "name": "진청시티",
+      "x": 20,
+      "y": 100,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_42",
+      "name": "42번 도로",
+      "x": 92,
+      "y": 44,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_MT_MORTAR",
+      "name": "절구산",
+      "x": 84,
+      "y": 44,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_MAHOGANY_TOWN",
+      "name": "황토마을",
+      "x": 108,
+      "y": 44,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_43",
+      "name": "43번 도로",
+      "x": 108,
+      "y": 36,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_LAKE_OF_RAGE",
+      "name": "분노의 호수",
+      "x": 108,
+      "y": 28,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_44",
+      "name": "44번 도로",
+      "x": 120,
+      "y": 44,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ICE_PATH",
+      "name": "얼음샛길",
+      "x": 130,
+      "y": 38,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_BLACKTHORN_CITY",
+      "name": "검은먹시티",
+      "x": 132,
+      "y": 44,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_DRAGONS_DEN",
+      "name": "용의 굴",
+      "x": 132,
+      "y": 36,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_45",
+      "name": "45번 도로",
+      "x": 132,
+      "y": 64,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_DARK_CAVE",
+      "name": "어둠의 동굴",
+      "x": 112,
+      "y": 72,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_46",
+      "name": "46번 도로",
+      "x": 124,
+      "y": 88,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_SILVER_CAVE",
+      "name": "은빛 산",
+      "x": 148,
+      "y": 68,
+      "region": "johto"
+    },
+    {
+      "id": "LANDMARK_PALLET_TOWN",
+      "name": "태초마을",
+      "x": 52,
+      "y": 108,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_1",
+      "name": "1번 도로",
+      "x": 52,
+      "y": 92,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_VIRIDIAN_CITY",
+      "name": "상록시티",
+      "x": 52,
+      "y": 76,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_2",
+      "name": "2번 도로",
+      "x": 52,
+      "y": 64,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_PEWTER_CITY",
+      "name": "회색시티",
+      "x": 52,
+      "y": 52,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_3",
+      "name": "3번 도로",
+      "x": 64,
+      "y": 52,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_MT_MOON",
+      "name": "달맞이 산",
+      "x": 76,
+      "y": 52,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_4",
+      "name": "4번 도로",
+      "x": 88,
+      "y": 52,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_CERULEAN_CITY",
+      "name": "블루시티",
+      "x": 100,
+      "y": 52,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_24",
+      "name": "24번 도로",
+      "x": 100,
+      "y": 44,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_25",
+      "name": "25번 도로",
+      "x": 108,
+      "y": 36,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_5",
+      "name": "5번 도로",
+      "x": 100,
+      "y": 60,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_UNDERGROUND_PATH",
+      "name": "지하통로",
+      "x": 108,
+      "y": 76,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_6",
+      "name": "6번 도로",
+      "x": 100,
+      "y": 76,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_VERMILION_CITY",
+      "name": "갈색시티",
+      "x": 100,
+      "y": 84,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_DIGLETTS_CAVE",
+      "name": "디그다의 굴",
+      "x": 88,
+      "y": 60,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_7",
+      "name": "7번 도로",
+      "x": 88,
+      "y": 68,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_8",
+      "name": "8번 도로",
+      "x": 116,
+      "y": 68,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_9",
+      "name": "9번 도로",
+      "x": 116,
+      "y": 52,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROCK_TUNNEL",
+      "name": "돌산 터널",
+      "x": 132,
+      "y": 52,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_10",
+      "name": "10번 도로",
+      "x": 132,
+      "y": 56,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_POWER_PLANT",
+      "name": "발전소",
+      "x": 132,
+      "y": 60,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_LAVENDER_TOWN",
+      "name": "보라타운",
+      "x": 132,
+      "y": 68,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_LAV_RADIO_TOWER",
+      "name": "보라 라디오타워",
+      "x": 140,
+      "y": 68,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_CELADON_CITY",
+      "name": "무지개시티",
+      "x": 76,
+      "y": 68,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_SAFFRON_CITY",
+      "name": "노랑시티",
+      "x": 100,
+      "y": 68,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_11",
+      "name": "11번 도로",
+      "x": 116,
+      "y": 84,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_12",
+      "name": "12번 도로",
+      "x": 132,
+      "y": 80,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_13",
+      "name": "13번 도로",
+      "x": 124,
+      "y": 100,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_14",
+      "name": "14번 도로",
+      "x": 116,
+      "y": 112,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_15",
+      "name": "15번 도로",
+      "x": 104,
+      "y": 116,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_16",
+      "name": "16번 도로",
+      "x": 68,
+      "y": 68,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_17",
+      "name": "17번 도로",
+      "x": 68,
+      "y": 92,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_18",
+      "name": "18번 도로",
+      "x": 80,
+      "y": 116,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_FUCHSIA_CITY",
+      "name": "연분홍시티",
+      "x": 92,
+      "y": 116,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_19",
+      "name": "19번 도로",
+      "x": 92,
+      "y": 128,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_20",
+      "name": "20번 도로",
+      "x": 76,
+      "y": 132,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_SEAFOAM_ISLANDS",
+      "name": "쌍둥이섬",
+      "x": 68,
+      "y": 132,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_CINNABAR_ISLAND",
+      "name": "홍련섬",
+      "x": 52,
+      "y": 132,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_21",
+      "name": "21번 도로",
+      "x": 52,
+      "y": 120,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_22",
+      "name": "22번 도로",
+      "x": 36,
+      "y": 68,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_VICTORY_ROAD",
+      "name": "챔피언 로드",
+      "x": 28,
+      "y": 52,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_23",
+      "name": "23번 도로",
+      "x": 28,
+      "y": 44,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_INDIGO_PLATEAU",
+      "name": "석영고원",
+      "x": 28,
+      "y": 36,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_26",
+      "name": "26번 도로",
+      "x": 28,
+      "y": 92,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_27",
+      "name": "27번 도로",
+      "x": 20,
+      "y": 100,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_TOHJO_FALLS",
+      "name": "동성폭포",
+      "x": 12,
+      "y": 100,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_ROUTE_28",
+      "name": "28번 도로",
+      "x": 20,
+      "y": 68,
+      "region": "kanto"
+    },
+    {
+      "id": "LANDMARK_FAST_SHIP",
+      "name": "쾌속선",
+      "x": 140,
+      "y": 116,
+      "region": "kanto"
+    }
+  ],
+  "source": {
+    "repository": "https://github.com/Narishma-gb/pokegold-kr",
+    "commit": "c90f31dadef17f033a8f1bdada701b26cef18241",
+    "files": [
+      "gfx/pokegear/town_map.png",
+      "gfx/pokegear/johto.bin",
+      "gfx/pokegear/kanto.bin",
+      "gfx/pokegear/pokegear.pal",
+      "gfx/pokegear/town_map_palette_map.asm",
+      "data/maps/landmarks.asm",
+      "data/maps/maps.asm"
+    ]
+  }
+}

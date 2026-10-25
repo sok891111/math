@@ -7,3 +7,6 @@ state_*.json
 events_*.json
 
 .tralalerio-grants/
+
+.magic-english-data/
+magic-english/.block-world-data/

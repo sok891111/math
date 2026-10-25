@@ -1,0 +1,5 @@
+{
+  "source": "https://github.com/Narishma-gb/pokegold-kr",
+  "commit": "c90f31dadef17f033a8f1bdada701b26cef18241",
+  "note": "Static map layouts, tiles, collision declarations and sprites converted from public disassembly. Palette rendering approximated. Event logic reimplemented for this limited demo; full original script interpreter is not implemented."
+}

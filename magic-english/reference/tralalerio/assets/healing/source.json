@@ -1,0 +1,211 @@
+{
+  "source": {
+    "repository": "https://github.com/Narishma-gb/pokegold-kr",
+    "commit": "c90f31dadef17f033a8f1bdada701b26cef18241",
+    "files": [
+      "engine/events/heal_machine_anim.asm",
+      "engine/events/std_scripts.asm",
+      "gfx/overworld/heal_machine.png",
+      "gfx/overworld/heal_machine.pal",
+      "audio/music/healpokemon.asm"
+    ]
+  },
+  "oam": [
+    {
+      "x": 26,
+      "y": 16,
+      "tile": 0,
+      "flip": false
+    },
+    {
+      "x": 30,
+      "y": 16,
+      "tile": 0,
+      "flip": false
+    },
+    {
+      "x": 24,
+      "y": 22,
+      "tile": 1,
+      "flip": false
+    },
+    {
+      "x": 32,
+      "y": 22,
+      "tile": 1,
+      "flip": true
+    },
+    {
+      "x": 24,
+      "y": 27,
+      "tile": 1,
+      "flip": false
+    },
+    {
+      "x": 32,
+      "y": 27,
+      "tile": 1,
+      "flip": true
+    },
+    {
+      "x": 24,
+      "y": 32,
+      "tile": 1,
+      "flip": false
+    },
+    {
+      "x": 32,
+      "y": 32,
+      "tile": 1,
+      "flip": true
+    }
+  ],
+  "frames": {
+    "take": 20,
+    "turn": 10,
+    "perBall": 30,
+    "flashes": 8,
+    "perFlash": 10,
+    "return": 30,
+    "face": 10,
+    "bowUp": 10,
+    "bowDown": 10
+  },
+  "music": {
+    "tempo": 144,
+    "duration": 2.25,
+    "channels": [
+      [
+        {
+          "start": 0.225,
+          "duration": 0.225,
+          "midi": 71,
+          "volume": 8,
+          "slide": {
+            "octave": 4,
+            "pitch": "B_"
+          }
+        },
+        {
+          "start": 0.45,
+          "duration": 0.225,
+          "midi": 71,
+          "volume": 8,
+          "slide": {
+            "octave": 3,
+            "pitch": "E_"
+          }
+        },
+        {
+          "start": 0.675,
+          "duration": 0.225,
+          "midi": 64,
+          "volume": 8,
+          "slide": {
+            "octave": 4,
+            "pitch": "E_"
+          }
+        },
+        {
+          "start": 1.35,
+          "duration": 0.45,
+          "midi": 64,
+          "volume": 8,
+          "slide": {
+            "octave": 5,
+            "pitch": "B_"
+          }
+        },
+        {
+          "start": 1.8,
+          "duration": 0.45,
+          "midi": 71,
+          "volume": 8,
+          "slide": {
+            "octave": 4,
+            "pitch": "B_"
+          }
+        }
+      ],
+      [
+        {
+          "start": 0,
+          "duration": 0.45,
+          "midi": 71,
+          "volume": 12,
+          "slide": null
+        },
+        {
+          "start": 0.45,
+          "duration": 0.45,
+          "midi": 71,
+          "volume": 12,
+          "slide": null
+        },
+        {
+          "start": 0.9,
+          "duration": 0.225,
+          "midi": 71,
+          "volume": 12,
+          "slide": null
+        },
+        {
+          "start": 1.125,
+          "duration": 0.225,
+          "midi": 68,
+          "volume": 12,
+          "slide": null
+        },
+        {
+          "start": 1.35,
+          "duration": 0.9,
+          "midi": 76,
+          "volume": 12,
+          "slide": null
+        }
+      ],
+      [
+        {
+          "start": 0,
+          "duration": 0.225,
+          "midi": 64,
+          "volume": 1,
+          "slide": null
+        },
+        {
+          "start": 0.45,
+          "duration": 0.225,
+          "midi": 64,
+          "volume": 1,
+          "slide": null
+        },
+        {
+          "start": 0.9,
+          "duration": 0.225,
+          "midi": 64,
+          "volume": 1,
+          "slide": null
+        },
+        {
+          "start": 1.125,
+          "duration": 0.225,
+          "midi": 68,
+          "volume": 1,
+          "slide": null
+        },
+        {
+          "start": 1.35,
+          "duration": 0.675,
+          "midi": 64,
+          "volume": 1,
+          "slide": null
+        }
+      ]
+    ]
+  },
+  "anchor": {
+    "x": 8,
+    "y": 8
+  },
+  "note": "Original graphic palette, OAM and frame sequence. WAV synthesizes the original three note tracks with web-compatible envelopes; it is not an emulated hardware recording."
+}

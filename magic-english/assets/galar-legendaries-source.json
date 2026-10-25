@@ -1,0 +1,37 @@
+{
+  "retrieved": "2026-10-25",
+  "official": [
+    "https://pokemonkorea.co.kr/pokedex?word=889",
+    "https://pokemonkorea.co.kr/pokedex/view/1133"
+  ],
+  "species": {
+    "zamazenta": {
+      "pokemon": "https://pokeapi.co/api/v2/pokemon/zamazenta",
+      "species": "https://pokeapi.co/api/v2/pokemon-species/zamazenta",
+      "sprites": {
+        "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/889.png",
+        "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/889.png"
+      }
+    },
+    "eternatus": {
+      "pokemon": "https://pokeapi.co/api/v2/pokemon/eternatus",
+      "species": "https://pokeapi.co/api/v2/pokemon-species/eternatus",
+      "sprites": {
+        "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/890.png",
+        "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/890.png"
+      }
+    }
+  },
+  "moves": {
+    "METAL_CLAW": "https://pokeapi.co/api/v2/move/metal-claw",
+    "IRON_HEAD": "https://pokeapi.co/api/v2/move/iron-head",
+    "CRUNCH": "https://pokeapi.co/api/v2/move/crunch",
+    "POISON_TAIL": "https://pokeapi.co/api/v2/move/poison-tail",
+    "TOXIC": "https://pokeapi.co/api/v2/move/toxic",
+    "VENOSHOCK": "https://pokeapi.co/api/v2/move/venoshock",
+    "CROSS_POISON": "https://pokeapi.co/api/v2/move/cross-poison",
+    "DRAGON_PULSE": "https://pokeapi.co/api/v2/move/dragon-pulse",
+    "DYNAMAX_CANNON": "https://pokeapi.co/api/v2/move/dynamax-cannon",
+    "ETERNABEAM": "https://pokeapi.co/api/v2/move/eternabeam"
+  }
+}

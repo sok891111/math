@@ -1,0 +1,21 @@
+// Extract both user-provided character illustrations; reuse mirrored art on the player's side.
+const fs=require('node:fs'),path=require('node:path'),{chromium}=require('playwright'),assets=path.resolve(__dirname,'../assets');
+(async()=>{
+ const {MINECRAFT_MOVES}=await import('../minecraft-moves.js'),data=JSON.parse(fs.readFileSync(path.join(assets,'battle-data.json')));
+ const profiles={
+  megaply:{name:'메가 플라이',level:6,height:1.2,weight:45,base:{hp:40,attack:40,defense:45,speed:60,specialAttack:40,specialDefense:40},description:'양쪽 날개에 달린 십자 모양 장치로 바람의 흐름을 조절하는 비행 친구다. 36레벨이 되면 자이언트 플라이로 진화한다.',evolutions:[{method:'level',level:36,species:'mc_giantfly'}],crop:[65,276,595,470],mask:'M69 444 L139 281 Q144 277 152 282 L274 320 Q282 321 279 329 L258 399 L277 416 L302 419 L459 469 L479 457 L493 468 L508 365 Q510 357 519 361 L647 398 Q654 400 653 410 L639 568 Q638 578 629 579 L495 568 L488 590 L461 588 L426 702 L396 717 L375 741 L365 743 L351 718 L251 692 L233 712 L223 715 L218 703 L219 678 L201 666 L195 627 L209 526 L213 497 L79 454 Z'},
+  giantfly:{name:'자이언트 플라이',level:12,height:4.8,weight:320,base:{hp:65,attack:60,defense:65,speed:50,specialAttack:60,specialDefense:60},description:'메가 플라이가 진화한 하늘의 수호자. 커다란 날개와 푸르게 빛나는 엔진으로 날아다니며 주변의 바람을 모아 거대한 폭풍을 일으킨다.',evolutions:[],crop:[902,150,1146,628],mask:'M907 503 L937 326 L962 315 L1027 298 L1180 287 L1191 288 L1216 414 L1229 400 L1272 385 L1278 314 Q1283 305 1290 305 L1361 295 L1371 344 L1489 327 L1487 287 Q1489 278 1497 275 L1578 269 L1591 321 L1632 333 L1654 360 L1660 210 L1787 176 L1933 154 Q1945 153 1956 159 L2044 345 L2048 360 L2048 462 L1982 472 L1951 480 L1984 520 L1974 540 L1991 548 L2013 630 L1983 655 L1935 675 L1883 665 L1868 621 L1851 600 L1836 644 L1783 638 L1757 641 L1736 702 L1713 731 L1689 735 L1679 711 L1668 720 L1661 753 L1643 770 L1625 739 L1589 748 L1462 754 L1428 752 L1420 774 L1408 777 L1398 750 L1333 738 L1329 763 L1316 769 L1289 732 L1271 694 L1231 621 L1214 605 L1198 628 L1167 624 L1154 675 L1126 729 L1105 736 L1050 720 L1027 691 L1030 663 L1010 660 L1014 627 L973 612 L970 574 L923 526 Z'}
+ };
+ const browser=await chromium.launch({headless:true,channel:'chrome'});
+ try{const page=await browser.newPage();await page.setContent('<canvas width="512" height="512"></canvas>');const source=fs.readFileSync(path.join(__dirname,'artwork/fly-monsters-reference.png')).toString('base64');
+ for(const [kind,profile]of Object.entries(profiles)){
+  const id='mc_'+kind,m=MINECRAFT_MOVES[kind];data.moves[m.id]={name:m.name,type:m.type,power:m.power,effect:m.effect,chance:m.chance,accuracy:m.accuracy,pp:m.pp};
+  data.species[id]={name:profile.name,base:profile.base,types:['FLYING','STEEL'],catchRate:kind==='megaply'?220:100,baseExp:kind==='megaply'?60:135,growth:'MEDIUM_FAST',minecraftKind:kind,signatureMove:m.id,height:profile.height,weight:profile.weight,description:profile.description,category:'바람의 비행 몬스터',artwork:'user-provided',evolutions:profile.evolutions,learnset:[{level:1,move:m.id},{level:1,move:'GROWL'},{level:7,move:'GUST'},{level:12,move:'QUICK_ATTACK'},{level:20,move:'AGILITY'},...(kind==='giantfly'?[{level:36,move:m.id}]:[])]};
+  for(const table of Object.values(data.encounters))for(const period of ['morning','day','night'])if(!table[period].some(mon=>mon.species===id))table[period].push({species:id,level:profile.level});
+  for(const side of ['front','back']){
+   const url=await page.evaluate(async({source,profile,side})=>{const image=new Image();image.src='data:image/png;base64,'+source;await image.decode();const g=document.querySelector('canvas').getContext('2d'),[x,y,w,h]=profile.crop,scale=484/Math.max(w,h);g.clearRect(0,0,512,512);g.save();if(side==='back'){g.translate(512,0);g.scale(-1,1);}g.translate((512-w*scale)/2,(512-h*scale)/2);g.scale(scale,scale);g.translate(-x,-y);g.clip(new Path2D(profile.mask));g.drawImage(image,0,0,2048,1085);g.restore();return document.querySelector('canvas').toDataURL('image/png');},{source,profile,side});fs.writeFileSync(path.join(assets,'battle',`${id}-${side}.png`),Buffer.from(url.split(',')[1],'base64'));
+  }
+ }
+ }finally{await browser.close();}
+ fs.writeFileSync(path.join(assets,'battle-data.json'),JSON.stringify(data));console.log('Added Mega Ply and Giant Fly from supplied art, with level-36 evolution.');
+})().catch(e=>{console.error(e);process.exitCode=1});

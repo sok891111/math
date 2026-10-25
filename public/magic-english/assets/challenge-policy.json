@@ -1,0 +1,57 @@
+{
+  "version": 4,
+  "difficultyVersion": 7,
+  "commonGrade": 3,
+  "hardGrade": 4,
+  "hardChance": 0.2,
+  "rareSpecies": [
+    "mc_enderdragon",
+    "mc_wither"
+  ],
+  "rareMinLevel": 10,
+  "rareEncounterWeight": 100,
+  "totalEncounterWeight": 10000,
+  "pokemonShare": 0.6,
+  "minecraftShare": 0.4,
+  "featuredSpecies": [
+    {
+      "id": "mc_gaddoongi",
+      "maps": [
+        "Route30",
+        "Route31",
+        "Route32",
+        "DarkCaveVioletEntrance"
+      ],
+      "weight": 2000
+    },
+    {
+      "id": "mc_megaply",
+      "maps": [
+        "Route30",
+        "Route31",
+        "Route32",
+        "DarkCaveVioletEntrance"
+      ],
+      "weight": 800
+    },
+    {
+      "id": "mc_giantfly",
+      "maps": [
+        "Route30",
+        "Route31",
+        "Route32",
+        "DarkCaveVioletEntrance"
+      ],
+      "weight": 200
+    }
+  ],
+  "legendarySpecies": [
+    "mc_enderdragon",
+    "mew",
+    "koraidon",
+    "zamazenta",
+    "eternatus"
+  ],
+  "legendaryEncounterWeight": 50,
+  "legendaryLevelOffset": 10
+}

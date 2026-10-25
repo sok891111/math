@@ -1,5 +1,7 @@
 # 선율이의 열칸 블록섬
 
+마법영어가 개인 게임 게이트에 추가되었습니다. `/magic-english` 또는 `/<개인코드>/magic-english`에서 실행합니다. Stage 1·2, 영어 말하기, 내 블록 세계가 기존 Vercel 빌드에 함께 포함됩니다. 서버 환경변수 `ELEVENLABS_API_KEY` 설정과 이관 범위는 [마법영어 통합 안내](docs/MAGIC-ENGLISH-INTEGRATION.md)를 참고하세요.
+
 설치 없이 실행하는 어린이용 더하기 탐험 게임입니다. `index.html`을 브라우저로 열거나 이 폴더에서 아래 명령을 실행하세요.
 
 ```sh

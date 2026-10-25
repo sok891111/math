@@ -56,4 +56,19 @@ fs.cpSync(tralalerioDir, path.join(publicDir, 'tralalerio'), {
   },
 });
 
-console.log('✅ Synchronized public assets successfully.');
+
+const magicDir=path.join(rootDir,'magic-english');
+if(fs.existsSync(magicDir)){
+ const destination=path.join(publicDir,'magic-english');
+ fs.rmSync(destination,{recursive:true,force:true});
+ fs.cpSync(magicDir,destination,{recursive:true,filter:src=>{
+  const relative=path.relative(magicDir,src),parts=relative.split(path.sep);
+  if(!relative)return true;
+  if(parts.some(p=>p.startsWith('.')))return false;
+  if(parts[0]==='assets')return true;
+  if(['block-world','creative'].includes(parts[0]))return fs.statSync(src).isDirectory()||/\.(js|html|css|json|png|jpg|svg|mp3|txt)$/.test(relative);
+  return parts.length===1&&/\.(js|html|css)$/.test(relative);
+ }});
+}
+
+console.log('✅ Synchronized public assets, including magic-english.');

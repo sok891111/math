@@ -1,0 +1,559 @@
+{
+  "species": {
+    "mew": {
+      "name": "뮤",
+      "base": {
+        "hp": 100,
+        "attack": 100,
+        "defense": 100,
+        "speed": 100,
+        "specialAttack": 100,
+        "specialDefense": 100
+      },
+      "types": [
+        "PSYCHIC_TYPE"
+      ],
+      "catchRate": 45,
+      "baseExp": 64,
+      "growth": "MEDIUM_SLOW",
+      "learnset": [
+        {
+          "level": 1,
+          "move": "POUND"
+        },
+        {
+          "level": 20,
+          "move": "MEGA_PUNCH"
+        },
+        {
+          "level": 40,
+          "move": "PSYCHIC_M"
+        },
+        {
+          "level": 50,
+          "move": "ANCIENTPOWER"
+        }
+      ]
+    },
+    "koraidon": {
+      "name": "코라이돈",
+      "base": {
+        "hp": 100,
+        "attack": 135,
+        "defense": 115,
+        "speed": 135,
+        "specialAttack": 85,
+        "specialDefense": 100
+      },
+      "types": [
+        "FIGHTING",
+        "DRAGON"
+      ],
+      "catchRate": 3,
+      "baseExp": 335,
+      "growth": "SLOW",
+      "learnset": [
+        {
+          "level": 1,
+          "move": "ROCK_SMASH"
+        },
+        {
+          "level": 1,
+          "move": "ANCIENTPOWER"
+        },
+        {
+          "level": 7,
+          "move": "DRAIN_PUNCH"
+        },
+        {
+          "level": 14,
+          "move": "BREAKING_SWIPE"
+        },
+        {
+          "level": 21,
+          "move": "FLAME_CHARGE"
+        },
+        {
+          "level": 28,
+          "move": "AGILITY"
+        },
+        {
+          "level": 35,
+          "move": "DRAGON_CLAW"
+        },
+        {
+          "level": 42,
+          "move": "FLAMETHROWER"
+        },
+        {
+          "level": 49,
+          "move": "COLLISION_COURSE"
+        },
+        {
+          "level": 56,
+          "move": "SCREECH"
+        },
+        {
+          "level": 63,
+          "move": "COUNTER"
+        },
+        {
+          "level": 70,
+          "move": "OUTRAGE"
+        },
+        {
+          "level": 77,
+          "move": "CLOSE_COMBAT"
+        },
+        {
+          "level": 84,
+          "move": "FLARE_BLITZ"
+        },
+        {
+          "level": 91,
+          "move": "GIGA_IMPACT"
+        }
+      ]
+    },
+    "zamazenta": {
+      "name": "자마젠타",
+      "base": {
+        "hp": 92,
+        "attack": 120,
+        "defense": 115,
+        "specialAttack": 80,
+        "specialDefense": 115,
+        "speed": 138
+      },
+      "types": [
+        "FIGHTING"
+      ],
+      "catchRate": 10,
+      "baseExp": 335,
+      "growth": "SLOW",
+      "femaleThreshold": null,
+      "legendary": true,
+      "boss": true,
+      "learnset": [
+        {
+          "level": 1,
+          "move": "BITE"
+        },
+        {
+          "level": 1,
+          "move": "QUICK_ATTACK"
+        },
+        {
+          "level": 1,
+          "move": "METAL_CLAW"
+        },
+        {
+          "level": 11,
+          "move": "SLASH"
+        },
+        {
+          "level": 33,
+          "move": "IRON_HEAD"
+        },
+        {
+          "level": 55,
+          "move": "CRUNCH"
+        },
+        {
+          "level": 77,
+          "move": "CLOSE_COMBAT"
+        },
+        {
+          "level": 88,
+          "move": "GIGA_IMPACT"
+        }
+      ]
+    },
+    "eternatus": {
+      "name": "무한다이노",
+      "base": {
+        "hp": 140,
+        "attack": 85,
+        "defense": 95,
+        "specialAttack": 145,
+        "specialDefense": 95,
+        "speed": 130
+      },
+      "types": [
+        "POISON",
+        "DRAGON"
+      ],
+      "catchRate": 255,
+      "baseExp": 345,
+      "growth": "SLOW",
+      "femaleThreshold": null,
+      "legendary": true,
+      "boss": true,
+      "learnset": [
+        {
+          "level": 1,
+          "move": "AGILITY"
+        },
+        {
+          "level": 1,
+          "move": "POISON_TAIL"
+        },
+        {
+          "level": 8,
+          "move": "TOXIC"
+        },
+        {
+          "level": 16,
+          "move": "VENOSHOCK"
+        },
+        {
+          "level": 32,
+          "move": "CROSS_POISON"
+        },
+        {
+          "level": 40,
+          "move": "DRAGON_PULSE"
+        },
+        {
+          "level": 48,
+          "move": "FLAMETHROWER"
+        },
+        {
+          "level": 56,
+          "move": "DYNAMAX_CANNON"
+        },
+        {
+          "level": 72,
+          "move": "RECOVER"
+        },
+        {
+          "level": 88,
+          "move": "ETERNABEAM"
+        }
+      ]
+    }
+  },
+  "moves": {
+    "SCREECH": {
+      "name": "싫은소리",
+      "effect": "EFFECT_DEFENSE_DOWN_2",
+      "power": 0,
+      "type": "NORMAL",
+      "accuracy": 85,
+      "pp": 40,
+      "chance": 0
+    },
+    "BREAKING_SWIPE": {
+      "name": "와이드브레이커",
+      "power": 60,
+      "type": "DRAGON",
+      "effect": "NORMAL_HIT",
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 100
+    },
+    "AGILITY": {
+      "name": "고속이동",
+      "effect": "EFFECT_SPEED_UP_2",
+      "power": 0,
+      "type": "PSYCHIC_TYPE",
+      "accuracy": 100,
+      "pp": 30,
+      "chance": 0
+    },
+    "ROCK_SMASH": {
+      "name": "바위깨기",
+      "effect": "EFFECT_DEFENSE_DOWN_HIT",
+      "power": 20,
+      "type": "FIGHTING",
+      "accuracy": 100,
+      "pp": 15,
+      "chance": 50
+    },
+    "METRONOME": {
+      "name": "손가락흔들기",
+      "effect": "EFFECT_METRONOME",
+      "power": 0,
+      "type": "NORMAL",
+      "accuracy": 100,
+      "pp": 10,
+      "chance": 0
+    },
+    "COLLISION_COURSE": {
+      "name": "액셀브레이크",
+      "power": 100,
+      "type": "FIGHTING",
+      "effect": "NORMAL_HIT",
+      "pp": 5,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "CLOSE_COMBAT": {
+      "name": "인파이트",
+      "power": 120,
+      "type": "FIGHTING",
+      "effect": "NORMAL_HIT",
+      "pp": 5,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "DRAIN_PUNCH": {
+      "name": "드레인펀치",
+      "power": 75,
+      "type": "FIGHTING",
+      "effect": "NORMAL_HIT",
+      "pp": 10,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "TRANSFORM": {
+      "name": "변신",
+      "effect": "EFFECT_TRANSFORM",
+      "power": 0,
+      "type": "NORMAL",
+      "accuracy": 100,
+      "pp": 10,
+      "chance": 0
+    },
+    "DRAGON_CLAW": {
+      "name": "드래곤클로",
+      "power": 80,
+      "type": "DRAGON",
+      "effect": "NORMAL_HIT",
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "COUNTER": {
+      "name": "카운터",
+      "effect": "EFFECT_COUNTER",
+      "power": 1,
+      "type": "FIGHTING",
+      "accuracy": 100,
+      "pp": 20,
+      "chance": 0
+    },
+    "OUTRAGE": {
+      "name": "역린",
+      "effect": "EFFECT_RAMPAGE",
+      "power": 90,
+      "type": "DRAGON",
+      "accuracy": 100,
+      "pp": 15,
+      "chance": 0
+    },
+    "FLARE_BLITZ": {
+      "name": "플레어드라이브",
+      "power": 120,
+      "type": "FIRE",
+      "effect": "RECOIL_HIT",
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "ANCIENTPOWER": {
+      "name": "원시의 힘",
+      "effect": "EFFECT_ALL_UP_HIT",
+      "power": 60,
+      "type": "ROCK",
+      "accuracy": 100,
+      "pp": 5,
+      "chance": 10
+    },
+    "PSYCHIC_M": {
+      "name": "사이코키네시스",
+      "effect": "EFFECT_SP_DEF_DOWN_HIT",
+      "power": 90,
+      "type": "PSYCHIC_TYPE",
+      "accuracy": 100,
+      "pp": 10,
+      "chance": 10
+    },
+    "FLAME_CHARGE": {
+      "name": "니트로차지",
+      "power": 50,
+      "type": "FIRE",
+      "effect": "NORMAL_HIT",
+      "pp": 20,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "MEGA_PUNCH": {
+      "name": "메가톤펀치",
+      "effect": "EFFECT_NORMAL_HIT",
+      "power": 80,
+      "type": "NORMAL",
+      "accuracy": 85,
+      "pp": 20,
+      "chance": 0
+    },
+    "FLAMETHROWER": {
+      "name": "화염방사",
+      "effect": "EFFECT_BURN_HIT",
+      "power": 95,
+      "type": "FIRE",
+      "accuracy": 100,
+      "pp": 15,
+      "chance": 10
+    },
+    "POUND": {
+      "name": "막치기",
+      "effect": "EFFECT_NORMAL_HIT",
+      "power": 40,
+      "type": "NORMAL",
+      "accuracy": 100,
+      "pp": 35,
+      "chance": 0
+    },
+    "GIGA_IMPACT": {
+      "name": "기가임팩트",
+      "power": 150,
+      "type": "NORMAL",
+      "effect": "NORMAL_HIT",
+      "pp": 5,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "METAL_CLAW": {
+      "name": "메탈클로",
+      "effect": "ATTACK_UP_HIT",
+      "type": "STEEL",
+      "power": 50,
+      "pp": 35,
+      "accuracy": 95,
+      "chance": 10
+    },
+    "IRON_HEAD": {
+      "name": "아이언헤드",
+      "effect": "FLINCH_HIT",
+      "type": "STEEL",
+      "power": 80,
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 30
+    },
+    "CRUNCH": {
+      "name": "깨물어부수기",
+      "effect": "DEFENSE_DOWN_HIT",
+      "type": "DARK",
+      "power": 80,
+      "pp": 15,
+      "accuracy": 100,
+      "chance": 20
+    },
+    "POISON_TAIL": {
+      "name": "포이즌테일",
+      "effect": "POISON_HIT",
+      "type": "POISON",
+      "power": 50,
+      "pp": 25,
+      "accuracy": 100,
+      "chance": 10
+    },
+    "TOXIC": {
+      "name": "맹독",
+      "effect": "POISON",
+      "type": "POISON",
+      "power": 0,
+      "pp": 10,
+      "accuracy": 90,
+      "chance": 0
+    },
+    "VENOSHOCK": {
+      "name": "베놈쇼크",
+      "effect": "NORMAL_HIT",
+      "type": "POISON",
+      "power": 65,
+      "pp": 10,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "CROSS_POISON": {
+      "name": "크로스포이즌",
+      "effect": "POISON_HIT",
+      "type": "POISON",
+      "power": 70,
+      "pp": 20,
+      "accuracy": 100,
+      "chance": 10
+    },
+    "DRAGON_PULSE": {
+      "name": "용의파동",
+      "effect": "NORMAL_HIT",
+      "type": "DRAGON",
+      "power": 85,
+      "pp": 10,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "DYNAMAX_CANNON": {
+      "name": "다이맥스포",
+      "effect": "NORMAL_HIT",
+      "type": "DRAGON",
+      "power": 100,
+      "pp": 5,
+      "accuracy": 100,
+      "chance": 0
+    },
+    "ETERNABEAM": {
+      "name": "무한다이빔",
+      "effect": "NORMAL_HIT",
+      "type": "DRAGON",
+      "power": 160,
+      "pp": 5,
+      "accuracy": 90,
+      "chance": 0
+    }
+  },
+  "dex": [
+    {
+      "id": "koraidon",
+      "number": 252,
+      "national": 1007,
+      "name": "코라이돈",
+      "kind": "pokemon",
+      "category": "패러독스포켓몬",
+      "height": 2.5,
+      "weight": 303,
+      "types": [
+        "FIGHTING",
+        "DRAGON"
+      ],
+      "description": "힘찬 다리로 대지를 박차고 달린다. 강인한 몸으로 상대에게 힘껏 돌진하는 고대의 포켓몬이다.",
+      "image": "assets/battle/koraidon-front.png"
+    },
+    {
+      "id": "zamazenta",
+      "number": 253,
+      "national": 889,
+      "name": "자마젠타",
+      "kind": "pokemon",
+      "category": "강자포켓몬",
+      "height": 2.9,
+      "weight": 210.0,
+      "types": [
+        "FIGHTING"
+      ],
+      "description": "가라르를 지켜 온 전설의 포켓몬. 다부진 몸으로 공격을 받아 내며 동료를 지킨다.",
+      "legendary": true,
+      "image": "assets/battle/zamazenta-front.png"
+    },
+    {
+      "id": "eternatus",
+      "number": 254,
+      "national": 890,
+      "name": "무한다이노",
+      "kind": "pokemon",
+      "category": "거대포켓몬",
+      "height": 20.0,
+      "weight": 950.0,
+      "types": [
+        "POISON",
+        "DRAGON"
+      ],
+      "description": "가슴의 코어에 에너지를 모으는 거대한 전설의 포켓몬. 독과 드래곤의 힘으로 싸운다.",
+      "legendary": true,
+      "image": "assets/battle/eternatus-front.png"
+    }
+  ]
+}
