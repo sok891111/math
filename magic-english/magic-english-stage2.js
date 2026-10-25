@@ -1,3 +1,4 @@
+import {SENTENCE_PRACTICE} from './magic-english-practice.js';
 // Stage 2: Episode 2 - 사라진 보따리와 B의 버스! (BusStop -> BusInterior -> NextStop)
 export const STAGE2_WORDS = {
   bus: {
@@ -8,8 +9,8 @@ export const STAGE2_WORDS = {
     sound: '/b/ (브)',
     soundTip: "입술을 다물었다가 '브' 하고 힘차게 터뜨리는 소리예요!",
     emoji: '🚌',
-    sentence: 'It is a big bus!',
-    sentenceKo: '이건 큰 버스야!',
+    sentence: SENTENCE_PRACTICE.bus.text,
+    sentenceKo: SENTENCE_PRACTICE.bus.korean,
     image: 'assets/stage2/page05.jpg',
   },
   bag: {
@@ -20,8 +21,8 @@ export const STAGE2_WORDS = {
     sound: '/b/ (브)',
     soundTip: "입술을 붙였다 떼며 '브' 소리로 시작해요!",
     emoji: '🎒',
-    sentence: 'My bag is here!',
-    sentenceKo: '내 가방(보따리)이 여기 있어!',
+    sentence: SENTENCE_PRACTICE.bag.text,
+    sentenceKo: SENTENCE_PRACTICE.bag.korean,
     image: 'assets/stage2/page06.jpg',
   },
   big: {
@@ -32,8 +33,8 @@ export const STAGE2_WORDS = {
     sound: '/b/ (브)',
     soundTip: "글자 이름은 '비(B)'지만 단어 속에서는 '브(/b/)' 소리가 나요!",
     emoji: '🐘',
-    sentence: 'A big blue bus!',
-    sentenceKo: '커다란 파란 버스!',
+    sentence: SENTENCE_PRACTICE.big.text,
+    sentenceKo: SENTENCE_PRACTICE.big.korean,
     image: 'assets/stage2/page04.jpg',
   },
 };

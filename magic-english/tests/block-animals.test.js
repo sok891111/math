@@ -4,11 +4,11 @@ import {VoxelWorld,collides,validateSave,DEFAULT_BAR} from '../block-world/world
 import {AnimalWorld,ANIMALS} from '../block-world/animals.js';
 const player=()=>({x:64.5,y:17.01,z:72.5,yaw:0,pitch:-.35});
 function fixture(type='pig'){
- const world=new VoxelWorld('animal-test').generate(),saved={version:1,entities:[{id:'test-animal',type,x:64.5,y:17.01,z:70.5,yaw:0,hp:ANIMALS[type].hp,respawn:0,wait:20}]};return {world,animals:new AnimalWorld(world,saved),p:player()};
+ const world=new VoxelWorld('animal-test').generate(),saved={version:1,hostilesInitialized:true,entities:[{id:'test-animal',type,x:64.5,y:17.01,z:70.5,yaw:0,hp:ANIMALS[type].hp,respawn:0,wait:20}]};return {world,animals:new AnimalWorld(world,saved),p:player()};
 }
-test('default world is flat and spawns four pigs and four chickens on safe ground',()=>{
+test('default world is flat and spawns pigs, chickens, creepers and zombies on safe ground',()=>{
  const world=new VoxelWorld('default').generate();assert.equal(world.terrain,'flat');for(let x=0;x<128;x+=7)for(let z=0;z<128;z+=7)assert.equal(world.top(x,z),16);
- const animals=new AnimalWorld(world);assert.equal(animals.entities.length,8);for(const type of ['pig','chicken'])assert.equal(animals.entities.filter(a=>a.type===type).length,4);for(const a of animals.entities)assert(!collides(world,a,ANIMALS[a.type].height));
+ const animals=new AnimalWorld(world);assert.equal(animals.entities.length,12);for(const type of ['pig','chicken'])assert.equal(animals.entities.filter(a=>a.type===type).length,4);for(const a of animals.entities)assert(!collides(world,a,ANIMALS[a.type].height));
 });
 test('wandering animals remain in a pen and avoid placed blocks and water',()=>{
  const {world,animals,p}=fixture();for(let y=17;y<=19;y++)for(let n=61;n<=67;n++){world.set(n,y,67,3);world.set(n,y,73,3);world.set(61,y,n+6,3);world.set(67,y,n+6,3);}world.set(64,16,69,11);

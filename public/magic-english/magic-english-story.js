@@ -1,3 +1,4 @@
+import {SENTENCE_PRACTICE} from './magic-english-practice.js';
 // Magic English Stage 1 Story, Map Layout, Word Discoveries & NPC Conditions
 // Based on STAGE-1-PLAN.md and /Users/gimseongjin/english_book/book_1/마법영어_1화_스토리.md
 
@@ -11,7 +12,7 @@ export const STAGE1_STAGES = [
   'practice_with_amy',  // 5. 에이미에게 표현을 듣고 짧게 말하기 연습
   'speak_to_staff',     // 6. 안내 직원에게 “Excuse me. Can I ask?” 말하기
   'reunite_hwalbin',    // 7. 분실물 보관소에서 딩고(활빈) 구출 → 친구로서 따라다니기 시작!
-  'battle_misspell',    // 8. 마지막 퀘스트: 미스터 미스스펠과 3단어 Speak 대결 (글자 마법 해제 격파 후 황금 A 조각 획득!)
+  'battle_misspell',    // 8. 마지막 퀘스트: 미스터 미스스펠과 생활 문장 대결 (글자 마법 해제 격파 후 황금 A 조각 획득!)
   'stage1_complete',    // 9. 내 블록 세계 건축 & 모험으로 돌아와 BUS → SUB 다음 화 예고
 ];
 
@@ -25,8 +26,8 @@ export const STAGE1_WORDS = {
     letterName: '에이 (/eɪ/)',
     wordSound: '에어 (/ɛər/) — 첫 글자 A가 뒤에 오는 글자들과 만나 "에어" 소리를 내요',
     soundCompare: '글자 이름은 「에이(A)」이지만, Airplane 단어 속에서는 「에어플레인」으로 소리 나요!',
-    sentence: 'A is for Airplane.',
-    sentenceKo: 'A는 비행기(Airplane)의 A야.',
+    sentence: SENTENCE_PRACTICE.airplane.text,
+    sentenceKo: SENTENCE_PRACTICE.airplane.korean,
     gildongQuote: 'A... Airplane... 하늘을 나는 거대한 쇠가마 말이냐!',
     image: 'assets/battle/me_airplane-front.png',
     comicPage: 'assets/stage1/page10.jpg',
@@ -41,8 +42,8 @@ export const STAGE1_WORDS = {
     letterName: '에이 (/eɪ/)',
     wordSound: '애 (/æ/) — 입을 옆으로 넓게 벌려 짧고 또렷하게 "애" 소리를 내요',
     soundCompare: '글자 이름은 「에이(A)」이지만, Apple 단어 속 첫소리는 「애(/æ/)」여서 「애플」이라고 읽어요!',
-    sentence: 'A is for Apple.',
-    sentenceKo: 'A는 사과(Apple)의 A야.',
+    sentence: SENTENCE_PRACTICE.apple.text,
+    sentenceKo: SENTENCE_PRACTICE.apple.korean,
     gildongQuote: '오호! 활빈이 가장 좋아하는 달콤한 능금(사과) 같은 것이로구나!',
     image: 'assets/battle/me_apple-front.png',
     comicPage: 'assets/stage1/page10.jpg',
@@ -57,8 +58,8 @@ export const STAGE1_WORDS = {
     letterName: '에이 (/eɪ/)',
     wordSound: '애 (/æ/) — 입을 벌려 "애스크"라고 소리 내며, 모를 때 용기 내어 묻는 말이에요',
     soundCompare: '글자 이름은 「에이(A)」이지만, Ask 단어 속 첫소리는 「애(/æ/)」여서 「애스크」라고 읽어요!',
-    sentence: 'Excuse me. Can I ask?',
-    sentenceKo: '실례합니다. 물어봐도 될까요?',
+    sentence: SENTENCE_PRACTICE.ask.text,
+    sentenceKo: SENTENCE_PRACTICE.ask.korean,
     gildongQuote: '모를 때는 묻는 것! 조선에서 내가 외쳤던 "모르면 묻고 살펴라"와 똑같구나!',
     image: 'assets/battle/me_ask-front.png',
     comicPage: 'assets/stage1/page11.jpg',
@@ -112,7 +113,7 @@ export const STAGE1_CHECKLIST = [
   {
     id: 'step8',
     title: '8. 보스 미스터 미스스펠 격파 & A 배지 획득',
-    subtitle: '오늘 찾은 세 단어로 미스스펠의 글자 마법을 풀고 출구를 열어요!',
+    subtitle: '오늘 배운 생활 문장으로 미스스펠의 글자 마법을 풀고 출구를 열어요!',
     isDone: s => !!s.rewardReceipts?.[STAGE1_REWARD_ID],
   },
   {
@@ -146,7 +147,7 @@ export function currentStageGoal(state) {
     case 'reunite_hwalbin':
       return '열린 분실물 보관소(오른쪽 위)로 들어가 파트너 딩고(활빈)를 구출하세요!';
     case 'battle_misspell':
-      return '마지막 퀘스트! 뒤를 따라다니는 파트너 딩고(활빈)와 함께 북쪽 출구 앞의 악당 「미스터 미스스펠」에게 말을 걸어 세 단어로 출구의 마법을 풀어요!';
+      return '마지막 퀘스트! 뒤를 따라다니는 파트너 딩고(활빈)와 함께 북쪽 출구 앞의 악당 「미스터 미스스펠」에게 말을 걸어 생활 문장으로 출구의 마법을 풀어요!';
     case 'stage1_complete':
       if (!state.busHookSeen) {
         return '축하합니다! 황금 A 조각를 획득했어요! 북쪽의 열린 출구로 가서 Stage 2 버스 정류장 모험을 시작하세요.';

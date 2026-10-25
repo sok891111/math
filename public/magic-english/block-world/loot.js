@@ -1,0 +1,3 @@
+export const LOOT_ITEMS=Object.freeze({raw_chicken:{name:'생닭고기',emoji:'🍗'},feather:{name:'깃털',emoji:'🪶'}});
+export function chickenDrops(random=Math.random){const drops=[{itemId:'raw_chicken',quantity:1}],feathers=Math.min(2,Math.floor(Math.max(0,random())*3));if(feathers)drops.push({itemId:'feather',quantity:feathers});return drops;}
+export function collectLoot(inventory,drops){const loot={...(inventory.loot||{})};for(const drop of drops){if(!Object.hasOwn(LOOT_ITEMS,drop.itemId)||!Number.isInteger(drop.quantity)||drop.quantity<1)throw Error('드롭 아이템이 올바르지 않습니다.');loot[drop.itemId]=(loot[drop.itemId]||0)+drop.quantity;if(loot[drop.itemId]>1000000)throw Error('아이템 보관함 한도입니다.');}return {...inventory,loot};}

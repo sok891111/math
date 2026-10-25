@@ -1,3 +1,5 @@
+import {SENTENCE_PRACTICE,practiceStep} from './magic-english-practice.js';
+import {dialogueAction,nextChoiceIndex} from './dialogue-controls.js';
 import {walkingPortal} from './magic-english-portals.js';
 import {dialogueCharacter} from './character-voices.js';
 import {createTravel, departure, arrival} from './world-travel.js';
@@ -230,7 +232,7 @@ export async function startMagicEnglishStage1App() {
     speechRecognizer.cancel();
     cancelActiveVoice();
     const learning=ensureLearningState(state);learning.praised??={};
-    const pageList=(Array.isArray(pages)?pages:[pages]).filter(page=>page?.type!=='praise'||!learning.praised[page.npcId]);
+    const pageList=(Array.isArray(pages)?pages:[pages]).map(practiceStep).filter(page=>page?.type!=='praise'||!learning.praised[page.npcId]);
     for(const page of pageList){if(typeof page!=='object'||!page)continue;const voice=page.type==='speak'?page.guideClip||page.targetPhrase:page.voiceClip;if(voice)void preloadCharacterVoice(voice,page.type==='speak'?'amy':dialogueCharacter(page.speaker||speaker,page.text)).catch(()=>{});}
     dialog = {
       speaker,
@@ -251,6 +253,7 @@ export async function startMagicEnglishStage1App() {
       mapLabelsOverlay.classList.toggle('dimmed', Boolean(dialog || menuOpen));
     }
     el.hidden = !dialog;
+    $('#touch-action').querySelector('span').textContent=dialog?'다음·확인':'조사·대화';
     if (!dialog) return;
 
     const rawStep = dialog.pages[dialog.index];
@@ -261,6 +264,7 @@ export async function startMagicEnglishStage1App() {
       learning.praiseSequence=(learning.praiseSequence||0)+1;learning.praised[rawStep.npcId]=true;persist();
     }
     const isSpeakTurn = typeof rawStep === 'object' && rawStep !== null && rawStep.type === 'speak';
+    if(isSpeakTurn)$('#touch-action').querySelector('span').textContent='말하기·완료';
     const isBadgeRevealTurn = typeof rawStep === 'object' && rawStep !== null && rawStep.type === 'badge_reveal';
     const isObjectNpc = typeof rawStep === 'object' && rawStep !== null && !isSpeakTurn;
 
@@ -364,6 +368,7 @@ export async function startMagicEnglishStage1App() {
         el.insertBefore(rewardEl, $('#choices'));
       }
       rewardEl.textContent = isBadgeRevealTurn ? '🏆 알파벳 조각: 철 1개 · Stage 완료: 나무·흙·철 각 5개' : (typeof rawStep.rewardBanner==='string' ? rewardBannerText : rawStep.speaker?.includes('활빈') ? '💛 활빈과 함께 여행해요!' : ensureLearningState(state).lastRewardQuantity ? '🪵 나무 블록 +'+state.learning.lastRewardQuantity+'개 · 내 블록 세계로 전달해요!' : rewardBannerText);
+      if(ensureLearningState(state).lastWeapon)rewardEl.textContent+=' · ⚔️ '+state.learning.lastWeapon+' 획득!';
       rewardEl.hidden = false;
     } else if (rewardEl) {
       rewardEl.hidden = true;
@@ -405,6 +410,7 @@ export async function startMagicEnglishStage1App() {
             ${rawStep.rewardHint ? `<span class="me-turn-reward-pill">🎁 ${rawStep.rewardHint}</span>` : ''}
           </div>
           <div class="me-turn-phrase">“${rawStep.targetPhrase}”</div>
+          ${rawStep.meaningKo?`<div class="me-turn-meaning">${rawStep.meaningKo}</div>`:''}
           ${rawStep.phonetic ? `<div class="me-turn-phonetic">${rawStep.phonetic}</div>` : ''}
         </div>
         <div class="me-turn-status ${st.statusType}">${st.statusText}</div>
@@ -452,7 +458,7 @@ export async function startMagicEnglishStage1App() {
 
         const turnDialog = dialog;
         const attemptId = globalThis.crypto?.randomUUID?.() || 'speech-'+Date.now()+'-'+Math.random().toString(36).slice(2);
-        const stillHere = () => dialog === turnDialog && dialog?.speakState === st;
+        const stillHere = () => dialog === turnDialog && dialog?.speakState === st && dialog.index===st.stepIndex;
         speechRecognizer.start({
           userId:blockUser, attemptId,
           target: rawStep.targetKey || 'full',
@@ -470,10 +476,11 @@ export async function startMagicEnglishStage1App() {
             const outcome = serverAssessment || assessLearningSpeech(transcript,rawStep.targetKey || 'full');
             if (!outcome.passed) {finishUnheard(turnDialog,st);return;}
             st.settled=true;
-            const learning=ensureLearningState(state); learning.failures=0; learning.lastFeedback=outcome.message;learning.lastQuality=outcome.quality; learning.lastRewardQuantity=outcome.quantity || 1;
+            const learning=ensureLearningState(state); learning.failures=0; learning.lastFeedback=outcome.message;learning.lastQuality=outcome.quality; learning.lastRewardQuantity=outcome.quantity || 1;learning.lastWeapon=outcome.weaponName||null;
             if(serverAssessment?.rewardToken) queueReward({id:attemptId,type:'speech',token:serverAssessment.rewardToken});
             st.statusType='success';
-            st.statusText=`💬 ${outcome.message} 🪵 나무 블록 +${outcome.quantity || 1}개`;
+            st.statusText=`💬 ${outcome.message} 🪵 나무 블록 +${outcome.quantity || 1}개${outcome.weaponName?' · ⚔️ '+outcome.weaponName+' 획득!':''}`;
+            if(outcome.weaponName)toast('완전한 문장 보상! ⚔️ '+outcome.weaponName+'을 내 블록 세계로 보냈어요!');
             rawStep.onPass?.('self'); persist();updateSidebar();renderDialog();
             setTimeout(()=>{if(stillHere())advanceDialog(true);},750);
           },
@@ -514,7 +521,7 @@ export async function startMagicEnglishStage1App() {
         b.onclick = () => {
           cancelActiveVoice();
           dialog = null;
-          el.hidden = true;
+          el.hidden = true;renderDialog();
           if (mapLabelsOverlay) mapLabelsOverlay.classList.remove('dimmed');
           fn?.();
           canvas.focus({ preventScroll: true });
@@ -527,11 +534,10 @@ export async function startMagicEnglishStage1App() {
   function advanceDialog(forceFromSpeak = false) {
     if (!dialog) return;
     const currentStep = dialog.pages[dialog.index];
-    if (currentStep && typeof currentStep === 'object' && currentStep.type === 'speak' && !forceFromSpeak) {
-      const speakBtn = $('#turn-speak-btn');
-      if (speakBtn) speakBtn.click();
-      return;
-    }
+    const action=dialogueAction({dialog:currentStep,pending:!forceFromSpeak&&dialog.speakState?.stepIndex===dialog.index&&dialog.speakState?.pending,settled:forceFromSpeak||dialog.speakState?.stepIndex===dialog.index&&dialog.speakState?.settled,choices:dialog.index===dialog.pages.length-1&&Boolean(dialog.choices?.length)});
+    if(action==='wait')return;
+    if(action==='speak'){$('#turn-speak-btn')?.click();return;}
+    if(action==='choose'){const choices=$('#choices'),selected=choices.contains(document.activeElement)?document.activeElement:choices.querySelector('button');selected?.click();return;}
 
     speechRecognizer.cancel();
     cancelActiveVoice();
@@ -637,22 +643,22 @@ export async function startMagicEnglishStage1App() {
           type: 'npc',
           speaker: '링고 (Ringo)',
           text: {
-            bus: `링고: “It is a Bus ${info.phonetic}! 버스야! 알파벳 B의 이름은 ‘비’지만, 단어 첫소리는 입술을 다물었다 터뜨리는 ‘브(/b/)’ 소리가 나!”`,
-            bag: `링고: “My Bag ${info.phonetic} is here! 길동의 소중한 보따리(가방) 흔적이야! Bag도 입술을 붙였다 떼며 ‘브(/b/)’ 소리로 시작해!”`,
-            big: `링고: “A Big ${info.phonetic} blue bus! 저기 그려진 파란 버스는 정말 크다(Big)! Big도 ‘브(/b/)’ 소리로 시작해!”`,
+            bus: `링고: “${info.sentence} (${info.sentenceKo}) B로 시작하는 Bus가 들어간 문장이야. 버스가 왔을 때 이렇게 말해 보자!”`,
+            bag: `링고: “${info.sentence} (${info.sentenceKo}) B로 시작하는 Bag는 가방이야. 내 가방을 가리키며 말해 보자!”`,
+            big: `링고: “${info.sentence} (${info.sentenceKo}) B로 시작하는 Big는 크다는 뜻이야. 큰 버스를 보며 말해 보자!”`,
           }[w],
           voiceClip: info.sentence,
           image: info.image,
         },
         speak(
-          info.word,
+          info.sentence,
           w,
           () => {
             advanceStage2(state,'word',w);
             grantSpeakRewardOnce(state, `s2-clue-${w}`, 10, `${info.word} 단서 말하기 보상`);
           },
           {
-            prompt: `🔊 가이드 음성을 듣고 Speak 버튼을 눌러 「${info.word}」를 따라 말해 보세요!`,
+            prompt: `🔊 가이드 음성을 듣고 Speak 버튼을 눌러 「${info.sentence}」를 따라 말해 보세요!`,
             phonetic: info.phonetic,
             meaningKo: info.korean,
             rewardHint: '단서 도감 등록 + 나무 블록 1개',
@@ -661,7 +667,7 @@ export async function startMagicEnglishStage1App() {
         {
           type: 'npc',
           speaker: '링고 & 딩고(활빈)',
-          text: `링고: “${info.word} ${info.phonetic}! 아주 또렷한 /b/ 소리였어! 지도에 단서를 기록해 둘게!”`,
+          text: `링고: “${info.word} ${info.phonetic}! 문장으로 이야기했어! 지도에 단서를 기록해 둘게!”`,
           voiceClip: 'Good job! You found the clue!',
         },
       ]);
@@ -801,7 +807,7 @@ export async function startMagicEnglishStage1App() {
                   else if (chosen === expected)
                     say('링고 · 간판 복구 Speak!', [
                       speak(
-                        info.word,
+                        info.sentence,
                         w,
                         () => {
                           advanceStage2(state,'sign',w);
@@ -839,7 +845,7 @@ export async function startMagicEnglishStage1App() {
       if (chosen === expected)
         say('링고 · 간판 복구 Speak!', [
           speak(
-            info.word,
+            info.sentence,
             w,
             () => {
               advanceStage2(state,'sign',w);
@@ -863,7 +869,7 @@ export async function startMagicEnglishStage1App() {
 
     if (target.id === 's2_bigbus') {
       say('큰 파란 버스 (Big Blue Bus)', [
-        speak('Big bus!', 'big_bus', null, {
+        speak(SENTENCE_PRACTICE.big.text, 'big_bus', null, {
           prompt: '눈앞의 커다란 파란 버스를 보며 “Big bus!”라고 외쳐 보세요!',
           phonetic: '[bɪɡ bʌs]',
           meaningKo: '큰 버스!',
@@ -906,8 +912,8 @@ export async function startMagicEnglishStage1App() {
           bossBattle: { name: '보스 미스터 미스스펠', hp: 2, maxHp: 2 },
           image: 'assets/stage2/page13.jpg',
         },
-        speak('Big bus!', 'big_bus', null, {
-          prompt: '🚌 첫 번째 봉인을 깨뜨리도록 “Big bus!”라고 외쳐 보세요!',
+        speak(SENTENCE_PRACTICE.big.text, 'big_bus', null, {
+          prompt: '🚌 “It is a big bus.”라고 말해 첫 번째 봉인을 풀어 주세요!',
           phonetic: '[bɪɡ bʌs]',
           meaningKo: '큰 버스!',
           rewardHint: '✨ 첫 번째 짐칸 봉인 해제',
@@ -921,7 +927,7 @@ export async function startMagicEnglishStage1App() {
           bossBattle: { name: '보스 미스터 미스스펠', hp: 1, maxHp: 2 },
         },
         speak(
-          'My bag!',
+          SENTENCE_PRACTICE.bag.text,
           'my_bag',
           () => {
             if (!st.bagRecovered) {
@@ -930,7 +936,7 @@ export async function startMagicEnglishStage1App() {
             }
           },
           {
-            prompt: '🎒 마지막 봉인을 풀고 보따리와 황금 B 조각을 되찾도록 “My bag!”이라고 외쳐 주세요!',
+            prompt: '🎒 “This is my bag.”라고 말해 보따리를 되찾아 주세요!',
             phonetic: '[maɪ bæɡ]',
             meaningKo: '내 가방(보따리)!',
             rewardHint: '✨ 마지막 봉인 해제 & 보따리·B 조각 획득!',
@@ -1015,20 +1021,20 @@ export async function startMagicEnglishStage1App() {
       airplane: {
         phonetic: '[ˈeər.pleɪn]',
         meaning: '비행기',
-        sentenceClip: 'sentence_airplane',
-        wordClip: 'word_airplane',
+        sentenceClip: info.sentence,
+        wordClip: info.sentence,
       },
       apple: {
         phonetic: '[ˈæp.əl]',
         meaning: '사과',
-        sentenceClip: 'sentence_apple',
-        wordClip: 'word_apple',
+        sentenceClip: info.sentence,
+        wordClip: info.sentence,
       },
       ask: {
         phonetic: '[æsk]',
         meaning: '묻다 · 질문하다',
-        sentenceClip: 'sentence_ask',
-        wordClip: 'word_ask',
+        sentenceClip: info.sentence,
+        wordClip: info.sentence,
       },
     }[wordId];
 
@@ -1048,8 +1054,8 @@ export async function startMagicEnglishStage1App() {
         {
           type: 'speak',
           speaker: `홍길동 · 단서 말하기 차례 🎙️`,
-          prompt: `🔊 가이드 음성을 듣고 Speak 버튼을 눌러 「${info.word}」를 따라 말해 보세요!`,
-          targetPhrase: info.word,
+          prompt: `🔊 가이드 음성을 듣고 Speak 버튼을 눌러 「${info.sentence}」를 따라 말해 보세요!`,
+          targetPhrase: info.sentence,
           phonetic: guideMap.phonetic,
           meaningKo: guideMap.meaning,
           targetKey: wordId,
@@ -1473,7 +1479,7 @@ export async function startMagicEnglishStage1App() {
                   ? '✓ 황금 배지 [A], [B] 획득 완료! (보스 미스터 미스스펠 격파 보상 · 클릭하면 발음을 들려줘요)'
                   : earnedA
                   ? '✓ 첫 번째 모험 배지 [A] 획득 완료! (보스 미스터 미스스펠 격파 보상 · 클릭하면 발음을 들려줘요)'
-                  : '🔒 보스 미스터 미스스펠에게 Airplane·Apple·Ask 3단어를 모두 Speak하면 [A] 배지를 얻어요!'
+                  : '🔒 보스 미스터 미스스펠에게 Airplane·Apple·Ask가 들어간 생활 문장 세 개를 말하면 [A] 배지를 얻어요!'
               }
             </div>
           </div>
@@ -1882,12 +1888,12 @@ export async function startMagicEnglishStage1App() {
         {
           type: 'speak',
           speaker: '홍길동 & 딩고 · 보스 공격 1/3 🎙️',
-          prompt: '✈️ 뒤섞인 비행기 글자를 되찾도록 Airplane이라고 말해 보세요!',
-          targetPhrase: 'Airplane',
+          prompt: '✈️ “I see an airplane.”이라고 말해 비행기 글자를 되찾아 주세요!',
+          targetPhrase: SENTENCE_PRACTICE.airplane.text,
           phonetic: '[ˈeər.pleɪn]',
           meaningKo: '비행기',
           targetKey: 'airplane',
-          guideClip: 'word_airplane',
+          guideClip: SENTENCE_PRACTICE.airplane.text,
           rewardHint: '✨ 첫 번째 글자 마법 풀기',
           bossBattle: { name: '보스 미스터 미스스펠', hp: 3, maxHp: 3 },
         },
@@ -1903,11 +1909,11 @@ export async function startMagicEnglishStage1App() {
           type: 'speak',
           speaker: '홍길동 & 딩고 · 보스 공격 2/3 🎙️',
           prompt: '🍎 사과 그림에 걸린 마법을 풀도록 Apple이라고 말해 보세요!',
-          targetPhrase: 'Apple',
+          targetPhrase: SENTENCE_PRACTICE.apple.text,
           phonetic: '[ˈæp.əl]',
           meaningKo: '사과',
           targetKey: 'apple',
-          guideClip: 'word_apple',
+          guideClip: SENTENCE_PRACTICE.apple.text,
           rewardHint: '✨ 두 번째 글자 마법 풀기',
           bossBattle: { name: '보스 미스터 미스스펠', hp: 2, maxHp: 3 },
         },
@@ -1922,12 +1928,12 @@ export async function startMagicEnglishStage1App() {
         {
           type: 'speak',
           speaker: '홍길동 & 딩고 · 최후의 일격 3/3 🎙️',
-          prompt: '❓ 마지막 세 번째 A 단어를 외쳐 마지막 마법을 풀고 A 조각을 되찾아 주세요!',
-          targetPhrase: 'Ask',
+          prompt: '❓ 마지막 세 번째 A 문장을 말해 마지막 마법을 풀고 A 조각을 되찾아 주세요!',
+          targetPhrase: SENTENCE_PRACTICE.ask.text,
           phonetic: '[æsk]',
           meaningKo: '묻다 · 질문하다',
           targetKey: 'ask',
-          guideClip: 'word_ask',
+          guideClip: SENTENCE_PRACTICE.ask.text,
           rewardHint: '✨ 마지막 봉인을 풀고 A 조각 되찾기!',
           bossBattle: { name: '보스 미스터 미스스펠', hp: 1, maxHp: 3 },
           onPass: () => {
@@ -1991,16 +1997,13 @@ export async function startMagicEnglishStage1App() {
   }
 
   function act() {
-    if (saveCorruptedError || cutsceneLocked || anyModalOpen()) return;
+    if (saveCorruptedError || anyModalOpen()) return;
+    if(dialog){advanceDialog();return;}
+    if(cutsceneLocked)return;
     if (menuOpen) {
       toggleMenu(false);
       return;
     }
-    if (dialog) {
-      advanceDialog();
-      return;
-    }
-
     const map = currentMap();
     const d = DIRECTIONS[state.facing] || DIRECTIONS.down;
     const tx = state.x + d[0];
@@ -2126,6 +2129,7 @@ export async function startMagicEnglishStage1App() {
   }
 
   function move(dir) {
+    if(dialog&&dialog.index===dialog.pages.length-1&&dialog.choices?.length){const buttons=[...$('#choices').querySelectorAll('button')];const index=buttons.indexOf(document.activeElement);const selected=nextChoiceIndex(index,dir,buttons.length);buttons.forEach((button,i)=>button.classList.toggle('me-choice-focused',i===selected));buttons[selected]?.focus();return;}
     if (saveCorruptedError || cutsceneLocked || anyModalOpen() || dialog || menuOpen) return;
     const d = DIRECTIONS[dir];
     if (!d) return;
@@ -2593,7 +2597,7 @@ export async function startMagicEnglishStage1App() {
   for (const b of document.querySelectorAll('[data-move]')) {
     b.onpointerdown = e => {
       e.preventDefault();
-      if (anyModalOpen() || cutsceneLocked) return;
+      if (anyModalOpen() || cutsceneLocked&&!dialog) return;
       b.setPointerCapture(e.pointerId);
       move(b.dataset.move);
       held.add(b.dataset.move);

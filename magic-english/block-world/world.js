@@ -1,3 +1,4 @@
+import {validEquipment} from './weapons.js';
 // Pure voxel model. Rendering and browser storage are deliberately separate.
 import {validateAnimalSave} from './animal-state.js';
 import {validateInventory} from './inventory.js';
@@ -73,7 +74,7 @@ export function validateSave(value){
  const p=value.player;if(!p||!['x','y','z','yaw','pitch'].every(k=>Number.isFinite(p[k]))||p.x<.3||p.x>SIZE-.3||p.z<.3||p.z>SIZE-.3||p.y<1||p.y>HEIGHT-1.8||Math.abs(p.pitch)>Math.PI/2+.01)throw Error('플레이어 위치가 올바르지 않습니다.');
  if(!Array.isArray(value.bar)||value.bar.length!==9||!value.bar.every(id=>Number.isInteger(id)&&id>0&&id<BLOCKS.length&&!BLOCKS[id].unbreakable))throw Error('핫바 기록이 올바르지 않습니다.');
  if(typeof value.name!=='string'||!value.name.trim()||value.name.length>40)throw Error('세계 이름이 올바르지 않습니다.');
- if(value.tool!==undefined&&value.tool!==null&&value.tool!=='stick')throw Error('도구 기록이 올바르지 않습니다.');
+ if(value.tool!==undefined&&!validEquipment(value.tool,value.inventory))throw Error('도구 기록이 올바르지 않습니다.');
  if(value.animals!==undefined)validateAnimalSave(value.animals,SIZE,HEIGHT);
  if(value.inventory!==undefined){validateInventory(value.inventory);const edits=new Map(value.edits);for(const [index,id]of Object.entries(value.inventory.placed))if(edits.get(Number(index))!==id)throw Error('설치 블록과 보관함 기록이 다릅니다.');}
  return value;

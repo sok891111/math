@@ -1,3 +1,5 @@
+import {daylight,skyAngle,isNight} from './day-night.js';
+import {WEAPONS,isWeapon} from './weapons.js';
 import * as THREE from './vendor/three.module.js';
 import {BLOCKS,SIZE,HEIGHT,CHUNK,hashSeed} from './world.js';
 import {AnimalRenderer} from './animal-renderer.js';
@@ -82,16 +84,23 @@ export class WorldRenderer {
   const progress=1-swing,pose=stickSwingPose(progress);this.heldStick.position.set(...pose.position);this.heldStick.rotation.set(...pose.rotation);if(!swing&&moving)this.heldStick.position.y+=Math.sin(wave)*.012;
   this.stickTrails.forEach((trail,i)=>{trail.visible=this.heldStick.visible&&swing>0&&progress>.18&&progress<.64;const prior=stickSwingPose(Math.max(0,progress-(i+1)*.07));trail.position.set(...prior.position);trail.rotation.set(...prior.rotation);});
   for(const p of this.particles){p.life-=dt;p.v.y-=dt*8;p.mesh.position.addScaledVector(p.v,dt);p.mesh.scale.setScalar(Math.max(0,p.life/.55));if(p.life<=0){this.scene.remove(p.mesh);p.mesh.geometry.dispose();p.mesh.material.dispose();}}
-  this.particles=this.particles.filter(p=>p.life>0);if(this.cycle)this.time=(this.time+dt/720)%1;
-  const day=Math.max(.08,Math.min(1,Math.sin(this.time*Math.PI*2)*1.4));const sky=new THREE.Color('#15273e').lerp(new THREE.Color('#acd7e6'),day);this.scene.background.copy(sky);this.scene.fog.color.copy(sky);this.sunlight.intensity=day*1.3;this.scene.children.find(o=>o.isHemisphereLight).intensity=.25+day*2.05;
-  const angle=this.time*Math.PI*2;this.sun.position.set(player.x+Math.cos(angle)*90,Math.sin(angle)*90,player.z-35);this.sun.lookAt(this.camera.position);this.clouds.position.x=Math.sin(performance.now()*.00002)*8;
+  this.particles=this.particles.filter(p=>p.life>0);
+  const day=daylight(this.time);const sky=new THREE.Color('#15273e').lerp(new THREE.Color('#acd7e6'),day);this.scene.background.copy(sky);this.scene.fog.color.copy(sky);this.sunlight.intensity=day*1.3;this.scene.children.find(o=>o.isHemisphereLight).intensity=.25+day*2.05;
+  const angle=skyAngle(this.time);this.sun.material.color.set(isNight(this.time)?'#d6e8f6':'#fff2bc');this.sun.position.set(player.x+Math.cos(angle)*90,Math.abs(Math.sin(angle))*90,player.z-35);this.sun.lookAt(this.camera.position);this.clouds.position.x=Math.sin(performance.now()*.00002)*8;
   const water=this.world.get(Math.floor(player.x),Math.floor(player.y+1.4),Math.floor(player.z))===11;this.scene.fog.near=water?.3:this.drawDistance*.42;this.scene.fog.far=water?13:this.drawDistance;this.camera.far=this.drawDistance+30;this.camera.updateProjectionMatrix();
   for(const [key,group]of this.chunks){const [x,z]=key.split(',').map(Number);group.visible=Math.hypot(x*16+8-player.x,z*16+8-player.z)<this.drawDistance+15;}
   this.renderer.render(this.scene,this.camera);
  }
  direction(){return this.camera.getWorldDirection(new THREE.Vector3());}
  setBuildPreview(cell){this.buildPreview.visible=!!cell;if(cell)this.buildPreview.position.set(cell.x+.5,cell.y+.5,cell.z+.5);}
- setTool(tool){this.held.visible=tool!=='stick';this.heldStick.visible=tool==='stick';}
+ setTool(tool){
+  this.held.visible=!tool;this.heldStick.visible=Boolean(tool);this.weaponModels??=new Map();
+  const sword=isWeapon(tool);this.heldStick.children[0].visible=!sword;this.heldStick.children[1].visible=!sword;
+  if(sword&&!this.weaponModels.has(tool)){const group=new THREE.Group();const part=(w,h,d,y,color)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color,depthTest:false}));mesh.position.y=y;mesh.renderOrder=12;group.add(mesh);};part(.09,.23,.08,-.23,'#6a4933');part(.3,.07,.1,-.1,WEAPONS[tool].color);part(.11,.48,.045,.18,WEAPONS[tool].color);part(.06,.07,.045,.455,WEAPONS[tool].color);this.heldStick.add(group);this.weaponModels.set(tool,group);}
+  for(const [id,model]of this.weaponModels)model.visible=id===tool;
+  for(const trail of this.stickTrails)trail.material.color.set(WEAPONS[tool]?.color||'#e1c397');
+ }
+
  renderAnimals(animals,dt,active){this.animalRenderer.update(animals,dt,active);}
  getStickPose(){return {position:this.heldStick.position.toArray(),rotation:[this.heldStick.rotation.x,this.heldStick.rotation.y,this.heldStick.rotation.z],visible:this.heldStick.visible};}
 }

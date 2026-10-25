@@ -6,8 +6,8 @@ function fixture(){const values=new Map();const store={get:async key=>values.get
  return {request,calls,values,store,setTranscript:value=>transcript=value};}
 const wav=()=>{const result=Buffer.alloc(6400);result.write('RIFF');return result;};
 test('Vercel API keeps Bus and Big assessment, claims, duplicate rewards and profiles connected',async()=>{
- const f=fixture();for(const [target,text]of [['bus','bus'],['big','big'],['bus','buzz']]){f.setTranscript(text);const result=await f.request('assess-pronunciation?word='+target+'&userId=child001&attemptId='+target+'-'+text,wav());assert.equal(result.status,200);assert(result.body.passed);const grant={userId:'child001',type:'speech',token:result.body.rewardToken};assert((await f.request('rewards',grant)).body.created);assert.equal((await f.request('rewards',grant)).body.created,false);assert.equal((await f.request('rewards',{...grant,userId:'other001'})).status,400);}
- const rewards=await f.request('block-world/rewards?userId=child001',null,'GET');assert.equal(rewards.body.rewards.length,3);assert.deepEqual(rewards.body.rewards[0].blocks,[{blockId:5,quantity:1}]);assert.equal((await f.request('block-world/rewards?userId=other001',null,'GET')).body.rewards.length,0);
+ const f=fixture();for(const [target,text]of [['bus','Here is the bus.'],['big','It is a big bus.'],['bus','Here is the buzz.']]){f.setTranscript(text);const result=await f.request('assess-pronunciation?word='+target+'&userId=child001&attemptId='+target+'-'+text.toLowerCase().replace(/[^a-z]/g,''),wav());assert.equal(result.status,200);assert(result.body.passed);const grant={userId:'child001',type:'speech',token:result.body.rewardToken};assert((await f.request('rewards',grant)).body.created);assert.equal((await f.request('rewards',grant)).body.created,false);assert.equal((await f.request('rewards',{...grant,userId:'other001'})).status,400);}
+ const rewards=await f.request('block-world/rewards?userId=child001',null,'GET');assert.equal(rewards.body.rewards.length,3);assert.deepEqual(rewards.body.rewards[0].blocks,[{blockId:5,quantity:2}]);assert.equal((await f.request('block-world/rewards?userId=other001',null,'GET')).body.rewards.length,0);
  assert(f.calls[0].options.body.getAll('keyterms').includes('Bus'));assert.equal((await f.request('rewards',{type:'clear',stage:2,userId:'child001'})).status,400);
 });
 test('new voice lines retain their ElevenLabs cast and durable cache across handler instances',async()=>{
@@ -25,4 +25,10 @@ test('deployment contains the gate, route tracing, nested renderer and latest st
  for(const file of ['server.cjs','.block-world-data','tools/character-voice-api.cjs','.env.local'])assert(!fs.existsSync(path.join(root,'public/magic-english',file)),file);
  assert(read('public/magic-english/index.html').includes('<base href="/magic-english/">'));
  assert(read('public/magic-english/block-world/reward-client.js').includes('/api/magic-english/block-world/rewards'));
+});
+
+test('complete sentence rewards contain a server-selected sword, while partial answers and retries cannot forge extra weapons',async()=>{
+ const f=fixture();f.setTranscript('Thank you!');const perfect=await f.request('assess-pronunciation?word=thank_you&userId=child001&attemptId=perfect-greeting',wav());assert.equal(perfect.body.quality,'complete');assert(perfect.body.weaponName);
+ const claim={userId:'child001',type:'speech',token:perfect.body.rewardToken,items:[{itemId:'diamond_sword',quantity:100}]};const first=await f.request('rewards',claim);assert.deepEqual(first.body.reward.items,[perfect.body.weaponReward]);assert.deepEqual(first.body.reward.blocks,[{blockId:5,quantity:2}]);assert.equal((await f.request('rewards',claim)).body.created,false);
+ f.setTranscript('please');const partial=await f.request('assess-pronunciation?word=yes_please&userId=child001&attemptId=partial-greeting',wav());assert.equal(partial.body.quality,'partial');assert.equal(partial.body.weaponName,undefined);const gift=await f.request('rewards',{...claim,token:partial.body.rewardToken});assert.equal(gift.body.reward.items,undefined);
 });

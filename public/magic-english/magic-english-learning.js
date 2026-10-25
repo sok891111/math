@@ -1,14 +1,16 @@
+import {SENTENCE_PRACTICE,sentenceAssessment} from './magic-english-practice.js';
 // Recognition measures understood text, not acoustic pronunciation accuracy.
 export const SPEECH_TARGETS = {
  full:'Excuse me. Can I ask?', excuse_me:'Excuse me.', can_i_ask:'Can I ask?',
  i_am_okay:'I am okay.', good_morning:'Good morning!', i_am_gildong:'I am Gildong.',
  yes_please:'Yes, please!', thank_you:'Thank you!', help_please:'My friend. Help, please!',
  where_bus:'Where is the bus?', my_bag:'My bag!', big_bus:'Big bus!', it_is_big:'It is big.',
- airplane:'Airplane', apple:'Apple', ask:'Ask', bus:'Bus', bag:'Bag', big:'Big',
+ ...Object.fromEntries(Object.entries(SENTENCE_PRACTICE).map(([key,practice])=>[key,practice.text])),
 };
 import {evaluateWordSimilarity60} from './magic-english-speech.js';
 const normalize=s=>String(s||'').toLowerCase().replace(/[^a-z\s]/g,' ').replace(/\s+/g,' ').trim();
 export function assessLearningSpeech(transcript,target){
+ const sentence=sentenceAssessment(transcript,target);if(sentence)return sentence;
  const aliases={bus:['버스','버쓰','버즈','buzz','buss','buses','b u s'],bag:['백','배그'],big:['빅','비그']};
  const raw=String(transcript||'').replace(/[.!?,]/g,'').trim();
  const ideal=normalize(SPEECH_TARGETS[target]||target), heard=aliases[target]?.includes(raw)?target:normalize(transcript);
@@ -23,7 +25,7 @@ export function ensureLearningState(state){
  state.learning??={}; state.learning.failures??=0; state.learning.visits??={}; state.learning.sequence??=0; state.learning.pending??=[];
  return state.learning;
 }
-export const REPEAT_DIALOGUES={
+const RAW_REPEAT_DIALOGUES={
  npc_traveler:[['How are you today?','I am okay.','i_am_okay'],['Oh, you are back! Are you okay?','I am okay.','i_am_okay'],['I found the exit! Thank you!','Thank you!','thank_you']],
  npc_pilot:[['Good morning, my friend!','Good morning!','good_morning'],['A new flight today! Can you see the airplane?','Airplane','airplane'],['Thank you for visiting me again!','Thank you!','thank_you']],
  npc_guard:[['Hello! What is your name?','I am Gildong.','i_am_gildong'],['Welcome back! How are you?','I am okay.','i_am_okay'],['Good morning, Gildong!','Good morning!','good_morning']],
@@ -40,3 +42,5 @@ export const REPEAT_DIALOGUES={
  s2_student:[['Hi! I have my school bag! What about you?','My bag!','my_bag'],['Look at the big blue bus over there!','It is big.','it_is_big'],['Good morning, my friend!','Good morning!','good_morning']],
  s2_passenger:[['Excuse me! Are you looking for the big bus?','Where is the bus?','where_bus'],['Do not worry! You can ask the driver!','Excuse me. Can I ask?','full'],['Good luck finding your bag!','Thank you!','thank_you']],
 };
+
+export const REPEAT_DIALOGUES=Object.fromEntries(Object.entries(RAW_REPEAT_DIALOGUES).map(([id,variants])=>[id,variants.map(([question,phrase,key])=>[question,SENTENCE_PRACTICE[key]?.text||phrase,key])]));

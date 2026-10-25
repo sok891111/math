@@ -1096,3 +1096,7 @@
     flex-direction: column;
   }
 }
+
+#choices button.me-choice-focused{outline:4px solid #dca72f;outline-offset:2px;background:#fff0b5;color:#263c31;}
+
+.me-turn-meaning{font-size:clamp(16px,2vw,20px);color:#506544;text-align:center;margin:8px 0;font-weight:650;}
