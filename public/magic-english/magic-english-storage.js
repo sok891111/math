@@ -1,3 +1,4 @@
+import {STAGE4_MAP_IDS,validStage4,createStage4Maps} from './magic-english-stage4.js';
 import {STAGE3_MAP_IDS, validStage3, createStage3Maps} from './magic-english-stage3.js';
 // Magic English Stage 1 Save, State Transitions, Idempotent Rewards & Block World Storage
 // Implements STAGE-1-PLAN.md Sections 5 & 6.
@@ -83,7 +84,7 @@ export function createInitialMagicEnglishState() {
 export function validMagicEnglishState(s) {
   if (!s || typeof s !== 'object' || s.version !== 1) return false;
   if (!STAGE1_STAGES.includes(s.stage)) return false;
-  if (!['JoseonMarket', 'AirportHall', 'BusStop', 'BusInterior', 'NextStop', ...STAGE3_MAP_IDS].includes(s.map)) return false;
+  if (!['JoseonMarket', 'AirportHall', 'BusStop', 'BusInterior', 'NextStop', ...STAGE3_MAP_IDS,...STAGE4_MAP_IDS].includes(s.map)) return false;
   if (!Number.isInteger(s.x) || !Number.isInteger(s.y) || s.x < 0 || s.y < 0 || s.x >= 20 || s.y >= 16) return false;
   if (!['up', 'down', 'left', 'right'].includes(s.facing)) return false;
   if (!s.discoveries || typeof s.discoveries !== 'object') return false;
@@ -98,6 +99,7 @@ export function validMagicEnglishState(s) {
   if (typeof s.staffSpeech.attempted !== 'boolean' || typeof s.staffSpeech.completed !== 'boolean') return false;
   if (![null, 'self', 'assisted', 'dev-skip'].includes(s.staffSpeech.method)) return false;
 
+  if (!validStage4(s.stage4)) return false;
   if (!validStage3(s.stage3)) return false;
   if (!Array.isArray(s.alphabetPieces) || !s.alphabetPieces.every(p => typeof p === 'string')) return false;
   if (!s.rewardReceipts || typeof s.rewardReceipts !== 'object' || Array.isArray(s.rewardReceipts)) return false;
@@ -147,6 +149,7 @@ export function parseMagicEnglishState(raw) {
         parsed.y = 10;
       }
     }
+    if(STAGE4_MAP_IDS.includes(parsed.map)&&!createStage4Maps()[parsed.map].isPassable(parsed,parsed.x,parsed.y)){parsed.x=10;parsed.y=12;}
     if(STAGE3_MAP_IDS.includes(parsed.map)){const map=createStage3Maps()[parsed.map];if(!map.isPassable(parsed,parsed.x,parsed.y)){parsed.x=parsed.map==='CocoRoom'?3:10;parsed.y=parsed.map==='CocoRoom'?7:12;}}
     return { ok: true, error: null, state: parsed };
   } catch {

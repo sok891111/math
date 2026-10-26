@@ -83,16 +83,16 @@ export const STAGE3_DAILY_PROFILES={
  s3_coco_rescued:profile('에이미 · 코코와 함께','pet','art','team'),
 };
 export const DAILY_FAREWELL='Nice talking with you. See you soon!';
-export function createStage3Daily({getState,say,save,update}){
- function memory(){const state=getState();state.learning??={};state.learning.stage3Daily??={visits:{},active:{},serial:0};return state.learning.stage3Daily;}
+export function createStage3Daily({getState,say,save,update,profiles=STAGE3_DAILY_PROFILES,topics=STAGE3_DAILY_TOPICS,practice=STAGE3_DAILY_PRACTICE,memoryKey='stage3Daily'}){
+ function memory(){const state=getState();state.learning??={};state.learning[memoryKey]??={visits:{},active:{},serial:0};return state.learning[memoryKey];}
  function open(id,intro){
-  const profile=STAGE3_DAILY_PROFILES[id];if(!profile)return false;
+  const profile=profiles[id];if(!profile)return false;
   const mem=memory();let session=mem.active[id];
   if(!session){session={serial:++mem.serial,variant:(mem.visits[id]||0)%profile.topics.length,next:0};mem.active[id]=session;save();}
-  const rows=STAGE3_DAILY_TOPICS[profile.topics[session.variant]],pages=[];
+  const rows=topics[profile.topics[session.variant]],pages=[];
   if(intro)pages.push({type:'npc',speaker:profile.speaker,...(typeof intro==='string'?{text:intro}:intro)});
   for(let index=session.next;index<rows.length;index++){
-   const row=rows[index],p=STAGE3_DAILY_PRACTICE[row.key];
+   const row=rows[index],p=practice[row.key];
    pages.push({type:'npc',speaker:profile.speaker,text:`${row.question}\n${row.korean}`,voiceClip:row.question},{type:'speak',speaker:'홍길동 · 내 대답 차례',targetKey:row.key,targetPhrase:p.text,guideClip:p.text,meaningKo:p.korean,noFollowup:true,conversationTurn:index+1,conversationTotal:rows.length,rewardHint:'대화 성공: 블록 1~2개·하트 0.5~1개 · 완전한 문장: 무기 확률 20%',onPass:()=>{
     const current=memory().active[id];if(!current||current.serial!==session.serial||current.next!==index)return;
     current.next=index+1;

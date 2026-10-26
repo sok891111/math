@@ -1,11 +1,11 @@
-import {legendaryCaptureBlocked,LEGENDARY_HP_MESSAGE} from './capture-rules.js?v=20261025-escape1';
+import {legendaryCaptureBlocked,LEGENDARY_HP_MESSAGE} from './capture-rules.js?v=20261026-verdict1';
 import {messageVisual} from './battle-presentation.js?v=20261018-table19';
 import {isHpLossMessage} from './hp-messages.js?v=20261018-table19';
 import {isMathReward,isCaptureReward,CAPTURE_MATH_FAILURE} from './math-rewards.js?v=20261018-table19';
-import {requestMath,requestCapture,requestEscape} from './math-challenge.js?v=20261025-escape1';
-import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261025-escape1';
+import {requestMath,requestCapture,requestEscape} from './math-challenge.js?v=20261026-verdict1';
+import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261026-verdict1';
 import {createSendoutAnimator} from './sendout-animation.js?v=20261018-fly31';
-import {createCaptureAnimator,showCaughtBall} from './capture-animation.js?v=20261025-escape1';
+import {createCaptureAnimator,showCaughtBall} from './capture-animation.js?v=20261026-verdict1';
 import {createBattleAnimator,animationAssets} from './battle-animation.js?v=20261025-galar5';
 const typeNames={NORMAL:'노말',FIRE:'불꽃',WATER:'물',GRASS:'풀',FLYING:'비행',DARK:'악',PSYCHIC_TYPE:'에스퍼',POISON:'독',BUG:'벌레',ELECTRIC:'전기',GROUND:'땅',ROCK:'바위',FIGHTING:'격투',ICE:'얼음',DRAGON:'드래곤',GHOST:'고스트',STEEL:'강철'};
 const statusNames={burn:'화상',poison:'독',paralysis:'마비',sleep:'잠듦',freeze:'얼음'};

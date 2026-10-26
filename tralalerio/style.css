@@ -26,3 +26,21 @@ html,body{touch-action:manipulation}*,*::before,*::after{-webkit-user-select:non
 .dpad{--direction-size:clamp(44px,8vw,64px);width:calc(var(--direction-size)*3);height:calc(var(--direction-size)*3);grid-template-columns:repeat(3,var(--direction-size));grid-template-rows:repeat(3,var(--direction-size));flex-shrink:0}
 .dpad button{font-size:24px}.dpad span{font-size:22px}.touch-controls{gap:12px;flex-wrap:wrap;row-gap:30px}
 @media(max-width:360px){.dpad{--direction-size:42px}.touch-controls{padding-inline:0;gap:10px}.action-buttons{gap:12px;padding-right:0;transform:none}}
+
+/* iPad landscape: controls sit beside the screen, within the first viewport. */
+@media (min-width:768px) and (orientation:landscape) and (any-pointer:coarse){
+  header{height:48px;padding:0 max(16px,env(safe-area-inset-left));gap:12px}
+  .brand{font-size:15px}.brand .edition{font-size:9px;padding-left:10px;letter-spacing:1px}
+  main{max-width:none;padding:12px max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left))}
+  .intro{display:none}.play-layout{display:block;max-width:none;margin:0}
+  .console{height:calc(100dvh - 76px - env(safe-area-inset-bottom));min-height:360px;padding:12px 18px 0;display:grid;grid-template-columns:minmax(150px,190px) minmax(0,1fr) minmax(150px,190px);grid-template-rows:24px minmax(0,1fr) 30px;column-gap:24px;border-radius:16px}
+  .console-top{grid-area:1/1/2/4;margin:0}
+  .screen-wrap{grid-area:2/2;align-self:center;justify-self:center;max-height:100%;width:min(100%,calc((100dvh - 156px)*10/9));height:auto;max-width:100%;aspect-ratio:10/9}
+  .console-bottom{grid-area:3/2;padding:7px 0;font-size:8px;letter-spacing:1px}
+  .touch-controls{display:contents}
+  .dpad{grid-area:2/1;align-self:center;justify-self:center;--direction-size:clamp(44px,5vw,64px);touch-action:none}
+  .action-buttons{grid-area:2/3;align-self:center;justify-self:center;gap:20px;padding:0;transform:rotate(-12deg);touch-action:none}
+  .action-buttons button{width:64px;height:64px;font-size:25px}.action-buttons span{top:72px;width:64px;font-size:12px}
+  .play-layout>aside{margin-top:28px}.screen-wrap #menu{overflow-y:auto;max-height:100%;touch-action:pan-y}
+  footer{margin-top:24px}
+}

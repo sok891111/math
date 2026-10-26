@@ -25,7 +25,7 @@ export const STAGE3_NEIGHBOURS={
    s3_room_caretaker:['준비실 선생님','책장과 미술 도구는 함께 쓰는 물건이야. 이제 친구들과 교실에서 다시 이야기해 보렴.','Please keep our books and art supplies tidy.'],
   };
 
-export function createStage3Controller({getState,say,save,update,go,queueReward}){
+export function createStage3Controller({getState,say,save,update,go,queueReward,enterStage4}){
  const state=()=>getState(),s=()=>ensureStage3(state());
  const daily=createStage3Daily({getState,say,save,update});
  function reward(type){const id=`stage3:${type}:v2`;if(!state().rewardReceipts[id]){state().rewardReceipts[id]={id};queueReward({id,type,stage:3});}}
@@ -97,7 +97,8 @@ export function createStage3Controller({getState,say,save,update,go,queueReward}
   if(id==='s3_boss'||id==='s3_shadow'){boss();return;}
   if(id==='s3_lunch'){
    if(!s().completed){say('에이미',stage3Goal(state()));return;}
-   s().dHookSeen=true;save();say('다음은 D · 식당의 문과 D의 주문!',[npc('활빈','킁킁… 식당에서 달콤한 냄새가 나! Delicious?','Delicious?',14),npc('링고','다음 좌표 D 감지! Door, Drink, Delicious.','D. Door. Drink. Delicious.',14),npc('미스터 미스스펠','섀도까지 당하다니! 다음엔 식당의 글자를 뒤바꿔 주마!','Next time, I will change the words in the cafeteria!',15),npc('에이미','C 모험 완료! D 모험이 준비될 때까지 친구들과 다시 이야기해 보자.','You finished our C adventure!',16)]);return;
+   if(s().dHookSeen&&enterStage4){enterStage4();return;}
+   s().dHookSeen=true;save();say('다음은 D · 식당의 문과 D의 주문!',[npc('활빈','킁킁… 식당에서 달콤한 냄새가 나! Delicious?','Delicious?',14),npc('링고','다음 좌표 D 감지! Door, Drink, Delicious.','D. Door. Drink. Delicious.',14),npc('미스터 미스스펠','섀도까지 당하다니! 다음엔 식당의 글자를 뒤바꿔 주마!','Next time, I will change the words in the cafeteria!',15),npc('에이미','C 모험 완료! 식당으로 함께 가서 D의 주문을 배워 보자.','You finished our C adventure!',16)],()=>enterStage4?.());return;
   }
   if(id.endsWith('_student')){daily.open(id);return;}
  }

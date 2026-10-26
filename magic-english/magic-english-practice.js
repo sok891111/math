@@ -1,8 +1,11 @@
+import {STAGE4_PRACTICE} from './magic-english-stage4-learning.js';
+import {STAGE4_DAILY_PRACTICE} from './magic-english-stage4-daily.js';
 import {STAGE3_DAILY_PRACTICE} from './magic-english-stage3-daily.js';
 import {STAGE3_PRACTICE} from './magic-english-stage3-learning.js';
 // Short everyday sentences for children learning English as a second language.
 export const PRACTICE_VERSION=2;
 export const SENTENCE_PRACTICE={
+ ...STAGE4_PRACTICE, ...STAGE4_DAILY_PRACTICE,
  ...STAGE3_PRACTICE,
  ...STAGE3_DAILY_PRACTICE,
  airplane:{text:'I see an airplane.',korean:'비행기가 보여요.',required:['i','see','airplane']},

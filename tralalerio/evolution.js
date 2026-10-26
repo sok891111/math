@@ -1,4 +1,4 @@
-import {statsFor} from './battle.js?v=20261025-escape1';
+import {statsFor} from './battle.js?v=20261026-verdict1';
 import {recordCaught} from './monster-dex.js?v=20261018-gaddoongi30';
 // Only Gold's ordinary level evolution is enabled in this game.
 export function evolutionFor(data,p){

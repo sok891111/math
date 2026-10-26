@@ -1,3 +1,4 @@
+import {stage4Portal} from './magic-english-stage4.js';
 import {stage3Portal} from './magic-english-stage3.js';
 // Entrances are entered by walking; investigation targets still use A/Space.
 const gates={
@@ -6,6 +7,7 @@ const gates={
  NextStop:[['s2_back',3,13],['s2_next',10,2]],
 };
 export function walkingPortal(state,x,y){
+ const kitchen=stage4Portal(state,x,y);if(kitchen)return kitchen;
  const school=stage3Portal(state,x,y);if(school)return school;
  if(state.map==='AirportHall'&&x===10&&y===1)return {id:'airport_exit',x,y,ready:Boolean(state.rewardReceipts?.['stage-1-first-clear'])};
  const gate=gates[state.map]?.find(([,gx,gy])=>gx===x&&gy===y);if(!gate)return null;

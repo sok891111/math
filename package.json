@@ -44,7 +44,11 @@
     "test:central-state-browser": "node tests/central-state-browser.cjs",
     "test:magic-english-stage3": "node --test magic-english/tests/magic-english-stage3.test.js magic-english/tests/magic-english-stage3-daily.test.js",
     "test:magic-english-stage3:browser": "node magic-english/tools/check-magic-english-stage3.cjs",
-    "test:magic-english-stage3:daily-browser": "node magic-english/tools/check-magic-english-stage3-daily.cjs"
+    "test:magic-english-stage3:daily-browser": "node magic-english/tools/check-magic-english-stage3-daily.cjs",
+    "test:magic-english-stage4": "node --test magic-english/tests/magic-english-stage4.test.js",
+    "test:magic-english-stage4:browser": "node magic-english/tools/check-magic-english-stage4.cjs",
+    "test:magic-english-ipad": "node magic-english/tools/check-ipad-controls.cjs",
+    "test:magic-english-hearts-menu": "node --test magic-english/tests/adventure-heart-summary.test.js magic-english/tests/heart-energy.test.js"
   },
   "devDependencies": {
     "playwright": "1.63.0"

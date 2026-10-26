@@ -1104,3 +1104,25 @@
 .me-conversation-progress{display:inline-block;background:#345c4a;color:#fff;border-radius:18px;padding:7px 14px;font-size:17px;font-weight:800}
 .me-turn-status.retry{background:#fff2cf;color:#6d4b20;border:1px solid #d6ae59}
 #dialog-next:disabled{opacity:.6;cursor:default}
+
+.me-heart-balance{font-size:48px;font-weight:850;color:#a74c49;margin:20px 0}
+.me-hearts-modal button{min-height:46px;margin:8px;padding:10px 20px}
+/* iPad landscape: controls sit beside the screen, within the first viewport. */
+@media (min-width:768px) and (orientation:landscape) and (any-pointer:coarse){
+  header{height:48px;padding:0 max(16px,env(safe-area-inset-left));gap:12px}
+  .brand{font-size:15px}.brand .edition{font-size:9px;padding-left:10px;letter-spacing:1px}
+  .mode-switch-link{font-size:10px;padding:5px 8px}
+  main{max-width:none;padding:12px max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left))}
+  .intro{display:none}.play-layout{display:block;max-width:none;margin:0}
+  .console{height:calc(100dvh - 76px - env(safe-area-inset-bottom));min-height:360px;padding:12px 18px 0;display:grid;grid-template-columns:minmax(150px,190px) minmax(0,1fr) minmax(150px,190px);grid-template-rows:24px auto minmax(0,1fr) 30px;column-gap:24px;border-radius:16px}
+  .console-top{grid-area:1/1/2/4;margin:0}
+  .console #goal-banner-wrap{grid-area:2/1/3/4;margin:4px 0 12px;padding:6px 12px;font-size:12px;min-height:0}
+  .screen-wrap{grid-area:3/2;align-self:center;justify-self:center;max-height:100%;width:min(100%,calc((100dvh - 196px)*10/9));height:auto;max-width:100%;aspect-ratio:10/9}
+  .console-bottom{grid-area:4/2;padding:7px 0;font-size:8px;letter-spacing:1px}
+  .touch-controls{display:contents}
+  .dpad{grid-area:3/1;align-self:center;justify-self:center;--direction-size:clamp(44px,5vw,64px);touch-action:none}
+  .action-buttons{grid-area:3/3;align-self:center;justify-self:center;gap:20px;padding:0;transform:rotate(-12deg);touch-action:none}
+  .action-buttons button{width:64px;height:64px;font-size:25px}.action-buttons span{top:72px;width:64px;font-size:12px}
+  .play-layout>aside{margin-top:28px}.screen-wrap #menu{overflow-y:auto;max-height:100%;touch-action:pan-y}
+  footer{margin-top:24px}
+}

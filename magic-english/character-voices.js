@@ -2,13 +2,16 @@
 const fena={voiceId:'BlgEcC0TfWpBak7FmvHW',voice:'Fena',effect:'none',settings:{speed:.8,stability:.8,similarity_boost:.8,style:.1,use_speaker_boost:true}};
 const bill={voiceId:'pqHfZKP75CvOlQylNhV4',voice:'Bill',effect:'none',settings:{speed:.8,stability:.8,similarity_boost:.8,style:.1,use_speaker_boost:true}};
 export const CHARACTER_VOICES=Object.freeze({
- teacher:bill,tommy:fena,shadow:{...bill,effect:'villain'},
+ daisy:fena,teacher:bill,tommy:fena,shadow:{...bill,effect:'villain'},
  staff:bill,traveler:bill,pilot:bill,guard:bill,cafe:fena,kid:fena,hwalbin:fena,gildong:fena,
  amy:{voiceId:'BlgEcC0TfWpBak7FmvHW',voice:'Fena',effect:'none',settings:{speed:.8,stability:.8,similarity_boost:.8,style:.1,use_speaker_boost:true}},
  ringo:{voiceId:'BlgEcC0TfWpBak7FmvHW',voice:'Fena',effect:'robot',settings:{speed:.85,stability:.9,similarity_boost:.8,style:0,use_speaker_boost:true}},
  misspell:{voiceId:'pqHfZKP75CvOlQylNhV4',voice:'Bill',effect:'villain',settings:{speed:.85,stability:.8,similarity_boost:.8,style:.6,use_speaker_boost:true}},
 });
 export function dialogueCharacter(speaker='',text=''){
+ if(/데이지|Daisy/i.test(speaker))return 'daisy';
+ if(/조리사/i.test(speaker))return 'staff';
+ if(/배식 도우미/i.test(speaker))return 'cafe';
  if(/사일런트|Silent Shadow/i.test(speaker))return 'shadow';
  if(/릴리|Lily|도우미 친구|학교 친구|반 친구|등교하는 친구/i.test(speaker))return 'kid';
  if(/관리인|Custodian/i.test(speaker))return 'staff';

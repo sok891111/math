@@ -8,7 +8,7 @@ import {STORY_LABELS,STORY_TYPES,minecraftStory,minecraftCombineText} from './mi
 export const LEARNING_LABELS={shape_match:'같은 모양 찾기',shape_complete:'모양 완성',array_rule:'배열 규칙',table_count:'표 읽기',place_value:'십 묶음과 낱개',add_single:'두 자리와 한 자리 덧셈',add_tens:'몇십 더하기',add_two:'두 자리 덧셈',add_carry_single:'받아올림 한 자리 덧셈',add_carry_two:'받아올림 두 자리 덧셈',add_story:'이야기 덧셈',subtract_single:'한 자리 뺄셈',subtract_story:'한 자리 이야기 뺄셈',times_table:'구구단 · 2~6단',calc_puzzle:'계산 탐험',...STORY_LABELS,...ANALYSIS_LABELS,...REFERENCE_LABELS,...NUMBER_REASONING_LABELS,...EARLY_ARITHMETIC_LABELS};
 export const LEARNING_TYPES=Object.keys(LEARNING_LABELS).filter(type=>!['place_value','shape_match','shape_complete'].includes(type));
 const shuffle=(a,r)=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
-export function learningQuestion(type,grade,r){
+export function learningQuestion(type,grade,r,focusedTimesTable=false){
  if(Object.hasOwn(EARLY_ARITHMETIC_LABELS,type))return earlyArithmetic(type,grade,r);
  if(['subtract_single','subtract_story'].includes(type))grade=Math.max(1,Math.min(2,grade));
  if(Object.hasOwn(NUMBER_REASONING_LABELS,type))return numberReasoningQuestion(type,grade,r);
@@ -27,7 +27,7 @@ export function learningQuestion(type,grade,r){
   if(type==='subtract_single'&&grade>=3){q.missingSubtrahend=true;q.title='빈칸에 들어갈 수를 찾아 줘!';q.instruction='처음 수와 남은 수를 읽고, 몇 개를 덜어 냈는지 생각해 보세요. 빈칸에 들어갈 수를 골라 주세요.';q.remaining=result;q.answer=[b];q.prompt=`${a}개에서 몇 개를 덜어 내면 ${result}개가 남을까요? 빈칸에 들어갈 수를 찾아보세요.`;q.equation=`${a} - ? = ${result}`;result=b;}
   q.choices=shuffle([result,...shuffle(Array.from({length:10},(_,i)=>i).filter(n=>n!==result),r).slice(0,3)].map(value=>({value,label:String(value)})),r);
  }else if(type==='times_table'){
-  a=grade>=4?4+pick(3):2+pick(grade===2?2:5);b=grade>=4?6+pick(4):1+pick(grade===2?5:9);result=a*b;q.operands=[a,b];q.operator='×';q.answer=[result];q.title='같은 수씩 모으면 모두 몇 개일까?';
+  a=focusedTimesTable?2+pick(8):grade>=4?4+pick(3):2+pick(grade===2?2:5);b=focusedTimesTable?1+pick(9):grade>=4?6+pick(4):1+pick(grade===2?5:9);result=a*b;q.operands=[a,b];q.operator='×';q.answer=[result];q.title='같은 수씩 모으면 모두 몇 개일까?';
   q.instruction=`${a}단 문제예요. 한 묶음에 ${a}개씩 있는 것이 ${b}묶음이면 모두 몇 개인지 생각해 보세요. 답을 골라 빈칸에 넣어 주세요.`;
   q.prompt=`상자 하나에 에메랄드가 ${a}개씩 들어 있어요. 상자가 ${b}개라면 에메랄드는 모두 몇 개일까요?`;q.equation=`${a} × ${b} = ?`;
  }else if(type==='shape_match'||type==='shape_complete'){

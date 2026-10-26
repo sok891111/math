@@ -30,3 +30,13 @@
 .arithmetic-pyramid{display:grid;gap:10px;justify-items:center;margin:12px 0}.pyramid-row{display:flex;justify-content:center;gap:12px}.pyramid-number{display:grid;place-items:center;width:54px;min-height:48px;border:1px solid #a4b68e;border-radius:9px;background:#edf1df;font-size:22px}.pyramid-number.target{border:2px dashed #6c8555;background:#f9edca}.arithmetic-chain{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;padding:12px 0}.chain-node{background:#e6edd8;border-radius:9px;padding:8px 12px}.chain-operation{white-space:nowrap;font-weight:700}
 
 .learning-equation{white-space:pre-line}
+
+/* Red pencil judgment: draw once, hold, then resume the saved battle turn. */
+.math-verdict[hidden]{display:none}
+.math-verdict{position:fixed;inset:0;z-index:10;display:grid;place-items:center;pointer-events:none;background:#fffdf266}
+.math-verdict-mark{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 28px;border-radius:24px;background:#fffdf2ed;box-shadow:0 8px 32px #293f3622}
+.math-verdict svg{width:clamp(140px,35vw,220px);height:clamp(140px,35vw,220px);overflow:visible}
+.math-verdict circle,.math-verdict path{fill:none;stroke:#df252b;stroke-width:11;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:math-verdict-draw .55s ease-out forwards}
+.math-verdict strong{font-size:20px;color:#c91e26;text-align:center}
+@keyframes math-verdict-draw{to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){.math-verdict circle,.math-verdict path{animation:none;stroke-dashoffset:0}}

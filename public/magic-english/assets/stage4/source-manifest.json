@@ -1,0 +1,82 @@
+[
+  {
+    "file": "page01.jpg",
+    "source": "book_2/4화/마법영어_4화_page01-02_좌우.png",
+    "side": "left"
+  },
+  {
+    "file": "page02.jpg",
+    "source": "book_2/4화/마법영어_4화_page01-02_좌우.png",
+    "side": "right"
+  },
+  {
+    "file": "page03.jpg",
+    "source": "book_2/4화/마법영어_4화_page03-04_좌우.png",
+    "side": "left"
+  },
+  {
+    "file": "page04.jpg",
+    "source": "book_2/4화/마법영어_4화_page03-04_좌우.png",
+    "side": "right"
+  },
+  {
+    "file": "page05.jpg",
+    "source": "book_2/4화/마법영어_4화_page05-06_좌우.png",
+    "side": "left"
+  },
+  {
+    "file": "page06.jpg",
+    "source": "book_2/4화/마법영어_4화_page05-06_좌우.png",
+    "side": "right"
+  },
+  {
+    "file": "page07.jpg",
+    "source": "book_2/4화/마법영어_4화_page07-08_좌우.png",
+    "side": "left"
+  },
+  {
+    "file": "page08.jpg",
+    "source": "book_2/4화/마법영어_4화_page07-08_좌우.png",
+    "side": "right"
+  },
+  {
+    "file": "page09.jpg",
+    "source": "book_2/4화/마법영어_4화_page09-10_좌우.png",
+    "side": "left"
+  },
+  {
+    "file": "page10.jpg",
+    "source": "book_2/4화/마법영어_4화_page09-10_좌우.png",
+    "side": "right"
+  },
+  {
+    "file": "page11.jpg",
+    "source": "book_2/4화/마법영어_4화_page11-12_좌우.png",
+    "side": "left"
+  },
+  {
+    "file": "page12.jpg",
+    "source": "book_2/4화/마법영어_4화_page11-12_좌우.png",
+    "side": "right"
+  },
+  {
+    "file": "page13.jpg",
+    "source": "book_2/4화/마법영어_4화_page13-14_좌우.png",
+    "side": "left"
+  },
+  {
+    "file": "page14.jpg",
+    "source": "book_2/4화/마법영어_4화_page13-14_좌우.png",
+    "side": "right"
+  },
+  {
+    "file": "page15.jpg",
+    "source": "book_2/4화/마법영어_4화_page15-16_좌우.png",
+    "side": "left"
+  },
+  {
+    "file": "page16.jpg",
+    "source": "book_2/4화/마법영어_4화_page15-16_좌우.png",
+    "side": "right"
+  }
+]

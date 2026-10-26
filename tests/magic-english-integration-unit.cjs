@@ -76,3 +76,17 @@ test('C daily conversations use Stage 1 signed speech rewards, hearts, weapon ch
  f.setTranscript('Coco is cute cat');const partial=await f.request('assess-pronunciation?word=s3_daily_cute&userId='+userId+'&attemptId=daily-partial',wav());assert.equal(partial.body.quantity,1);assert.equal(partial.body.weaponReward,undefined);const partialReward=await f.request('rewards',{userId,type:'speech',token:partial.body.rewardToken});assert.equal(applyRewards(received.inventory,[partialReward.body.reward],userId).inventory.hearts,5.5);
  f.setTranscript('paper');const failed=await f.request('assess-pronunciation?word=s3_daily_paper&userId='+userId+'&attemptId=daily-word',wav());assert.equal(failed.body.passed,false);assert.equal(failed.body.rewardToken,undefined);
 });
+
+test('D signed boss utterances unlock one fragment; meal is required for clear; other targets cannot bypass the boss',async()=>{
+ const {STAGE4_REQUIRED,STAGE4_CLEAR_REQUIRED,STAGE4_PRACTICE}=await import('../magic-english/magic-english-stage4-learning.js'),f=fixture();
+ const grant=type=>f.request('rewards',{userId:'dchild01',type,stage:4});
+ assert.equal((await grant('fragment')).status,400);
+ for(const target of STAGE4_REQUIRED){
+  if(target==='s4_boss_thanks')assert.equal((await grant('fragment')).status,400);
+  f.setTranscript(STAGE4_PRACTICE[target].text);const result=await f.request('assess-pronunciation?word='+target+'&userId=dchild01&attemptId=d-'+target.replaceAll('_','-'),wav());assert.equal(result.status,200);assert(result.body.passed);assert.equal((await f.request('rewards',{userId:'dchild01',type:'speech',token:result.body.rewardToken})).status,200);
+ }
+ const fragment=await grant('fragment');assert(fragment.body.created);assert.equal((await grant('fragment')).body.created,false);assert.equal((await grant('clear')).status,400);
+ for(const target of STAGE4_CLEAR_REQUIRED){f.setTranscript(STAGE4_PRACTICE[target].text);const r=await f.request('assess-pronunciation?word='+target+'&userId=dchild01&attemptId=d-'+target.replaceAll('_','-'),wav());await f.request('rewards',{userId:'dchild01',type:'speech',token:r.body.rewardToken});}
+ assert((await grant('clear')).body.created);assert.equal((await grant('clear')).body.created,false);
+ const {rewardHearts}=await import('../magic-english/block-world/hearts.js');assert.equal(rewardHearts(fragment.body.reward),.5);
+});
