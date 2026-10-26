@@ -1,4 +1,4 @@
-import {dexHabitats} from './monster-dex.js?v=20261018-gaddoongi30';
+import {dexHabitats} from './monster-dex.js?v=20261026-collection1';
 const types={NORMAL:'노말',FIRE:'불꽃',WATER:'물',GRASS:'풀',FLYING:'비행',DARK:'악',PSYCHIC_TYPE:'에스퍼',POISON:'독',BUG:'벌레',ELECTRIC:'전기',GROUND:'땅',ROCK:'바위',FIGHTING:'격투',ICE:'얼음',DRAGON:'드래곤',GHOST:'고스트',STEEL:'강철'};
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
 export function createMonsterDexUI(getGame,onSave){

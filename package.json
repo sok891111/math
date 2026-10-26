@@ -49,7 +49,9 @@
     "test:magic-english-stage4:browser": "node magic-english/tools/check-magic-english-stage4.cjs",
     "test:magic-english-ipad": "node magic-english/tools/check-ipad-controls.cjs",
     "test:magic-english-hearts-menu": "node --test magic-english/tests/adventure-heart-summary.test.js magic-english/tests/heart-energy.test.js",
-    "test:magic-english-world-entry": "node magic-english/tools/check-personal-world-entry.cjs"
+    "test:magic-english-world-entry": "node magic-english/tools/check-personal-world-entry.cjs",
+    "test:magic-english-mob-talk": "node --test magic-english/tests/mob-conversations.test.js magic-english/tests/mob-loot.test.js magic-english/tests/magic-english-speech-session.test.js",
+    "test:magic-english-mob-talk:browser": "node magic-english/tools/check-mob-conversations.cjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"

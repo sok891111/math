@@ -1,5 +1,5 @@
 import {TIMES_TABLE_PRACTICE} from './math-practice.js';
-import {legendaryCaptureBlocked} from './capture-rules.js?v=20261026-verdict1';
+import {legendaryCaptureBlocked} from './capture-rules.js?v=20261026-collection1';
 import {chooseScheduledType} from './math-schedule.js?v=20261025-variety1';
 import {ADDITION_VERSION,additionType,additionWithinLimit,additionChecks} from './addition-policy.js?v=20261025-early1';
 import {mirrorQuestion,MIRROR_VERSION} from './mirror-puzzles.js?v=20261025-reason2';

@@ -1,10 +1,10 @@
 import {createGuide} from './math-lab-guide.js?v=20261025-guide1';
 import {chooseScheduledType} from './math-schedule.js?v=20261025-variety1';
 import {TYPE_LEVELS,SUBTRACTION_TYPES,LEVEL_LABELS} from './math-levels.js?v=20261025-reasoning5';
-import {createPokemon} from './battle.js?v=20261026-verdict1';
-import {Game} from './engine.js?v=20261026-verdict1';
-import {MATH_TYPES,MATH_LABELS,questionFor,emptyInput,validateQuestion} from './math-challenge.js?v=20261026-verdict1';
-import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261026-verdict1';
+import {createPokemon} from './battle.js?v=20261026-collection1';
+import {Game} from './engine.js?v=20261026-collection1';
+import {MATH_TYPES,MATH_LABELS,questionFor,emptyInput,validateQuestion} from './math-challenge.js?v=20261026-collection1';
+import {createMathPuzzleUI} from './math-puzzle-ui.js?v=20261026-collection1';
 const $=id=>document.getElementById(id),model=window.CreativeBattle,facto=window.FactoPuzzles;
 for(const type of MATH_TYPES){const option=document.createElement('option');option.value=type;option.textContent=MATH_LABELS[type];$('lab-type').append(option);}
 const params=new URLSearchParams(location.search);if(MATH_TYPES.includes(params.get('type')))$('lab-type').value=params.get('type');if(/^\d+$/.test(params.get('seed')||'')&&Number(params.get('seed'))<=4294967295)$('lab-seed').value=params.get('seed');if(params.get('mode')==='capture')$('lab-mode').value='capture';

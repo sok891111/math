@@ -1,3 +1,4 @@
+import {MOB_AUDIO_MANIFEST} from './assets/audio/mobs/manifest.js';
 import {STAGE4_AUDIO_MANIFEST} from './assets/audio/stage4/manifest.js';
 import {STAGE3_AUDIO_MANIFEST} from './assets/audio/stage3/manifest.js';
 import {CHARACTER_AUDIO_MANIFEST} from './character-audio-manifest.js';
@@ -350,8 +351,8 @@ function voiceContext(){const Context=window.AudioContext||window.webkitAudioCon
 function prepareVoiceBytes(textOrClipId,character='amy'){
  const clip=resolveElevenLabsClip(textOrClipId),text=clip?.text||textOrClipId,key=JSON.stringify([character,text]);
  if(voiceBytes.has(key))return voiceBytes.get(key);
- const cast=CHARACTER_VOICES[character],asset=STAGE4_AUDIO_MANIFEST[key]||STAGE3_AUDIO_MANIFEST[key]||CHARACTER_AUDIO_MANIFEST[key]||(clip?.voice===cast?.voice?clip.src:null);
- const promise=(async()=>{const response=asset?await fetch(asset):await fetch('/api/magic-english/character-voice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,text})});if(!response.ok)throw Error('배역 음성을 재생할 수 없어요.');return response.arrayBuffer();})();
+ const cast=CHARACTER_VOICES[character],asset=MOB_AUDIO_MANIFEST[key]||STAGE4_AUDIO_MANIFEST[key]||STAGE3_AUDIO_MANIFEST[key]||CHARACTER_AUDIO_MANIFEST[key]||(clip?.voice===cast?.voice?clip.src:null);
+ const promise=(async()=>{const response=asset?await fetch(new URL(asset,import.meta.url)):await fetch('/api/magic-english/character-voice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,text})});if(!response.ok)throw Error('배역 음성을 재생할 수 없어요.');return response.arrayBuffer();})();
  voiceBytes.set(key,promise);promise.catch(()=>voiceBytes.delete(key));return promise;
 }
 export function preloadCharacterVoice(textOrClipId,character='amy'){

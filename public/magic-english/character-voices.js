@@ -2,6 +2,7 @@
 const fena={voiceId:'BlgEcC0TfWpBak7FmvHW',voice:'Fena',effect:'none',settings:{speed:.8,stability:.8,similarity_boost:.8,style:.1,use_speaker_boost:true}};
 const bill={voiceId:'pqHfZKP75CvOlQylNhV4',voice:'Bill',effect:'none',settings:{speed:.8,stability:.8,similarity_boost:.8,style:.1,use_speaker_boost:true}};
 export const CHARACTER_VOICES=Object.freeze({
+ mob_zombie:{...bill,effect:'villain',settings:{...bill.settings,speed:.75,stability:.85}},mob_creeper:{...fena,effect:'robot',settings:{...fena.settings,speed:.85,style:.2}},mob_pig:{...bill,settings:{...bill.settings,speed:.85,style:.4}},mob_chicken:{...fena,settings:{...fena.settings,speed:.95,style:.4}},
  daisy:fena,teacher:bill,tommy:fena,shadow:{...bill,effect:'villain'},
  staff:bill,traveler:bill,pilot:bill,guard:bill,cafe:fena,kid:fena,hwalbin:fena,gildong:fena,
  amy:{voiceId:'BlgEcC0TfWpBak7FmvHW',voice:'Fena',effect:'none',settings:{speed:.8,stability:.8,similarity_boost:.8,style:.1,use_speaker_boost:true}},

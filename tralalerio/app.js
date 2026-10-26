@@ -12,8 +12,8 @@ import {chapterGoal,storyInteraction,storyEntry} from './chapter.js?v=20261025-t
 import {createHealingAnimation} from './healing-animation.js?v=20261018-audiomenu23';
 import {npcDialogue,signDialogue,LESSONS} from './npc-dialogue.js?v=20261018-table19';
 import {trainerName,personalize,walkingPose,PlayerWalk,MOVEMENT_TIMING} from './overworld-player.js?v=20261018-table19';
-import {Game} from './engine.js?v=20261026-verdict1';
-import {createBattleView} from './battle-view.js?v=20261026-verdict1';
+import {Game} from './engine.js?v=20261026-collection1';
+import {createBattleView} from './battle-view.js?v=20261026-collection1';
 const $=s=>document.querySelector(s);const canvas=$('#screen'),ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
 import {createEncounterTransition,transitionData} from './battle-transition.js?v=20261016-skills1';
 const playerName=trainerName(window.__BLOCK_USER__);const playerWalk=new PlayerWalk();

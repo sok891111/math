@@ -516,6 +516,7 @@ export async function startMagicEnglishStage1App() {
             const learning=ensureLearningState(state); learning.failures=0; learning.lastFeedback=outcome.message;learning.lastQuality=outcome.quality; learning.lastRewardQuantity=outcome.quantity || 1;learning.lastWeapon=outcome.weaponName||null;
             if(serverAssessment?.rewardToken) queueReward({id:attemptId,type:'speech',token:serverAssessment.rewardToken});
             st.statusType='success';
+            ensureLearningState(state).practicedTargets??={};state.learning.practicedTargets[rawStep.targetKey]=true;
             st.statusText=`💬 ${outcome.message} 🧱 ${outcome.blockName || '블록'} +${outcome.quantity || 1}개 · ❤️ 하트 +${heartRewardForBlocks(outcome.quantity || 1)}개${outcome.weaponName?' · ⚔️ '+outcome.weaponName+' 획득!':''}`;
             if(outcome.weaponName)toast('완전한 문장 보상! ⚔️ '+outcome.weaponName+'을 내 블록 세계로 보냈어요!');
             rawStep.onPass?.('self'); persist();updateSidebar();renderDialog();

@@ -30,3 +30,7 @@
 ## 최신 정책 · 2026-10-18
 
 사용자 요청으로 포켓몬60:마인크래프트40으로 변경한다. 각 지역·시간대 37슬롯: 원본Gold7, 뮤·코라이돈2, Minecraft28. 총5000 중 Gold2900(원본 상대비중×29), 뮤·코라이돈 각50, Minecraft2000. 엔더드래곤·위더 각50(전체1%), 나머지26종이1900을 균등 분배(정수 나머지는 슬롯순 배분). 기존 지역별 Gold 종·레벨·시간별 조우율은 보존한다. 블레이즈·철 골렘·눈 골렘·늑대를 모든 육상 서식지에 추가한다.
+
+
+2026-10-26 수집용 야생 조우: 전국도감10번 캐터피~100번 찌리리공91종이 모든16개 야생 지역/아침·낮·밤에 균등 무작위로 나온다. `collectionSpecies`가 있는 표의 앞7슬롯은 종이 아닌 지역별 레벨 분포를 선택하고, 이후91종 중 하나를 추가 난수로 고른다. 따라서 과거 원본7슬롯의 종/시간대 제한보다 이 정책이 우선한다. 일반 포켓몬 총58%를91종이 균등 분배하고, 추가 포켓몬 전설4종 각0.5%와 Minecraft40%(엔더드래곤0.5% 포함)는 유지한다. 진행/배지 조건은 없고 야생 조우 타일·조우율·레벨·전설 가중 평균+10·기존 저장은 유지한다. 도감 서식지도 collectionSpecies를 반영한다. 낮은 지역 레벨에 배울 기술이 없는 진화체는 원본 첫 습득 기술1개를 사용한다.
+재생성: `build_evolution_assets.py`가91종 및 자연진화 대상을 확장하고, `build_dex_assets.py` 후 `apply-collection-encounters.cjs`가 메타데이터를 적용한다. `rebuild-assets.cjs`에 포함돼 있으며 정책 재적용은 멱등이다. 확인: 루트에서 `node --test tralalerio/tests/collection-encounters.test.js tralalerio/tests/evolution.test.js tralalerio/tests/times-table-practice.test.js`, 로컬3000 서버 실행 후 `node tralalerio/tests/browser-collection-encounters.mjs`. 기존 전설 레벨5 출제 테스트는 현재 구구단 집중 모드와 정책이 다르므로 해당 검사는 실패할 수 있다.

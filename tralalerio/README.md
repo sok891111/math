@@ -106,3 +106,7 @@ Violet 테스트 URL은 별도 `:violet-test` 저장을 사용한다. 처음에�
 정답 제출 시 빨간 동그라미, 오답 제출 시 빨간 빗금을 0.55초 동안 그려 표시하고 총1.1초 뒤 전투를 이어 간다. 표시 중 입력/넘기기/ESC는 잠그며 판정한 턴은 즉시 저장해 중복 제출을 방지한다. 넘기기에는 채점 표시를 하지 않는다. 동작 줄이기 설정에서는 완성된 표시를 보여 준다. 브라우저 검증: `node tralalerio/tests/browser-math-verdict.mjs` (루트에서 로컬3000 서버 실행 후).
 
 iPad 가로 모드(폭768px 이상·터치 포인터)에서는 마법영어와 동일하게 화면 왼쪽에 방향키, 오른쪽에64px A/B 버튼을 배치한다. 게임 화면과 조작부가 첫 화면 안에 들어오며 세로 회전 시 기존 하단 조작부로 전환한다. Chromium/WebKit 검증: `node tralalerio/tests/browser-ipad-landscape.mjs` (로컬3000 서버 필요).
+
+
+2026-10-26 수집용 야생 조우: 전국도감10번 캐터피~100번 찌리리공91종이 모든16개 야생 지역/아침·낮·밤에 균등 무작위로 나온다. `collectionSpecies`가 있는 표의 앞7슬롯은 종이 아닌 지역별 레벨 분포를 선택하고, 이후91종 중 하나를 추가 난수로 고른다. 따라서 과거 원본7슬롯의 종/시간대 제한보다 이 정책이 우선한다. 일반 포켓몬 총58%를91종이 균등 분배하고, 추가 포켓몬 전설4종 각0.5%와 Minecraft40%(엔더드래곤0.5% 포함)는 유지한다. 진행/배지 조건은 없고 야생 조우 타일·조우율·레벨·전설 가중 평균+10·기존 저장은 유지한다. 도감 서식지도 collectionSpecies를 반영한다. 낮은 지역 레벨에 배울 기술이 없는 진화체는 원본 첫 습득 기술1개를 사용한다.
+재생성: `build_evolution_assets.py`가91종 및 자연진화 대상을 확장하고, `build_dex_assets.py` 후 `apply-collection-encounters.cjs`가 메타데이터를 적용한다. `rebuild-assets.cjs`에 포함돼 있으며 정책 재적용은 멱등이다. 확인: 루트에서 `node --test tralalerio/tests/collection-encounters.test.js tralalerio/tests/evolution.test.js tralalerio/tests/times-table-practice.test.js`, 로컬3000 서버 실행 후 `node tralalerio/tests/browser-collection-encounters.mjs`. 기존 전설 레벨5 출제 테스트는 현재 구구단 집중 모드와 정책이 다르므로 해당 검사는 실패할 수 있다.

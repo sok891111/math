@@ -12,5 +12,6 @@ run(process.execPath,[path.join(__dirname,'add-fly-monsters.cjs')]);
 run(process.execPath,[path.join(__dirname,'apply-challenge-policy.cjs')]);
 run('python3',[path.join(__dirname,'build_evolution_assets.py'),...process.argv.slice(2)]);
 run('python3',[path.join(__dirname,'build_dex_assets.py'),...process.argv.slice(2)]);
+run(process.execPath,[path.join(__dirname,'apply-collection-encounters.cjs')]);
 run('python3',[path.join(__dirname,'build_music_assets.py'),...process.argv.slice(2)]);
 run(process.execPath,[path.join(root,'scripts/sync-public.cjs')]);

@@ -11,6 +11,8 @@ def block(id):return blocks[id.replace('_','')]
 def rules(id):
  return [{'method':'level','level':int(level),'species':target.lower()} for level,target in re.findall(r'db EVOLVE_LEVEL, (\d+), (\w+)',block(id))]
 needed=set(id for id in data['species'] if id in names)
+# Collection encounters make National Dex 10 through 100 playable, including sprites/moves.
+needed.update(id.lower() for id in ids[9:100])
 while True:
  expanded=needed|{e['species'] for id in needed for e in rules(id)}
  if expanded==needed:break

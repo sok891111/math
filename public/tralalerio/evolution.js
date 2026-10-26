@@ -1,5 +1,5 @@
-import {statsFor} from './battle.js?v=20261026-verdict1';
-import {recordCaught} from './monster-dex.js?v=20261018-gaddoongi30';
+import {statsFor} from './battle.js?v=20261026-collection1';
+import {recordCaught} from './monster-dex.js?v=20261026-collection1';
 // Only Gold's ordinary level evolution is enabled in this game.
 export function evolutionFor(data,p){
  return data.species[p.species]?.evolutions?.find(e=>e.method==='level'&&data.species[e.species]&&p.level>=e.level)||null;
