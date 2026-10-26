@@ -26,16 +26,16 @@ const base=process.env.MAGIC_TEST_URL||'http://localhost:3000';
    else return;
   }throw Error('C dialog did not finish');}
   async function act(id){await page.evaluate(async id=>{const app=window.__MAGIC_ENGLISH_STAGE1__,s=app.getState(),o=app.getMapObjects().find(o=>o.id===id);if(!o)throw Error('Missing object '+id);const {stage3Floor}=await import('/magic-english/magic-english-stage3-layout.js');const at=[[0,1,'up'],[-1,0,'right'],[1,0,'left'],[0,-1,'down']].find(([dx,dy])=>stage3Floor(s.map,o.x+dx,o.y+dy)&&!app.getMapObjects().some(a=>a.kind==='npc'&&a.x===o.x+dx&&a.y===o.y+dy));if(!at)throw Error('No accessible approach '+id);Object.assign(s,{x:o.x+at[0],y:o.y+at[1],facing:at[2]});app.act();},id);}
-  assert.equal((await state()).map,'SchoolYard');assert((await page.evaluate(()=>window.__MAGIC_ENGLISH_STAGE1__.getMapObjects().filter(o=>o.kind==='npc').length))>=3);await act('s3_hall');assert.equal((await state()).map,'SchoolHall');
-  await act('s3_class');await drain();await act('s3_classroom');assert.equal((await state()).map,'Classroom');
-  await act('s3_teacher');await drain();await act('s3_cat');await drain();assert((await state()).stage3.words.cat);
-  await act('s3_incident');await drain();assert((await state()).stage3.incidentSeen);
+  assert.equal((await state()).map,'SchoolYard');assert(await page.evaluate(()=>window.__MAGIC_ENGLISH_STAGE1__.getMapObjects().every(o=>o.kind==='npc'||o.kind==='exit')));assert((await page.evaluate(()=>window.__MAGIC_ENGLISH_STAGE1__.getMapObjects().filter(o=>o.kind==='npc').length))>=3);await act('s3_hall');assert.equal((await state()).map,'SchoolHall');
+  await act('s3_amy');await drain();await act('s3_classroom');assert.equal((await state()).map,'Classroom');
+  await act('s3_teacher');await drain();await act('s3_class_art');await drain();assert((await state()).stage3.words.cat);
+  await page.reload();await page.waitForFunction(()=>window.__MAGIC_ENGLISH_STAGE1__);await act('s3_teacher');await drain();assert((await state()).stage3.incidentSeen);
   fs.mkdirSync('test-artifacts',{recursive:true});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:'test-artifacts/magic-stage3-dark.png'});
   await act('s3_ringo');await drain();await act('s3_tommy');await drain();assert((await state()).stage3.tommyReconciled);
-  for(const word of ['class','cat','come']){await act('s3_restore_'+word);await page.locator('#choices').getByRole('button',{name:'C',exact:true}).click();await drain();assert((await state()).stage3.restored[word]);}
-  await act('s3_boss');await drain(async()=> (await state()).stage3.boss.round===1);
+  for(const word of ['class','cat','come']){await act({class:'s3_teacher',cat:'s3_class_art',come:'s3_ringo'}[word]);await page.locator('#choices').getByRole('button',{name:'C',exact:true}).click();await drain();assert((await state()).stage3.restored[word]);}
+  await act('s3_shadow');await drain(async()=> (await state()).stage3.boss.round===1);
   await page.reload();await page.waitForFunction(()=>window.__MAGIC_ENGLISH_STAGE1__);assert.equal((await state()).stage3.boss.round,1);
-  await act('s3_boss');await drain();assert((await state()).stage3.rescue.completed);assert((await state()).alphabetPieces.includes('C'));
+  await act('s3_shadow');await drain();assert((await state()).stage3.rescue.completed);assert((await state()).alphabetPieces.includes('C'));
   await act('s3_teacher');await drain();assert((await state()).stage3.completed);
   assert.equal(await page.evaluate(()=>Number(sessionStorage.getItem('c-test-utterances'))),21);
   await act('s3_back');await act('s3_lunch');await drain();assert((await state()).stage3.dHookSeen);
@@ -43,6 +43,6 @@ const base=process.env.MAGIC_TEST_URL||'http://localhost:3000';
   assert.equal(await page.evaluate(()=>localStorage.getItem('magic-english-save-v1:guest')),'original-A-B-record');
   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:'test-artifacts/magic-stage3-mobile.png'});assert.equal(await page.locator('#central-state-status').count(),0);
   await page.evaluate(()=>{const app=window.__MAGIC_ENGLISH_STAGE1__,s=app.getState();s.map='NextStop';s.x=10;s.y=3;s.facing='up';app.move('up');});await page.waitForFunction(()=>window.__MAGIC_ENGLISH_STAGE1__.getState().map==='SchoolYard');assert((await state()).stage3.completed);
-  assert.deepEqual(errors,[]);console.log('PASS: C arrival → 21 utterances → Tommy → three restorations → boss reload/resume → Coco/C → introduction → D; original A/B save preserved.');
+  assert.deepEqual(errors,[]);console.log('PASS: NPC-only C route, presentation reload → 21 utterances → Tommy → three restorations → boss reload/resume → Coco/C → introduction → D; original A/B save preserved.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

@@ -26,11 +26,11 @@ const base=process.env.MAGIC_TEST_URL||'http://localhost:3000';
    await page.waitForTimeout(30);
   }throw Error('Daily dialogue did not finish');}
   async function act(id,map){await page.evaluate(async({id,map})=>{const app=window.__MAGIC_ENGLISH_STAGE1__,s=app.getState();if(map)s.map=map;const {stage3Floor}=await import('/magic-english/magic-english-stage3-layout.js');const o=id==='s3_hwalbin'?app.getFollowerState():app.getMapObjects().find(o=>o.id===id);if(!o)throw Error('Missing '+id);const at=[[0,1,'up'],[-1,0,'right'],[1,0,'left'],[0,-1,'down']].find(([dx,dy])=>stage3Floor(s.map,o.x+dx,o.y+dy)&&!app.getMapObjects().some(a=>a.kind==='npc'&&a.x===o.x+dx&&a.y===o.y+dy));if(!at)throw Error('No approach '+id);Object.assign(s,{x:o.x+at[0],y:o.y+at[1],facing:at[2]});app.act();},{id,map});}
-  // The directory stops walking at its marked approach, and A investigates the board.
+  // The CLASS directory remains scenery; class lessons now belong to Amy.
   await page.evaluate(()=>Object.assign(window.__MAGIC_ENGLISH_STAGE1__.getState(),{map:'SchoolHall',x:10,y:8,facing:'up'}));
   for(let i=0;i<3;i++){await page.evaluate(()=>window.__MAGIC_ENGLISH_STAGE1__.move('up'));await page.waitForTimeout(280);}
   assert.equal(await page.evaluate(()=>window.__MAGIC_ENGLISH_STAGE1__.getState().y),6);
-  await page.evaluate(()=>window.__MAGIC_ENGLISH_STAGE1__.act());await drain(async()=>await page.locator('#turn-close-btn').isVisible());await page.locator('#turn-close-btn').click();assert.equal(await count(),0);
+  assert(await page.evaluate(()=>window.__MAGIC_ENGLISH_STAGE1__.getMapObjects().every(o=>o.kind!=='investigate')));
   const groups={SchoolYard:['s3_yard_keeper','s3_bus_driver','s3_yard_student','s3_amy'],SchoolHall:['s3_librarian','s3_hall_teacher','s3_hall_nurse','s3_hall_student'],Classroom:['s3_class_lily','s3_class_art','s3_class_helper','s3_class_student','s3_teacher','s3_tommy','s3_ringo','s3_coco_rescued'],CocoRoom:['s3_room_amy','s3_room_monitor','s3_room_caretaker']};
   let expected=0;
   for(const [map,ids]of Object.entries(groups))for(const id of ids){const before=await count();await act(id,map);assert((await page.locator('#speaker').textContent()).length);await drain();const spoken=await count()-before;assert(spoken>=3&&spoken<=5,id+' spoke '+spoken+' turns');expected+=spoken;}
@@ -41,6 +41,6 @@ const base=process.env.MAGIC_TEST_URL||'http://localhost:3000';
   await page.evaluate(()=>window.dispatchEvent(new Event('online')));await page.waitForFunction(()=>window.__MAGIC_ENGLISH_STAGE1__.getState().learning.pending.length===0);
   assert.equal(new Set(claims.map(c=>c.token)).size,expected);assert(claims.every(c=>c.type==='speech'&&c.userId.startsWith('stage3-test-')));assert(claims.length>expected,'failed delivery was retried');
   assert.equal(await count(),expected);assert.deepEqual(errors,[]);
-  console.log('PASS: all 20 C daily NPC/companion conversations have 3–5 turns; reward outbox retries, partial-session reload resumes, and the CLASS stand stops walking.');
+  console.log('PASS: all 20 C daily NPC/companion conversations have 3–5 turns; reward outbox retries, partial-session reload resumes, and the decorative CLASS stand stops walking without starting a quest.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

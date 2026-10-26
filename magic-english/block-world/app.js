@@ -1,3 +1,4 @@
+import {magicEnglishProfile} from '../magic-english-profile.js';
 import {WORLD_FOV} from './zoom-lock.js';
 import {rewardHotbar} from './reward-hotbar.js';
 import {hurtPush} from './hurt-feedback.js';
@@ -15,7 +16,7 @@ import {createInventory,countBlock,planInventoryEdit,reverseInventoryEdit,applyR
 import {RewardClient} from './reward-client.js';
 
 const $=s=>document.querySelector(s),canvas=$('#world');
-const profile=(new URLSearchParams(location.search).get('user')||'').trim().slice(0,80);
+const profile=magicEnglishProfile(window.__BLOCK_USER__?.id||new URLSearchParams(location.search).get('user'));
 const KEY='magic-english-block-world-v1'+(profile?':'+profile:''),SETTINGS=KEY+':settings';
 let stock=createInventory(),selectedFood=null;
 let emptyNoticeAcknowledged=false,emptyNoticeReadyAt=Infinity;
@@ -54,7 +55,7 @@ async function loadWorld(value=null){
   selectedFood=null;stock=createInventory(value?.inventory||null,value?.edits||[]);bar=rewardHotbar(value?[...value.bar]:[...DEFAULT_BAR],stock);slot=Number.isInteger(value?.slot)?Math.max(0,Math.min(8,value.slot)):0;view.time=Number.isFinite(value?.time)?((value.time%1)+1)%1:.27;
   velocity={x:0,y:0,z:0};easy.reset();history.clear();grounded=false;selected=null;view.attach(world);animals=new AnimalWorld(world,value?.animals||null);animals.setNight(isNight(view.time));tool=validEquipment(value?.tool,stock)?value.tool:'stick';lastAttack=-Infinity;animalTarget=null;started=true;$('#hud').hidden=false;$('#world-name').textContent=worldName;if(isEasy()&&slot>4)slot=0;renderBars();renderInventory();markDirty();persist(true);readError=false;
   rewardClient.start();await resume();setTimeout(updateAdventureGuide,1650);void arrival('🧱 내 블록 세계에 도착했어요!');toast(isEasy()?'막대기는 A로 치기 · B로 블록 고르기':value?'다시 오신 걸 환영해요. 이어서 만들어 보세요.':'모험에서 받은 블록으로 내 세계를 만들어 보세요.');
- }catch(error){toast(errorMessage(error));if(started)pause();else{setPanel('welcome');$('#error-message').textContent=errorMessage(error);}}
+ }catch(error){toast(errorMessage(error));if(started)pause();else{setPanel('error-panel');$('#error-message').textContent=errorMessage(error);}}
 }
 function renderBars(){
  updateAdventureGuide();
@@ -138,9 +139,8 @@ function exportWorld(){if(!started)return;persist(true);const url=URL.createObje
 async function importFile(file){if(!file)return;try{if(file.size>12*1024*1024)throw Error('세계 파일은 12MB 이하만 가져올 수 있어요.');const value=validateSave(JSON.parse(await file.text()));ask('가져온 세계를 열까요?',`‘${value.name}’ 세계로 바꿉니다. 현재 세계는 교체 전 백업으로 보관합니다. 중요한 세계는 먼저 파일로 내보내 주세요.`,()=>{if(storeBackup())loadWorld(value);});}catch(error){toast('가져오기 실패: '+errorMessage(error));}finally{$('#file-input').value='';}}
 function updateModeUI(){
  const changed=document.body.dataset.controls!==settings.controls;document.body.dataset.controls=settings.controls;document.body.classList.toggle('easy-mode',isEasy());
- if(changed){$('#world-options').open=!isEasy();$('#adult-menu').open=!isEasy();}
+ if(changed){$('#adult-menu').open=!isEasy();}
  for(const b of document.querySelectorAll('[data-controls]'))b.setAttribute('aria-pressed',String(b.dataset.controls===settings.controls));
- $('#create-button').innerHTML=isEasy()?'놀러 가기 <span>→</span>':'새 세계 만들기 <span>→</span>';
  $('#continue-world').textContent=isEasy()?'계속 놀기 →':'계속하기 ↗';$('#resume-button').textContent=isEasy()?'계속 놀기 →':'계속 만들기 →';
  $('#controls-mode-button').textContent=isEasy()?'기존 조작으로 바꾸기':'방향키 + A/B로 바꾸기';$('#inventory-title').textContent=isEasy()?'어떤 블록으로 만들까요?':'무엇을 만들어 볼까요?';
  if(!readError)$('#welcome .intro-copy').innerHTML=isEasy()?'평지에서 돼지와 닭을 만나 봐요.<br>막대기로 치고, 블록으로 만들어 봐요.':'숲을 거닐고, 블록을 쌓고, 작은 집을 지어요.<br>잔디·흙·돌·참나무 판자로 작은 세계를 만들어요.';
@@ -151,11 +151,11 @@ function changeControls(controls){
 }
 function applySettings(){if(!view)return;updateModeUI();settings.fov=WORLD_FOV;view.camera.fov=WORLD_FOV;view.camera.updateProjectionMatrix();view.drawDistance=settings.distance;view.cycle=settings.cycle;$('#fov').value=settings.fov;$('#sensitivity').value=settings.sensitivity;$('#distance').value=settings.distance;$('#sound').checked=settings.sound;$('#day-cycle').checked=settings.cycle;$('#fov-value').value=settings.fov+'°';$('#sensitivity-value').value=settings.sensitivity+'%';try{localStorage.setItem(SETTINGS,JSON.stringify(settings));}catch{/* World saving reports storage errors separately. */}}
 
-const rewardClient=new RewardClient(profile||'demo',items=>{
- if(!started)return;try{const result=applyRewards(stock,items,profile||'demo');if(!result.applied){$('#reward-status').textContent='모험 보상 연결됨';return;}const previous=stock,previousBar=[...bar];stock=result.inventory;bar=rewardHotbar(bar,stock);markDirty();if(!persist(true)){stock=previous;bar=previousBar;$('#reward-status').textContent='저장 실패 · 보상은 다음에 다시 받아요';return;}renderBars();updateHeartGate();if(mode==='inventory-panel')renderInventory();$('#reward-status').textContent='새 모험 보상을 받았어요';toast(items.some(item=>item.items?.length)?'⚔️ 완전한 문장 보상! 블록·하트·새 검을 받았어요!':'모험 보상으로 블록과 하트를 받았어요!');}catch(error){$('#reward-status').textContent=errorMessage(error);}
+const rewardClient=new RewardClient(profile,items=>{
+ if(!started)return;try{const result=applyRewards(stock,items,profile);if(!result.applied){$('#reward-status').textContent='모험 보상 연결됨';return;}const previous=stock,previousBar=[...bar];stock=result.inventory;bar=rewardHotbar(bar,stock);markDirty();if(!persist(true)){stock=previous;bar=previousBar;$('#reward-status').textContent='저장 실패 · 보상은 다음에 다시 받아요';return;}renderBars();updateHeartGate();if(mode==='inventory-panel')renderInventory();$('#reward-status').textContent='새 모험 보상을 받았어요';toast(items.some(item=>item.items?.length)?'⚔️ 완전한 문장 보상! 블록·하트·새 검을 받았어요!':'모험 보상으로 블록과 하트를 받았어요!');}catch(error){$('#reward-status').textContent=errorMessage(error);}
 },()=>{$('#reward-status').textContent='오프라인 · 보유 블록으로 계속 놀아요';});
 
-$('#create-form').addEventListener('submit',event=>{event.preventDefault();if(saved||started||readError)ask('새 세계를 만들까요?','현재 세계를 교체합니다. 교체 전 기록을 백업하지만, 보관할 세계는 먼저 파일로 내보내 주세요.',()=>{if(storeBackup())loadWorld();});else loadWorld();});
+
 for(const b of document.querySelectorAll('[data-controls]'))b.onclick=()=>changeControls(b.dataset.controls);
 $('#show-all-blocks').onclick=()=>{allBlocks=!allBlocks;$('#show-all-blocks').textContent=allBlocks?'처음 블록만 보기 −':'다른 블록도 보기 ＋';renderInventory();};
 $('#easy-home-button').onclick=()=>{spawn();resume();};
@@ -168,10 +168,10 @@ for(const b of document.querySelectorAll('[data-easy-direction]')){
  b.addEventListener('click',event=>{if(event.detail===0&&active&&isEasy())easy.press(world,player,b.dataset.easyDirection,false);});
 }
 $('#easy-controls').addEventListener('contextmenu',event=>event.preventDefault());
-const backupButton=document.createElement('button');backupButton.id='restore-backup';backupButton.className='text-button';backupButton.textContent='교체 전 세계 복원하기 ↶';backupButton.style.display='block';$('#new-world-button').after(backupButton);backupButton.onclick=restoreBackup;$('#welcome-backup').onclick=restoreBackup;updateBackupButtons();
-$('#continue-world').onclick=()=>loadWorld(saved);$('#pause-button').onclick=pause;$('#resume-button').onclick=resume;$('#inventory-button').onclick=inventory;$('#close-inventory').onclick=resume;$('#block-search').oninput=renderInventory;$('#spawn-button').onclick=()=>{spawn();resume();};$('#controls-mode-button').onclick=()=>changeControls(isEasy()?'classic':'easy');$('#export-button').onclick=exportWorld;
+const backupButton=document.createElement('button');backupButton.id='restore-backup';backupButton.className='text-button';backupButton.textContent='교체 전 세계 복원하기 ↶';backupButton.style.display='block';$('#export-button').after(backupButton);backupButton.onclick=restoreBackup;$('#welcome-backup').onclick=restoreBackup;updateBackupButtons();
+$('#continue-world').onclick=()=>{if(saved&&!readError)void loadWorld(saved);};$('#pause-button').onclick=pause;$('#resume-button').onclick=resume;$('#inventory-button').onclick=inventory;$('#close-inventory').onclick=resume;$('#block-search').oninput=renderInventory;$('#spawn-button').onclick=()=>{spawn();resume();};$('#controls-mode-button').onclick=()=>changeControls(isEasy()?'classic':'easy');$('#export-button').onclick=exportWorld;
 $('#sync-rewards').onclick=()=>{if(started)void rewardClient.sync();};
-for(const id of ['import-button','welcome-import'])$('#'+id).onclick=()=>$('#file-input').click();$('#file-input').onchange=()=>importFile($('#file-input').files[0]);$('#new-world-button').onclick=()=>{persist();setPanel('welcome');updateSavedCard();};$('#confirm-cancel').onclick=()=>{confirmAction=null;setPanel(started?'pause-panel':'welcome');};$('#confirm-ok').onclick=()=>{const action=confirmAction;confirmAction=null;action?.();};
+for(const id of ['import-button','welcome-import'])$('#'+id).onclick=()=>$('#file-input').click();$('#file-input').onchange=()=>importFile($('#file-input').files[0]);$('#confirm-cancel').onclick=()=>{confirmAction=null;setPanel(started?'pause-panel':'welcome');};$('#confirm-ok').onclick=()=>{const action=confirmAction;confirmAction=null;action?.();};
 $('#fullscreen-button').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{toast('이 브라우저는 전체 화면을 지원하지 않아요.');}};
 for(const [id,key]of [['fov','fov'],['sensitivity','sensitivity'],['distance','distance']])$('#'+id).oninput=event=>{settings[key]=Number(event.target.value);applySettings();};$('#sound').onchange=event=>{settings.sound=event.target.checked;applySettings();};$('#day-cycle').onchange=event=>{settings.cycle=event.target.checked;applySettings();};for(const b of document.querySelectorAll('[data-time]'))b.onclick=()=>{view.time=Number(b.dataset.time);animals?.setNight(isNight(view.time));markDirty();};
 for(const name of ['전체','자연','건축','색상','장식']){const b=document.createElement('button');b.textContent=name;b.setAttribute('role','tab');b.setAttribute('aria-selected',String(name===category));b.onclick=()=>{category=name;for(const item of $('#categories').children)item.setAttribute('aria-selected',String(item===b));renderInventory();};$('#categories').append(b);}
@@ -201,7 +201,7 @@ window.addEventListener('blur',()=>{if(active)pause();});document.addEventListen
 
 try{
  if(matchMedia('(pointer: coarse)').matches||new URLSearchParams(location.search).has('touch'))document.body.classList.add('touch');
- try{const raw=localStorage.getItem(KEY);if(raw){saved=validateSave(JSON.parse(raw));updateSavedCard();}const rawSettings=JSON.parse(localStorage.getItem(SETTINGS)||'null');if(rawSettings){for(const [key,min,max]of [['fov',55,100],['sensitivity',30,200],['distance',64,140]])if(Number.isFinite(rawSettings[key]))settings[key]=Math.max(min,Math.min(max,rawSettings[key]));for(const key of ['sound','cycle'])if(typeof rawSettings[key]==='boolean')settings[key]=rawSettings[key];if(rawSettings.dayCycleVersion!==1)settings.cycle=true;settings.dayCycleVersion=1;if(['easy','classic'].includes(rawSettings.controls))settings.controls=rawSettings.controls;}}catch{readError=true;$('#welcome .intro-copy').textContent='기존 저장 기록을 읽지 못했어요. 자동으로 덮어쓰지 않습니다. 새 세계를 만들기 전에 브라우저 기록을 보관해 주세요.';}
+ try{const raw=localStorage.getItem(KEY);if(raw){saved=validateSave(JSON.parse(raw));updateSavedCard();}const rawSettings=JSON.parse(localStorage.getItem(SETTINGS)||'null');if(rawSettings){for(const [key,min,max]of [['fov',55,100],['sensitivity',30,200],['distance',64,140]])if(Number.isFinite(rawSettings[key]))settings[key]=Math.max(min,Math.min(max,rawSettings[key]));for(const key of ['sound','cycle'])if(typeof rawSettings[key]==='boolean')settings[key]=rawSettings[key];if(rawSettings.dayCycleVersion!==1)settings.cycle=true;settings.dayCycleVersion=1;if(['easy','classic'].includes(rawSettings.controls))settings.controls=rawSettings.controls;}}catch{readError=true;$('#welcome .intro-copy').textContent='기존 저장 기록을 읽지 못했어요. 기록을 그대로 보관하고 있어요. 인터넷 연결을 확인하거나 백업 파일로 복구해 주세요.';}
  const requestedControls=new URLSearchParams(location.search).get('controls');if(['easy','classic'].includes(requestedControls))settings.controls=requestedControls;
  view=new WorldRenderer(canvas,atlas);applySettings();world=new VoxelWorld('block-forest-preview').generate();player={x:76,y:27,z:85,yaw:.47,pitch:-.22,flying:false,crouch:false};view.attach(world);animals=new AnimalWorld(world);renderBars();renderInventory();setPanel(readError?'welcome':'loading-panel');requestAnimationFrame(frame);
  // Read-only diagnostics for browser regression checks; game mutations still use real input.

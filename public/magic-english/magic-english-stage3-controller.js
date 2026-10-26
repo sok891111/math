@@ -14,12 +14,12 @@ export const STAGE3_NEIGHBOURS={
    s3_yard_keeper:['학교 관리인','어서 와! 현관 위 학교 시계와 SCHOOL 간판을 찾아봐. 중앙 보도를 따라가면 에이미의 교실로 갈 수 있어.','Welcome to our school. Please follow the path.'],
    s3_bus_driver:['스쿨버스 기사','노란 스쿨버스에서 잘 내렸구나! 횡단보도를 건너 학교 현관으로 가렴.','Walk safely to the school entrance.'],
    s3_yard_student:['등교하는 친구','안녕! 에이미는 학교 현관 앞에서 기다려. 나도 오늘 Class를 배우러 가!','Good morning! Let us go to class.'],
-   s3_librarian:['도서 선생님','복도 중앙 받침대의 CLASS 안내판을 조사해 봐. 실제 교실 문은 오른쪽 벽에 있어.','Our class is beside the blue lockers.'],
+   s3_librarian:['도서 선생님','복도의 에이미에게 우리 반 이야기를 들어 봐. 교실 문은 오른쪽 벽에 있어.','Our class is beside the blue lockers.'],
    s3_hall_teacher:['담임 선생님','복도에서는 천천히 걸어도 괜찮아. 교실 문은 손잡이와 유리창이 있는 오른쪽 문이란다.','The classroom door is on your right.'],
    s3_hall_nurse:['보건 선생님','처음 온 학교라 긴장되니? 천천히 숨을 쉬고 친구들과 말해 보면 괜찮아.','Take your time. It is okay to feel shy.'],
    s3_class_lily:['릴리','창가에서 고양이 그림책을 보고 있었어! 여기 고양이도 Class의 친구야.','Look at the cat in my book!'],
    s3_class_art:['미술 선생님','이젤의 CAT 그림은 코코를 보고 그렸어. 그림과 실제 코코를 비교해 봐!','We painted a picture of Coco.'],
-   s3_class_helper:['보조 선생님','책상 위 공책과 연필은 함께 쓰면 돼. 발표할 때는 칠판 앞 발자국 자리로 와 줘.','Your notebook and pencil are on the desk.'],
+   s3_class_helper:['보조 선생님','책상 위 공책과 연필은 함께 쓰면 돼. 발표할 준비가 되면 선생님께 다시 말을 걸어 줘.','Your notebook and pencil are on the desk.'],
    s3_room_amy:['에이미','여기는 수업 준비실이야. 책과 미술 도구가 있고, 코코가 쉬는 바구니도 있어.','This is our supply room. Coco has a basket here.'],
    s3_room_monitor:['도우미 친구','코코가 무사해서 정말 다행이야! 바구니 옆에는 물과 고양이 장난감도 준비했어.','Coco is safe. We brought some water.'],
    s3_room_caretaker:['준비실 선생님','책장과 미술 도구는 함께 쓰는 물건이야. 이제 친구들과 교실에서 다시 이야기해 보렴.','Please keep our books and art supplies tidy.'],
@@ -49,7 +49,20 @@ export function createStage3Controller({getState,say,save,update,go,queueReward,
   pages.push(npc('활빈','그림자가 흩어지고 문이 열렸어! 코코가 달려 나와 네 품에 안겨.','Coco is safe! You did it!',12),{type:'badge_reveal',speaker:'링고',letter:'C',badgeTitle:'목소리의 용기 · 황금 C 조각',text:'C 조각을 얻었어! 선생님에게 돌아가 친구들 앞에서 첫 자기소개를 해 보자.',voiceClip:'You got the letter C piece!',rewardBanner:'C 조각 · 돌 1개와 하트 0.5개'});
   say('사일런트 섀도 · 코코를 구해 줘!',pages);
  }
+ function restore(word){
+   if(!s().tommyReconciled){say('에이미',stage3Goal(state()));return;}
+   if(s().restored[word]){say('링고',`${word.toUpperCase()}의 C 소리가 돌아왔어!`);return;}
+   const key='s3_'+word,p=STAGE3_PRACTICE[key];
+   say(word==='class'?'선생님':word==='cat'?'미술 선생님':'링고',`${word.toUpperCase().slice(1)} 앞에서 빠진 글자를 골라 줘.`,null,[['C',()=>say('C 소리 되찾기',[npc('링고',`맞아! ${word.toUpperCase()}의 첫소리를 문장으로 말해 보자.`,'Now say the sentence.',11),{type:'speak',targetKey:key,targetPhrase:p.text,guideClip:p.text,meaningKo:p.korean,noFollowup:true,onPass:()=>{advanceStage3(state(),'restore',word);save();update();}}])],['B',()=>say('링고','단어의 첫소리는 /k/야. C를 다시 찾아보자.')]]);return;
+ }
+ function incident(){
+   if(s().incidentSeen){say('링고',stage3Goal(state()));return;}
+   if(!s().words.cat){say('에이미',stage3Goal(state()));return;}
+   // Scripted hesitation belongs to the story, never a forced failed player recording.
+   say('사라진 C 소리',[npc('홍길동','모두가 나를 보니… 영어가 입에서 나오지 않는구나.','I feel shy.',3),npc('토미','토미가 작게 웃자 길동이 고개를 숙였어. 교실 구석에서 그림자가 일어나!', 'Oh...',3),npc('사일런트 섀도','침묵은 내 힘이야! CLASS → LASS, CAT → AT, COME → OME! 코코가 준비실로 피신하고 문이 닫혔어.','I will take your C sounds!',4),npc('에이미','틀려도 괜찮아. 작게라도 소리 내면 시작이야. 링고와 연습하자!','It is okay to make mistakes. We can try together.',7)],()=>{advanceStage3(state(),'incident');save();update();});return;
+  }
  function act(target){const id=target.id;
+  if(id==='s3_class_art'){if(s().conversations.teacher===2&&!s().words.cat){act({id:'s3_cat'});return;}if(s().tommyReconciled&&!s().restored.cat){restore('cat');return;}}
   if(STAGE3_NEIGHBOURS[id]){daily.open(id,{text:STAGE3_NEIGHBOURS[id][1],voiceClip:STAGE3_NEIGHBOURS[id][2]});return;}
   if(id==='s3_hwalbin'){daily.open(id);return;}
   if(id==='s3_hall'){go('SchoolHall',10,11);return;}
@@ -63,6 +76,8 @@ export function createStage3Controller({getState,say,save,update,go,queueReward,
   if(id==='s3_teacher'){
    if(s().rescue.completed&&!s().introductionCompleted){conversation('introduction',()=>{advanceStage3(state(),'complete');reward('clear');});return;}
    if(s().conversations.teacher!==2){conversation('teacher');return;}
+   if(s().words.cat&&!s().incidentSeen){incident();return;}
+   if(s().tommyReconciled&&!s().restored.class){restore('class');return;}
    daily.open(id,stage3Goal(state()));return;
   }
   if(id==='s3_coco_bed'){say('코코의 바구니','코코가 숨어 있던 작은 바구니야. 이제 코코는 친구들과 교실에 있어.');return;}
@@ -72,14 +87,9 @@ export function createStage3Controller({getState,say,save,update,go,queueReward,
    if(s().incidentSeen){say('에이미','코코가 준비실 안에 있어. 함께 C 소리를 되찾자!');return;}
    conversation('cat',()=>advanceStage3(state(),'word','cat'));return;
   }
-  if(id==='s3_incident'){
-   if(s().incidentSeen){say('링고',stage3Goal(state()));return;}
-   if(!s().words.cat){say('에이미',stage3Goal(state()));return;}
-   // Scripted hesitation belongs to the story, never a forced failed player recording.
-   advanceStage3(state(),'incident');save();update();
-   say('사라진 C 소리',[npc('홍길동','모두가 나를 보니… 영어가 입에서 나오지 않는구나.','I feel shy.',3),npc('토미','토미가 작게 웃자 길동이 고개를 숙였어. 교실 구석에서 그림자가 일어나!', 'Oh...',3),npc('사일런트 섀도','침묵은 내 힘이야! CLASS → LASS, CAT → AT, COME → OME! 코코가 준비실로 피신하고 문이 닫혔어.','I will take your C sounds!',4),npc('에이미','틀려도 괜찮아. 작게라도 소리 내면 시작이야. 링고와 연습하자!','It is okay to make mistakes. We can try together.',7)]);return;
-  }
+  if(id==='s3_incident'){incident();return;}
   if(id==='s3_ringo'){
+   if(s().tommyReconciled&&!s().restored.come){restore('come');return;}
    if(!s().incidentSeen||s().words.come){daily.open(id,stage3Goal(state()));return;}
    conversation('come',()=>advanceStage3(state(),'word','come'));return;
   }
@@ -87,13 +97,8 @@ export function createStage3Controller({getState,say,save,update,go,queueReward,
    if(!s().words.come||s().tommyReconciled){daily.open(id,s().incidentSeen&&!s().tommyReconciled?'나도 말하기가 무서워… 먼저 조금 이야기해 볼래?':undefined);return;}
    conversation('tommy',()=>advanceStage3(state(),'tommy'));return;
   }
-  if(id.startsWith('s3_restore_')){
-   const word=id.slice(11);
-   if(!s().tommyReconciled){say('에이미',stage3Goal(state()));return;}
-   if(s().restored[word]){say('링고',`${word.toUpperCase()}의 C 소리가 돌아왔어!`);return;}
-   const key='s3_'+word,p=STAGE3_PRACTICE[key];
-   say('링고',`${word.toUpperCase().slice(1)} 앞에서 빠진 글자를 골라 줘.`,null,[['C',()=>say('C 소리 되찾기',[npc('링고',`맞아! ${word.toUpperCase()}의 첫소리를 문장으로 말해 보자.`,'Now say the sentence.',11),{type:'speak',targetKey:key,targetPhrase:p.text,guideClip:p.text,meaningKo:p.korean,noFollowup:true,onPass:()=>{advanceStage3(state(),'restore',word);save();update();}}])],['B',()=>say('링고','단어의 첫소리는 /k/야. C를 다시 찾아보자.')]]);return;
-  }
+  if(id.startsWith('s3_restore_')){restore(id.slice(11));return;}
+  if(id==='s3_supply_room'){if(s().rescue.completed)go('CocoRoom',3,7);else say('에이미',stage3Goal(state()));return;}
   if(id==='s3_boss'||id==='s3_shadow'){boss();return;}
   if(id==='s3_lunch'){
    if(!s().completed){say('에이미',stage3Goal(state()));return;}

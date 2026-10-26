@@ -47,10 +47,23 @@ test('new furniture is solid while all entry thresholds and the cat escape path 
  for(const [x,y]of [[17,6],[16,6],[16,7],[15,7],[14,7]])assert(stage3Floor('Classroom',x,y));
 });
 
-test('CLASS directory has a solid base, a clear stopping point and a separate classroom door',async()=>{
- const state=createInitialMagicEnglishState();state.map='SchoolHall';const map=createStage3Maps().SchoolHall,board=map.getObjects(state).find(o=>o.id==='s3_class'),door=map.getObjects(state).find(o=>o.id==='s3_classroom');
- assert.deepEqual([board.x,board.y],[10,5]);assert.deepEqual([door.x,door.y],[16,6]);
+test('CLASS directory stays decorative and all C quests are attached to NPCs',()=>{
+ const state=createInitialMagicEnglishState();state.map='SchoolHall';const map=createStage3Maps().SchoolHall;
+ assert(!map.getObjects(state).some(o=>o.kind==='investigate'));
  for(const x of [9,10,11])assert.equal(map.isPassable(state,x,5),false);
- assert(map.isPassable(state,10,6));assert(map.isPassable(state,10,7));
- assert(map.isPassable(state,8,5));assert(map.isPassable(state,12,5));
+ assert(map.isPassable(state,10,6));assert(map.isPassable(state,8,5));assert(map.isPassable(state,12,5));
+ for(const m of Object.values(createStage3Maps()))assert(m.getObjects(state).every(o=>['npc','exit'].includes(o.kind)));
+});
+
+test('NPC-only C route resumes the first presentation, restores all words and grants C once',()=>{
+ let state=createInitialMagicEnglishState(),pages,done,choices;const rewards=[];
+ const c=createStage3Controller({getState:()=>state,say:(_title,p,d,ch)=>{pages=p;done=d;choices=ch;},save(){},update(){},go(){},queueReward:r=>rewards.push(r)});
+ const pass=id=>{c.act({id});for(const p of pages)if(p.type==='speak')p.onPass();done?.();};
+ pass('s3_amy');pass('s3_teacher');pass('s3_class_art');assert(state.stage3.words.cat);
+ // Existing saves immediately before the old presentation target remain usable.
+ state=parseMagicEnglishState(JSON.stringify(state)).state;
+ c.act({id:'s3_teacher'});assert(!state.stage3.incidentSeen);assert(Array.isArray(pages));assert(pages.some(p=>p.speaker==='사일런트 섀도'));done();assert(state.stage3.incidentSeen);
+ pass('s3_ringo');pass('s3_tommy');
+ for(const [id,word]of [['s3_teacher','class'],['s3_class_art','cat'],['s3_ringo','come']]){c.act({id});assert(Array.isArray(choices));choices.find(([label])=>label==='C')[1]();for(const p of pages)if(p.type==='speak')p.onPass();assert(state.stage3.restored[word]);}
+ pass('s3_shadow');assert(state.stage3.rescue.completed);assert.deepEqual(state.alphabetPieces,['C']);assert.equal(rewards.length,1);pass('s3_teacher');assert(state.stage3.completed);assert.equal(rewards.length,2);
 });

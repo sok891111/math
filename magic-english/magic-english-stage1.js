@@ -1,3 +1,4 @@
+import {magicEnglishProfile} from './magic-english-profile.js';
 import {adventureHeartSummary} from './magic-english-heart-summary.js';
 import {createStage4Maps,isStage4Map,ensureStage4,stage4Goal,STAGE4_CHECKLIST,STAGE4_WORDS,renderStage4Map} from './magic-english-stage4.js';
 import {createStage4Controller} from './magic-english-stage4-controller.js';
@@ -203,7 +204,7 @@ export async function startMagicEnglishStage1App() {
 
   let testProfile;
   if(stage3Test||stage4Test){const prefix=stage4Test?'stage4':'stage3',key='magic-english-'+prefix+'-test-profile';testProfile=localStorage.getItem(key);if(!testProfile){testProfile=prefix+'-test-'+crypto.randomUUID();localStorage.setItem(key,testProfile);}}
-  const blockUser = testProfile || (typeof user === 'string' ? user : user?.id || new URLSearchParams(location.search).get('user') || 'demo');
+  const blockUser = testProfile || magicEnglishProfile(typeof user==='string'?user:user?.id);
   let delivering = false;
   async function flushRewards() {
     if (delivering || saveCorruptedError) return;
@@ -232,7 +233,7 @@ export async function startMagicEnglishStage1App() {
   const travelToWorld=createTravel({save:persist,navigate:url=>location.assign(url),animate:departure});
   const blockWorldUI = {
     active:()=>false, close:()=>{},
-    open:()=>{void flushRewards();const returnTo=location.pathname+location.search;
+    open:()=>{void flushRewards();const returnURL=new URL(location.href);returnURL.searchParams.delete('view');const returnTo=returnURL.pathname+returnURL.search;
       return travelToWorld('/magic-english/block-world?user='+encodeURIComponent(blockUser)+'&controls=easy&returnTo='+encodeURIComponent(returnTo),'🧱 내 블록 세계로 여행하는 중…');},
   };
   $('#mode-link-magic').href=location.pathname+location.search;
@@ -1053,7 +1054,7 @@ export async function startMagicEnglishStage1App() {
   }
   function openWordDiscoveryModal(wordId) {
     if(Object.hasOwn(STAGE4_WORDS,wordId)){kitchen.act({id:wordId==='door'?'s4_door':'s4_word_'+wordId});return;}
-    if(Object.hasOwn(STAGE3_WORDS,wordId)){school.act({id:wordId==='class'?'s3_class':wordId==='cat'?'s3_cat':'s3_ringo'});return;}
+    if(Object.hasOwn(STAGE3_WORDS,wordId)){school.act({id:wordId==='class'?'s3_amy':wordId==='cat'?'s3_class_art':'s3_ringo'});return;}
     if (STAGE2_WORDS[wordId]) {
       held.clear();
       stage2Act({ id: `s2_word_${wordId}` });
@@ -2421,7 +2422,7 @@ export async function startMagicEnglishStage1App() {
       listEl.replaceChildren();
       for(const item of STAGE3_CHECKLIST){const li=document.createElement('li');li.id=`check-${item.id}`;li.className=item.isDone(state)?'done':'';const mark=document.createElement('span');mark.className='check';const content=document.createElement('div'),title=document.createElement('b'),sub=document.createElement('small');title.textContent=item.title;sub.textContent=item.subtitle;content.append(title,sub);li.append(mark,content);listEl.append(li);}
       wordsEl.replaceChildren();
-      for(const [id,w]of Object.entries(STAGE3_WORDS)){const b=document.createElement('button');b.type='button';b.className='me-word-chip'+(ensureStage3(state).words[id]?' found':'');b.textContent=`${w.word} ${w.phonetic} · ${w.korean}`;b.onclick=()=>school.act({id:id==='class'?'s3_class':id==='cat'?'s3_cat':'s3_ringo'});wordsEl.append(b);}
+      for(const [id,w]of Object.entries(STAGE3_WORDS)){const b=document.createElement('button');b.type='button';b.className='me-word-chip'+(ensureStage3(state).words[id]?' found':'');b.textContent=`${w.word} ${w.phonetic} · ${w.korean}`;b.onclick=()=>school.act({id:id==='class'?'s3_amy':id==='cat'?'s3_class_art':'s3_ringo'});wordsEl.append(b);}
     }
     if(isStage4Map(state.map)){
       document.title='마법영어 Stage 4 · 식당의 문과 D의 주문!';
