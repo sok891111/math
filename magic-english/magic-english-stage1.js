@@ -491,7 +491,7 @@ export async function startMagicEnglishStage1App() {
         const attemptId = globalThis.crypto?.randomUUID?.() || 'speech-'+Date.now()+'-'+Math.random().toString(36).slice(2);
         const stillHere = () => dialog === turnDialog && dialog?.speakState === st && dialog.index===st.stepIndex;
         speechRecognizer.start({
-          userId:blockUser, attemptId,
+          userId:blockUser, attemptId, targetPhrase:rawStep.targetPhrase,
           target: rawStep.targetKey || 'full',
           onPreparing:()=>{if(stillHere()){st.pending=true;st.preparing=true;st.statusText='마이크를 준비하고 있어요…';renderDialog();}},
           onProcessing:()=>{if(stillHere()&&!st.settled){st.pending=true;st.statusType='info';st.statusText='링고가 듣고 있어!';renderDialog();}},

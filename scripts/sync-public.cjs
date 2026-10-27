@@ -75,3 +75,7 @@ console.log('✅ Synchronized public assets, including magic-english.');
 
 fs.copyFileSync(path.join(rootDir, 'lib/central-state/keys.cjs'), path.join(publicDir, 'central-state-keys.js'));
 fs.copyFileSync(path.join(rootDir, 'scripts/central-state-client.js'), path.join(publicDir, 'central-state.js'));
+
+fs.copyFileSync(path.join(rootDir, 'scripts/learning-client.js'), path.join(publicDir, 'learning-client.js'));
+
+fs.copyFileSync(path.join(rootDir, 'scripts/game-access-client.js'), path.join(publicDir, 'game-access.js'));

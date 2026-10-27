@@ -1,3 +1,4 @@
+import {SPEECH_TARGETS,assessLearningSpeech} from './magic-english-learning.js';
 import {MOB_AUDIO_MANIFEST} from './assets/audio/mobs/manifest.js';
 import {STAGE4_AUDIO_MANIFEST} from './assets/audio/stage4/manifest.js';
 import {STAGE3_AUDIO_MANIFEST} from './assets/audio/stage3/manifest.js';
@@ -10,7 +11,7 @@ import {CHARACTER_VOICES, clipCharacter} from './character-voices.js';
 import { STAGE1_AUDIO_MANIFEST } from './assets/audio/stage1/manifest.js';
 
 export const PRIVACY_NOTICE =
-  'Speak 음성 확인을 위해 녹음된 음성이 서버를 통해 ElevenLabs(Scribe v2)로 전송되며, 게임 서버에는 별도 저장되지 않습니다. 「내 목소리 듣기(My voice)」는 현재 브라우저 메모리에만 보관되며 페이지를 떠나면 해제됩니다.';
+  'Speak 음성 확인을 위해 녹음된 음성이 서버를 통해 ElevenLabs(Scribe v2)로 전송되며, 게임 서버에는 별도 저장되지 않습니다. 개인 코드로 이용하면 목표 표현·인식된 문장·시도 결과가 부모 페이지의 학습 이력에 저장됩니다. 음성 파일은 학습 이력에 저장하지 않습니다. 「내 목소리 듣기(My voice)」는 현재 브라우저 메모리에만 보관되며 페이지를 떠나면 해제됩니다.';
 
 // Normalize transcript: lowercase, strip punctuation, collapse whitespace
 export function normalizeSpeechText(raw) {
@@ -491,6 +492,11 @@ export function createSpeechRecognizer(dependencies={}) {
   function cancel(){const run=session;sequence++;session=null;phase='idle';if(!run)return;run.finished=true;run.controller?.abort();release(run);try{if(run.recorder?.state!=='inactive')run.recorder?.stop();}catch{}}
   function finish(run,error,assessment,transcript=''){
     if(!current(run))return;release(run);run.finished=true;phase='idle';session=null;
+    try{
+      const heard=assessment?.recognizedText??assessment?.transcript??transcript;
+      const evaluated=assessment||assessLearningSpeech(heard,run.callbacks.target||'full');
+      window.BlockLearning?.record({kind:'speech',id:run.callbacks.attemptId,target:run.callbacks.target||'full',phrase:run.callbacks.targetPhrase||SPEECH_TARGETS[run.callbacks.target||'full']||'',transcript:heard,result:error?(['no-speech','low-volume'].includes(error.code)?'unheard':'error'):evaluated.passed?evaluated.quality==='complete'?'complete':'partial':heard.trim()?'retry':'unheard',errorCode:error?.code||'',durationSeconds:Math.round((Date.now()-run.startedAt)/1000)});
+    }catch{/* Logging must never interrupt a child's speech turn. */}
     if(error)run.callbacks.onError?.(error);else run.callbacks.onResult?.(assessment?.recognizedText??assessment?.transcript??transcript,[],assessment);
     run.callbacks.onEnd?.();
   }
@@ -498,7 +504,7 @@ export function createSpeechRecognizer(dependencies={}) {
   function stop(){const run=session;if(!run||phase!=='recording')return false;processing(run);try{run.recorder?.stop();return true;}catch(error){finish(run,{code:'recording-error',message:'녹음을 마치지 못했어요. 다시 이야기해 주세요.'});return false;}}
   async function start(callbacks={}){
     if(phase!=='idle')return false;
-    cancelActiveVoice();const run={id:++sequence,callbacks,finished:false,processing:false,stream:null,recorder:null};session=run;phase='requesting';callbacks.onPreparing?.();
+    cancelActiveVoice();const run={id:++sequence,callbacks,startedAt:Date.now(),finished:false,processing:false,stream:null,recorder:null};session=run;phase='requesting';callbacks.onPreparing?.();
     if(typeof window!=='undefined'&&typeof window.__MOCK_SPEECH_RECOGNIZER__==='function'){
       phase='recording';callbacks.onStart?.();window.__MOCK_SPEECH_RECOGNIZER__({emitResult:(transcript,assessment)=>finish(run,null,assessment,transcript),emitError:(code,message)=>finish(run,{code,message})});return true;
     }

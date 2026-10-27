@@ -28,7 +28,7 @@ export function createMobConversationUI({profile,getLearning,saveLearning,onResu
  $('speak').onclick=()=>{
   if(!current||speech.isBusy())return;const capture={...current,script:getLearning().queue[0].script},ticket=++generation;
   $('speak').disabled=true;$('listen').disabled=$('guide').disabled=true;
-  void speech.start({target:capture.row.target,userId:profile,attemptId:crypto.randomUUID(),onPreparing:()=>status('마이크를 준비하고 있어요…'),onStart:()=>{if(ticket!==generation)return;$('stop').hidden=false;status('🎙️ 듣고 있어요. 다 말했으면 멈춤 버튼을 눌러 주세요.');},onProcessing:()=>{if(ticket!==generation)return;$('stop').hidden=true;status('링고가 대답을 확인하고 있어요…');},onResult:(text,_alternatives,assessment)=>{
+  void speech.start({target:capture.row.target,targetPhrase:mobPractice(capture.row.target).text,userId:profile,attemptId:crypto.randomUUID(),onPreparing:()=>status('마이크를 준비하고 있어요…'),onStart:()=>{if(ticket!==generation)return;$('stop').hidden=false;status('🎙️ 듣고 있어요. 다 말했으면 멈춤 버튼을 눌러 주세요.');},onProcessing:()=>{if(ticket!==generation)return;$('stop').hidden=true;status('링고가 대답을 확인하고 있어요…');},onResult:(text,_alternatives,assessment)=>{
    if(ticket!==generation)return;ready();const result=assessment||assessLearningSpeech(text,capture.row.target);
    if(!result.passed){status('조금 다르게 들렸어요. 대답 가이드를 듣고 다시 말해 봐요! '+(text?'들린 말: '+text:''));return;}
    checkpoint(capture);

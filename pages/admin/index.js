@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
+import AdminParentAccount from '../../components/AdminParentAccount';
 import AdminMonsterGrants from '../../components/AdminMonsterGrants';
 import { getBaseUrl, setCustomBaseUrl } from '../../lib/config';
 
@@ -641,6 +642,8 @@ export default function AdminPage() {
                       </div>
                     </div>
 
+                    <a href={`/${user.id}/parent`} style={{display:"inline-block",margin:"12px 0",color:"#a7d9ba"}}>부모 페이지 · 학습 대시보드 ↗</a>
+                    <AdminParentAccount user={user} secret={secret} />
                     <details><summary style={{ cursor: 'pointer', color: '#86efac' }}>포켓몬·몬스터 추가 / 복구</summary><AdminMonsterGrants user={user} secret={secret} /></details>
                     <div className="url-box">
                       {/* 대표 접속 링크 (도트 모험 로비) */}

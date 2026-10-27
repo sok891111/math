@@ -378,6 +378,7 @@ export default function UserLobbyPage({ user, initialBadges, baseUrl = 'https://
         <div className="arcade-screen">
           {/* Top Marquee HUD */}
           <header className="arcade-hud">
+            <a href={`/${user.id}/parent`} style={{color:"#c4d5c9",fontSize:12,textDecoration:"none"}}>부모 페이지 ↗</a>
             <div className="hud-badge player-badge">
               <span className="blink-dot">●</span>
               <span>1P: {childName}</span>
