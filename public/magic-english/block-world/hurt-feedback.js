@@ -1,3 +1,0 @@
-export const HURT_DURATION=.5;
-export function hurtPose(age,intensity=1,reducedMotion=false){if(!Number.isFinite(age)||age<=0||age>=HURT_DURATION||reducedMotion)return {x:0,y:0,roll:0};const p=age/HURT_DURATION,fade=(1-p)**2,hit=Math.sin(Math.PI*Math.min(1,p*5));return {x:Math.sin(p*Math.PI*8)*.035*fade*intensity,y:-hit*.055*fade*intensity,roll:Math.sin(p*Math.PI*5)*.045*fade*intensity};}
-export function hurtPush(player,event){const dx=player.x-event.x,dz=player.z-event.z,length=Math.hypot(dx,dz);if(!Number.isFinite(length)||length<.001)return {x:0,y:0,z:0};const strength=event.type==='creeper-puff'?.45:.25;return {x:dx/length*strength,y:0,z:dz/length*strength};}

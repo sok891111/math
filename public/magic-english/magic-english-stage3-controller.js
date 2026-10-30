@@ -25,10 +25,10 @@ export const STAGE3_NEIGHBOURS={
    s3_room_caretaker:['준비실 선생님','책장과 미술 도구는 함께 쓰는 물건이야. 이제 친구들과 교실에서 다시 이야기해 보렴.','Please keep our books and art supplies tidy.'],
   };
 
-export function createStage3Controller({getState,say,save,update,go,queueReward,enterStage4}){
+export function createStage3Controller({getState,say,save,update,go,enterStage4}){
  const state=()=>getState(),s=()=>ensureStage3(state());
  const daily=createStage3Daily({getState,say,save,update});
- function reward(type){const id=`stage3:${type}:v2`;if(!state().rewardReceipts[id]){state().rewardReceipts[id]={id};queueReward({id,type,stage:3});}}
+ function reward(type){const id=`stage3:${type}:v2`;if(!state().rewardReceipts[id]){state().rewardReceipts[id]={id};}}
  function conversation(id,done){
   const rows=STAGE3_DIALOGUES[id],completed=s().conversations[id]||0,repeat=completed===rows.length,pages=[];
   rows.forEach(([speaker,text,english,key],index)=>{if(!repeat&&index<completed)return;const p=STAGE3_PRACTICE[key];pages.push(npc(speaker,text,english,id==='class'?2:id==='cat'?5:id==='tommy'?9:id==='introduction'?13:6),{type:'speak',speaker:'홍길동 · 내 대답',targetKey:key,targetPhrase:p.text,guideClip:p.text,meaningKo:p.korean,noFollowup:true,onPass:()=>{
@@ -46,7 +46,7 @@ export function createStage3Controller({getState,say,save,update,go,queueReward,
    const p=STAGE3_PRACTICE[keys[round]],hp={name:'사일런트 섀도 · 목소리 봉인',hp:3-round,maxHp:3};
    pages.push(npc(round===0?'사일런트 섀도':'에이미',round===0?'쉬이잇… 이 교실의 목소리는 내 거야!':round===1?'준비실 창에 코코가 보여! 배운 문장으로 말해 보자.':'토미와 친구들이 함께 응원해. 이제 코코를 불러 줘!',round===0?'Your class will be silent!':round===1?'Can you see the cat?':'Call Coco! We are with you!',round===2?12:11),{type:'speak',speaker:'홍길동 · 목소리의 힘',targetKey:keys[round],targetPhrase:p.text,guideClip:p.text,meaningKo:p.korean,noFollowup:true,bossBattle:hp,onPass:()=>{if(advanceStage3(state(),'round',round)){if(s().boss.completed)rescue();save();update();}}});
   }
-  pages.push(npc('활빈','그림자가 흩어지고 문이 열렸어! 코코가 달려 나와 네 품에 안겨.','Coco is safe! You did it!',12),{type:'badge_reveal',speaker:'링고',letter:'C',badgeTitle:'목소리의 용기 · 황금 C 조각',text:'C 조각을 얻었어! 선생님에게 돌아가 친구들 앞에서 첫 자기소개를 해 보자.',voiceClip:'You got the letter C piece!',rewardBanner:'C 조각 · 돌 1개와 하트 0.5개'});
+  pages.push(npc('활빈','그림자가 흩어지고 문이 열렸어! 코코가 달려 나와 네 품에 안겨.','Coco is safe! You did it!',12),{type:'badge_reveal',speaker:'링고',letter:'C',badgeTitle:'목소리의 용기 · 황금 C 조각',text:'C 조각을 얻었어! 선생님에게 돌아가 친구들 앞에서 첫 자기소개를 해 보자.',voiceClip:'You got the letter C piece!',rewardBanner:'잘했어요! 친구와 마음을 나눴어요.'});
   say('사일런트 섀도 · 코코를 구해 줘!',pages);
  }
  function restore(word){

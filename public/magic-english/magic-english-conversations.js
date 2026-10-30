@@ -25,7 +25,7 @@ export function conversationPages(pages,speaker='에이미'){
  if(count===1&&!result.some(p=>p?.noFollowup)){const index=result.findIndex(p=>p?.type==='speak'),first=result[index],rows=CONVERSATION_FOLLOWUPS[first.targetKey]||CONVERSATION_FOLLOWUPS.thank_you;
  const prior=result.slice(0,index).findLast(p=>p?.type==='npc');let partner=prior?.speaker||speaker;if(/홍길동|단서|발견|말하기|조사/.test(partner))partner='에이미';
  const {onPass,...start}=first,extra=[];
- for(const [question,phrase,key,korean]of rows){extra.push({type:'npc',speaker:partner,text:question,voiceClip:question},{type:'speak',speaker:'홍길동 · 영어로 답하기',prompt:'친구의 질문을 듣고 영어로 대답해 보세요!',targetPhrase:phrase,targetKey:key,guideClip:phrase,meaningKo:korean,rewardHint:'대화 성공: 랜덤 블록 1~2개·하트 0.5~1개',conversationGenerated:true});}
+ for(const [question,phrase,key,korean]of rows){extra.push({type:'npc',speaker:partner,text:question,voiceClip:question},{type:'speak',speaker:'홍길동 · 영어로 답하기',prompt:'친구의 질문을 듣고 영어로 대답해 보세요!',targetPhrase:phrase,targetKey:key,guideClip:phrase,meaningKo:korean,rewardHint:'친구의 말을 듣고 영어 문장으로 대답해 보세요.',conversationGenerated:true});}
  extra.at(-1).onPass=onPass;
  result.splice(index,1,start,...extra);count=1+rows.length;
  }

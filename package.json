@@ -39,7 +39,7 @@
     "test:tralalerio-third": "npm --prefix tralalerio run test:third",
     "test:tralalerio-early": "npm --prefix tralalerio run test:early",
     "test:tralalerio-variety": "npm --prefix tralalerio run test:variety",
-    "test:magic-english": "node --test tests/magic-english-integration-unit.cjs magic-english/tests/magic-english-speech-session.test.js magic-english/tests/magic-english-portals.test.js magic-english/tests/magic-english-audio-input.test.js magic-english/tests/character-voices.test.js magic-english/tests/guide-playback.test.js magic-english/tests/world-travel.test.js magic-english/tests/magic-weapons-monsters.test.js magic-english/tests/day-night-sentences-loot.test.js magic-english/tests/heart-energy.test.js magic-english/tests/ground-food.test.js magic-english/tests/hurt-feedback.test.js magic-english/tests/speech-retries.test.js magic-english/tests/mob-loot.test.js magic-english/tests/conversation-turns.test.js magic-english/tests/npc-farewells.test.js magic-english/tests/speech-rewards.test.js magic-english/tests/reward-hotbar.test.js magic-english/tests/block-animals.test.js magic-english/tests/block-inventory.test.js",
+    "test:magic-english": "node --test tests/magic-english-integration-unit.cjs magic-english/tests/magic-english-stage1.test.js magic-english/tests/magic-english-stage3.test.js magic-english/tests/magic-english-stage3-daily.test.js magic-english/tests/magic-english-stage4.test.js magic-english/tests/magic-english-speech-session.test.js magic-english/tests/magic-english-portals.test.js magic-english/tests/magic-english-audio-input.test.js magic-english/tests/character-voices.test.js magic-english/tests/guide-playback.test.js magic-english/tests/speech-retries.test.js magic-english/tests/conversation-turns.test.js magic-english/tests/npc-farewells.test.js",
     "test:central-state": "node --test tests/central-state-unit.cjs",
     "test:central-state-browser": "node tests/central-state-browser.cjs",
     "test:magic-english-stage3": "node --test magic-english/tests/magic-english-stage3.test.js magic-english/tests/magic-english-stage3-daily.test.js",
@@ -47,11 +47,8 @@
     "test:magic-english-stage3:daily-browser": "node magic-english/tools/check-magic-english-stage3-daily.cjs",
     "test:magic-english-stage4": "node --test magic-english/tests/magic-english-stage4.test.js",
     "test:magic-english-stage4:browser": "node magic-english/tools/check-magic-english-stage4.cjs",
-    "test:magic-english-ipad": "node magic-english/tools/check-ipad-controls.cjs",
-    "test:magic-english-hearts-menu": "node --test magic-english/tests/adventure-heart-summary.test.js magic-english/tests/heart-energy.test.js",
-    "test:magic-english-world-entry": "node magic-english/tools/check-personal-world-entry.cjs",
-    "test:magic-english-mob-talk": "node --test magic-english/tests/mob-conversations.test.js magic-english/tests/mob-loot.test.js magic-english/tests/magic-english-speech-session.test.js",
-    "test:magic-english-mob-talk:browser": "node magic-english/tools/check-mob-conversations.cjs"
+    "test:magic-english-ipad": "node magic-english/tools/check-english-only.cjs",
+    "test:magic-english-only:browser": "node magic-english/tools/check-english-only.cjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"

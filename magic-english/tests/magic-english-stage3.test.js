@@ -65,5 +65,5 @@ test('NPC-only C route resumes the first presentation, restores all words and gr
  c.act({id:'s3_teacher'});assert(!state.stage3.incidentSeen);assert(Array.isArray(pages));assert(pages.some(p=>p.speaker==='사일런트 섀도'));done();assert(state.stage3.incidentSeen);
  pass('s3_ringo');pass('s3_tommy');
  for(const [id,word]of [['s3_teacher','class'],['s3_class_art','cat'],['s3_ringo','come']]){c.act({id});assert(Array.isArray(choices));choices.find(([label])=>label==='C')[1]();for(const p of pages)if(p.type==='speak')p.onPass();assert(state.stage3.restored[word]);}
- pass('s3_shadow');assert(state.stage3.rescue.completed);assert.deepEqual(state.alphabetPieces,['C']);assert.equal(rewards.length,1);pass('s3_teacher');assert(state.stage3.completed);assert.equal(rewards.length,2);
+ pass('s3_shadow');assert(state.stage3.rescue.completed);assert.deepEqual(state.alphabetPieces,['C']);assert.equal(rewards.length,0);pass('s3_teacher');assert(state.stage3.completed);assert.equal(rewards.length,0);
 });

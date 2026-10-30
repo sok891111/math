@@ -9,9 +9,9 @@ export const STAGE4_DIALOGUES={
  meal:[['미즈 데이지','따뜻한 음식을 한 입 먹어 보렴.','How is your lunch?','s4_meal_delicious'],['에이미','맛있는 음식을 주신 데이지에게 고마운 마음을 전해 보자.','What can we say to Ms. Daisy?','s4_meal_thanks'],['미즈 데이지','천천히, 정중하게 말해 줘서 고맙구나.','You are very welcome!','s4_meal_finish']],
 };
 const npc=(speaker,text,voiceClip,page)=>({type:'npc',speaker,text,voiceClip,...(page?{image:`assets/stage4/page${String(page).padStart(2,'0')}.jpg`}:{})});
-export function createStage4Controller({getState,say,save,update,go,queueReward}){
+export function createStage4Controller({getState,say,save,update,go}){
  const state=()=>getState(),s=()=>ensureStage4(state()),daily=createStage4Daily({getState,say,save,update});
- function reward(type){const id=`stage4:${type}:v2`;if(!state().rewardReceipts[id]){state().rewardReceipts[id]={id};queueReward({id,type,stage:4});}}
+ function reward(type){const id=`stage4:${type}:v2`;if(!state().rewardReceipts[id]){state().rewardReceipts[id]={id};}}
  function conversation(id,done){
   const rows=STAGE4_DIALOGUES[id],completed=s().conversations[id]||0,repeat=completed===rows.length,pages=[];
   for(const [index,[speaker,text,english,key]]of rows.entries()){if(!repeat&&index<completed)continue;const p=STAGE4_PRACTICE[key];pages.push(npc(speaker,text,english,id==='door'?5:id==='meal'?14:4),{type:'speak',speaker:'홍길동 · 내 대답',targetKey:key,targetPhrase:p.text,guideClip:p.text,meaningKo:p.korean,noFollowup:true,conversationTurn:index+1,conversationTotal:rows.length,onPass:()=>{if(!repeat&&(s().conversations[id]||0)===index){s().conversations[id]=index+1;if(index===rows.length-1)done?.();save();update();}}});}
@@ -49,7 +49,7 @@ export function createStage4Controller({getState,say,save,update,go,queueReward}
    const p=STAGE4_PRACTICE[keys[round]],hp={name:'미스터 미스스펠 · 어순의 봉인',hp:3-round,maxHp:3};
    pages.push(npc(round===0?'미스터 미스스펠':round===1?'미즈 데이지':'미즈 데이지',round===0?'이번에도 네 주문을 뒤섞어 주마! 물을 원한다고 정중하게 말해 보자.':round===1?'첫 봉인이 깨졌어. 이번에는 음료를 받을 수 있는지 정중하게 물어보자.':'마지막 봉인! Here you are. 음식을 건네받고 감사 인사를 해 보자.',round===0?'Your words cannot stay in order!':round===1?'What would you like to drink?':'Here you are.',11),{type:'speak',speaker:'홍길동 · 정중한 문장의 힘',targetKey:keys[round],targetPhrase:p.text,guideClip:p.text,meaningKo:p.korean,noFollowup:true,bossBattle:hp,onPass:()=>{if(advanceStage4(state(),'round',round)){if(s().boss.completed)reward('fragment');save();update();}}});
   }
-  pages.push(npc('미스터 미스스펠','낱말이 이어져 문장이 되다니! 미스스펠이 빛에 밀려 보라색 연기 속으로 물러났어.','Your sentences are too strong!',13),{type:'badge_reveal',speaker:'링고',letter:'D',badgeTitle:'정중한 문장의 힘 · 황금 D 배지',text:'미스스펠을 이기고 황금 D 배지를 얻었어! 준비된 식탁으로 돌아가 맛있게 먹고 감사 인사를 하자.',voiceClip:'You got the letter D piece!',rewardBanner:'황금 D 배지 · 돌 1개와 하트 0.5개'});say('미스스펠 대결 · 황금 D 배지',pages);
+  pages.push(npc('미스터 미스스펠','낱말이 이어져 문장이 되다니! 미스스펠이 빛에 밀려 보라색 연기 속으로 물러났어.','Your sentences are too strong!',13),{type:'badge_reveal',speaker:'링고',letter:'D',badgeTitle:'정중한 문장의 힘 · 황금 D 배지',text:'미스스펠을 이기고 황금 D 배지를 얻었어! 준비된 식탁으로 돌아가 맛있게 먹고 감사 인사를 하자.',voiceClip:'You got the letter D piece!',rewardBanner:'잘했어요! 친구와 마음을 나눴어요.'});say('미스스펠 대결 · 황금 D 배지',pages);
  }
  function enter(){if(!state().stage3?.completed){say('에이미','먼저 C의 교실에서 코코를 구하고 자기소개를 마쳐 보자.');return false;}ensureStage4(state());go('CafeteriaEntrance',10,11);return true;}
  function act(target){const id=target.id;

@@ -1,11 +1,15 @@
 # 마법영어 통합 및 Vercel 배포
 
+> **2026-10-30 운영 변경:** 마법영어만 운영한다. 마인크래프트 이동·하트·블록·무기·코인 지급은 종료했다. 아래 건축/보상 절은 이전 구현 이력이며 현재 동작을 뜻하지 않는다. 기존 저장 데이터는 삭제하지 않는다.
+
+
+
 ## 실행과 게이트
 
 - 게임 이름/폴더: `magic-english` / `magic-english/`.
 - 개인 게이트 `/<개인코드>`의 **마법영어** → `/<개인코드>/magic-english`.
 - 체험: `/magic-english`.
-- 건축: `/magic-english/block-world?user=<개인코드>&returnTo=<모험주소>`.
+- 기존 건축 주소는 개인 마법영어 모험으로 리다이렉트한다. 마인크래프트 실행 자산은 운영 배포에서 제외한다.
 - 로컬은 저장소 루트에서 `npm run dev`, 배포 빌드는 `npm run build`다. 기존 Vercel Next.js 프로젝트에 함께 포함된다. 별도의 Vercel 프로젝트나 정적 서버가 필요하지 않다.
 - `magic-english/`를 수정하고 `scripts/sync-public.cjs`로 공개 자산을 생성한다. `public/magic-english/`는 직접 수정하지 않는다.
 
@@ -270,3 +274,13 @@ C는 에이미(Class), 미술 선생님/코코(Cat), 선생님(발표 사건·CL
 배역은 `mob_zombie`(졸린 Bill), `mob_creeper`(robot Fena), `mob_pig`(유쾌한 Bill), `mob_chicken`(활기찬 Fena)로 고정한다. 84개 배역/대사 매핑을 정적 ElevenLabs MP3로 준비했다. 녹음 입력은 기존 16kHz WAV → 서버 → Scribe v2 판정을 재사용한다. 건축 화면에서도 정적 음성 경로를 마법영어 모듈 기준으로 해석한다.
 
 검증: `npm run test:magic-english-mob-talk` 및 서버 실행 후 `npm run test:magic-english-mob-talk:browser`. 브라우저 테스트는 실제 전투 입력으로 네 종류를 처치하고, 발화는 모의한다. 실제 iPad 마이크 발화는 기기 확인이 필요하다.
+
+
+## 마법영어 단독 운영 (2026-10-30)
+
+- 메뉴·상단 탐색·사이드바·알파벳 도감·A 엔딩·직접 호출 진단 훅에서 건축 이동 기능을 제거했다. 하트 확인 메뉴와 자원/무기 보상 안내도 제거했다. `?view=block-world`는 제거하고 영어 모험을 이어간다.
+- 말하기 API는 발화 판정만 반환하며 자원 수량·보상 토큰·블록·무기 추첨을 생성하지 않는다. `/api/magic-english/rewards`와 모든 `block-world/*` API는 410으로 종료한다. 예전 대기열은 읽어 전송하지 않는다.
+- 말하기와 퀘스트 완료는 학습 체크포인트/알파벳 배지만 기록한다. A 완료도 코인·건축 블록·장식을 지급하지 않는다. 기존 `rewardReceipts` ID는 저장된 모험의 문 열림/구출 판정을 위해 유지한다.
+- 원본 `magic-english/block-world/`와 관련 보관 코드는 그대로 남긴다. 공개 자산 동기화에서 블록 세계 폴더·구형 건축/하트 UI·몬스터 음성 자산을 제외한다. 예전 블록 세계 페이지는 마법영어로 돌려보내고 정적 실행 주소는 제공하지 않는다.
+- 기존 월드·보유 아이템·영수증·학습 이력을 지우거나 초기화하지 않는다. 중앙 저장 키도 유지한다. 새 모험의 호환용 `blockWorld` 필드는 자원 0개로 둔다.
+- 현재 검증 명령: `npm run test:magic-english`, `npm run test:magic-english-only:browser`, C/D 브라우저 검증. 과거 Minecraft/하트/몬스터 대화 브라우저 도구는 보관용이며 현재 운영 검증에 포함하지 않는다.

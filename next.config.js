@@ -50,7 +50,6 @@ module.exports = {
       '/magic-english/test/stage3': ['./public/magic-english/index.html'],
       '/magic-english': ['./public/magic-english/index.html'],
       '/[userId]/magic-english': ['./public/magic-english/index.html'],
-      '/magic-english/block-world': ['./public/magic-english/block-world/index.html'],
       '/hanja': ['./public/hanja/index.html'],
       '/[userId]/hanja': ['./public/hanja/index.html'],
     },

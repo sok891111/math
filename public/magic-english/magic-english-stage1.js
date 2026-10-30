@@ -1,9 +1,7 @@
 import {magicEnglishProfile} from './magic-english-profile.js';
-import {adventureHeartSummary} from './magic-english-heart-summary.js';
 import {createStage4Maps,isStage4Map,ensureStage4,stage4Goal,STAGE4_CHECKLIST,STAGE4_WORDS,renderStage4Map} from './magic-english-stage4.js';
 import {createStage4Controller} from './magic-english-stage4-controller.js';
 import {drawDaisy} from './magic-english-stage4-renderer.js';
-import {heartRewardForBlocks} from './block-world/hearts.js';
 import {createStage3Maps,isStage3Map,ensureStage3,stage3Goal,STAGE3_CHECKLIST,STAGE3_WORDS,renderStage3Map,drawStage3Actor,sampleStage3Actor} from './magic-english-stage3.js';
 import {createStage3Controller} from './magic-english-stage3-controller.js';
 import {speechAttemptOutcome,npcVoiceLocked} from './speech-attempts.js';
@@ -13,7 +11,6 @@ import {SENTENCE_PRACTICE,practiceStep} from './magic-english-practice.js';
 import {dialogueAction,nextChoiceIndex} from './dialogue-controls.js';
 import {walkingPortal} from './magic-english-portals.js';
 import {dialogueCharacter} from './character-voices.js';
-import {createTravel, departure, arrival} from './world-travel.js';
 import {AirportLife, OPTIONAL_NPC_PRAISE} from './magic-english-airport-life.js';
 import {assessLearningSpeech, ensureLearningState, REPEAT_DIALOGUES} from './magic-english-learning.js';
 import {ensureStage2, stage2Goal, createStage2Maps, renderStage2Map, STAGE2_WORDS, STAGE2_CHECKLIST, advanceStage2} from './magic-english-stage2.js';
@@ -43,7 +40,7 @@ import {
   recordWordDiscovery,
   recordPracticeCompletion,
   recordStaffSpeechCompletion,
-  grantSpeakRewardOnce,
+  recordLearningMilestone,
   grantStage1ClearReward,
 } from './magic-english-storage.js';
 import {
@@ -205,50 +202,19 @@ export async function startMagicEnglishStage1App() {
   let testProfile;
   if(stage3Test||stage4Test){const prefix=stage4Test?'stage4':'stage3',key='magic-english-'+prefix+'-test-profile';testProfile=localStorage.getItem(key);if(!testProfile){testProfile=prefix+'-test-'+crypto.randomUUID();localStorage.setItem(key,testProfile);}}
   const blockUser = testProfile || magicEnglishProfile(typeof user==='string'?user:user?.id);
-  let delivering = false;
-  async function flushRewards() {
-    if (delivering || saveCorruptedError) return;
-    delivering = true;
-    try {
-      for (const reward of [...ensureLearningState(state).pending]) {
-        const response = await fetch('/api/magic-english/rewards', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...reward,userId:blockUser})});
-        if (!response.ok) break;
-        state.learning.pending = state.learning.pending.filter(r=>r.id!==reward.id);
-        persist();
-      }
-    } catch { /* Outbox is saved and retried on reconnect. */ }
-    finally {delivering=false;}
-  }
-  function queueReward(reward) {
-    const learning=ensureLearningState(state);
-    if (!learning.pending.some(r=>r.id===reward.id)) learning.pending.push(reward);
-    persist(); void flushRewards();
-  }
-  function milestone(stage) {
-    for (const type of ['fragment','clear']) {
-      const id=`stage${stage}:${type}:v2`;
-      if (!state.rewardReceipts[id]) {state.rewardReceipts[id]={id};queueReward({id,type,stage});}
-    }
-  }
-  const travelToWorld=createTravel({save:persist,navigate:url=>location.assign(url),animate:departure});
-  const blockWorldUI = {
-    active:()=>false, close:()=>{},
-    open:()=>{void flushRewards();const returnURL=new URL(location.href);returnURL.searchParams.delete('view');const returnTo=returnURL.pathname+returnURL.search;
-      return travelToWorld('/magic-english/block-world?user='+encodeURIComponent(blockUser)+'&controls=easy&returnTo='+encodeURIComponent(returnTo),'🧱 내 블록 세계로 여행하는 중…');},
-  };
+  // Preserve legacy milestone IDs for saved story gates; no inventory or rewards are issued.
+  function milestone(stage){for(const type of ['fragment','clear']){const id=`stage${stage}:${type}:v2`;state.rewardReceipts[id]??={id};}}
+  const currentURL=new URL(location.href);if(currentURL.searchParams.get('view')==='block-world'){currentURL.searchParams.delete('view');history.replaceState(null,'',currentURL.pathname+currentURL.search+currentURL.hash);}
   $('#mode-link-magic').href=location.pathname+location.search;
   document.querySelector('.brand').href=location.pathname+location.search;
-  $('#mode-link-block').onclick=event=>{event.preventDefault();blockWorldUI.open();};
-  window.addEventListener('online',flushRewards);
-  setInterval(flushRewards,10000);
 
   const goSchool=(map,x,y)=>{state.map=map;state.x=x;state.y=y;state.facing='up';playerWalk.reset();syncFollowerToPlayer();held.clear();persist();updateSidebar();};
-  const kitchen=createStage4Controller({getState:()=>state,say,save:persist,update:updateSidebar,queueReward,go:goSchool});
-  const school=createStage3Controller({getState:()=>state,say,save:persist,update:updateSidebar,queueReward,go:goSchool,enterStage4:()=>kitchen.enter()});
+  const kitchen=createStage4Controller({getState:()=>state,say,save:persist,update:updateSidebar,go:goSchool});
+  const school=createStage3Controller({getState:()=>state,say,save:persist,update:updateSidebar,go:goSchool,enterStage4:()=>kitchen.enter()});
   function schoolAct(target){if(target.id?.startsWith('s4_')){kitchen.act(target);return;}if(target.id?.startsWith('s3_')){school.act(target);return;}stage2Act(target);}
 
   function anyModalOpen() {
-    return interactiveModal.open || blockWorldUI.active();
+    return interactiveModal.open;
   }
 
   function currentMap() {
@@ -396,8 +362,7 @@ export async function startMagicEnglishStage1App() {
         rewardEl.className = 'me-dialog-reward-banner';
         el.insertBefore(rewardEl, $('#choices'));
       }
-      rewardEl.textContent = isBadgeRevealTurn ? '🏆 조각: 돌 1개·하트 0.5개 · Stage 완료: 블록 15개·하트 7.5개' : (typeof rawStep.rewardBanner==='string' ? rewardBannerText : rawStep.speaker?.includes('활빈') ? '💛 활빈과 함께 여행해요!' : ensureLearningState(state).lastRewardQuantity ? '🧱 블록 +'+state.learning.lastRewardQuantity+'개 · ❤️ 하트 +'+heartRewardForBlocks(state.learning.lastRewardQuantity)+'개' : rewardBannerText);
-      if(ensureLearningState(state).lastWeapon)rewardEl.textContent+=' · ⚔️ '+state.learning.lastWeapon+' 획득!';
+      rewardEl.textContent = isBadgeRevealTurn ? '🏆 알파벳 배지를 얻었어요!' : rewardBannerText;
       rewardEl.hidden = false;
     } else if (rewardEl) {
       rewardEl.hidden = true;
@@ -437,7 +402,7 @@ export async function startMagicEnglishStage1App() {
           <div class="me-turn-guide-top">
             <span class="me-turn-badge">${isRec ? '🔴 영어를 읽고 Complete를 눌러 주세요!' : '🗣️ 내가 말할 영어 가이드'}</span>
             ${rawStep.conversationTotal ? `<span class="me-conversation-progress">💬 내가 말할 차례 ${rawStep.conversationTurn} / ${rawStep.conversationTotal}</span>` : ''}
-      ${rawStep.rewardHint ? `<span class="me-turn-reward-pill">🎁 ${rawStep.rewardHint}</span>` : ''}
+      ${rawStep.rewardHint ? `<span class="me-turn-reward-pill">🗣️ ${rawStep.rewardHint}</span>` : ''}
           </div>
           <div class="me-turn-phrase">“${rawStep.targetPhrase}”</div>
           ${rawStep.meaningKo?`<div class="me-turn-meaning">${rawStep.meaningKo}</div>`:''}
@@ -513,12 +478,10 @@ export async function startMagicEnglishStage1App() {
               st.settled=true;speechRecognizer.cancel();cancelActiveVoice();dialog=null;cutsceneLocked=false;say('에이미','여러 번 이야기해 줘서 고마워! 이번에는 여기까지 하고, 준비되면 다시 이야기하자.');return;
             }
             st.settled=true;
-            const learning=ensureLearningState(state); learning.failures=0; learning.lastFeedback=outcome.message;learning.lastQuality=outcome.quality; learning.lastRewardQuantity=outcome.quantity || 1;learning.lastWeapon=outcome.weaponName||null;
-            if(serverAssessment?.rewardToken) queueReward({id:attemptId,type:'speech',token:serverAssessment.rewardToken});
+            const learning=ensureLearningState(state); learning.failures=0; learning.lastFeedback=outcome.message;learning.lastQuality=outcome.quality;
             st.statusType='success';
             ensureLearningState(state).practicedTargets??={};state.learning.practicedTargets[rawStep.targetKey]=true;
-            st.statusText=`💬 ${outcome.message} 🧱 ${outcome.blockName || '블록'} +${outcome.quantity || 1}개 · ❤️ 하트 +${heartRewardForBlocks(outcome.quantity || 1)}개${outcome.weaponName?' · ⚔️ '+outcome.weaponName+' 획득!':''}`;
-            if(outcome.weaponName)toast('완전한 문장 보상! ⚔️ '+outcome.weaponName+'을 내 블록 세계로 보냈어요!');
+            st.statusText='💬 '+outcome.message;
             rawStep.onPass?.('self'); persist();updateSidebar();renderDialog();
             setTimeout(()=>{if(stillHere())advanceDialog(true);},750);
           },
@@ -612,7 +575,7 @@ export async function startMagicEnglishStage1App() {
   function finishUnheard(turnDialog,st) {
     st.settled=true; ensureLearningState(state).failures++; persist();
     speechRecognizer.cancel(); cancelActiveVoice(); dialog=null; cutsceneLocked=false;
-    say('에이미','목소리가 잘 들리지 않았어. 괜찮아, 다음에 다시 이야기하자! (블록 보상 0개)');
+    say('에이미','목소리가 잘 들리지 않았어. 괜찮아, 다음에 다시 이야기하자! ');
   }
   function openRepeatConversation(target) {
     const learning=ensureLearningState(state), variants=REPEAT_DIALOGUES[target.id] || REPEAT_DIALOGUES.npc_amy;
@@ -621,7 +584,7 @@ export async function startMagicEnglishStage1App() {
     learning.farewells??={};const [farewell,farewellKo]=chooseFarewell(target.id,learning.farewells);learning.farewells[target.id]=farewell;learning.farewells.last=farewell;persist();
     say(target.label||'친구',[
       {type:'npc',speaker:target.label||'친구',text:question,voiceClip:question},
-      {type:'speak',prompt:'친구에게 영어로 대답해 보세요!',targetPhrase:phrase,targetKey:key,guideClip:phrase,rewardHint:'말하기 성공: 블록 1개·하트 0.5개 · 완전한 문장: 블록 2개·하트 1개'},
+      {type:'speak',prompt:'친구에게 영어로 대답해 보세요!',targetPhrase:phrase,targetKey:key,guideClip:phrase,rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.'},
       {type:'npc',speaker:target.label||'친구',text:farewell+'\n('+farewellKo+')',voiceClip:farewell},
     ]);
   }
@@ -670,7 +633,7 @@ export async function startMagicEnglishStage1App() {
       meaningKo: extra.meaningKo || '',
       targetKey: key,
       guideClip: phrase,
-      rewardHint: extra.rewardHint || '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
+      rewardHint: extra.rewardHint || '친구에게 영어 문장으로 대답해 보세요.',
       bossBattle: extra.bossBattle || null,
       onPass: () => {
         onPass?.();
@@ -699,13 +662,13 @@ export async function startMagicEnglishStage1App() {
           w,
           () => {
             advanceStage2(state,'word',w);
-            grantSpeakRewardOnce(state, `s2-clue-${w}`, 10, `${info.word} 단서 말하기 보상`);
+            recordLearningMilestone(state, `s2-clue-${w}`, `${info.word} 단서 말하기 보상`);
           },
           {
             prompt: `🔊 가이드 음성을 듣고 Speak 버튼을 눌러 「${info.sentence}」를 따라 말해 보세요!`,
             phonetic: info.phonetic,
             meaningKo: info.korean,
-            rewardHint: '단서 도감 등록 + 랜덤 블록 1~2개·하트 0.5~1개',
+            rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.',
           }
         ),
         {
@@ -784,7 +747,7 @@ export async function startMagicEnglishStage1App() {
           'where_bus',
           () => {
             advanceStage2(state,'driver');
-            grantSpeakRewardOnce(state, 's2-driver-ask', 20, '버스 기사님과 실전 대화 완료');
+            recordLearningMilestone(state, 's2-driver-ask', '버스 기사님과 실전 대화 완료');
           },
           {
             prompt: '우리가 찾는 버스가 어디에 있는지 영어로 물어보세요!',
@@ -976,7 +939,6 @@ export async function startMagicEnglishStage1App() {
           () => {
             if (!st.bagRecovered) {
               advanceStage2(state,'recover');
-              queueReward({ id: 'stage2:fragment:v2', type: 'fragment', stage: 2 });
             }
           },
           {
@@ -1000,9 +962,9 @@ export async function startMagicEnglishStage1App() {
           speaker: '🏆 두 번째 모험 알파벳 조각 획득! · GOLDEN LETTER [B]',
           letter: 'B',
           badgeTitle: '두 번째 모험 황금 알파벳 「B」 조각 획득!',
-          text: '링고: “Ding! Correct! You got the letter B piece! Good job!\n축하합니다! 빛나는 두 번째 황금 B 조각을 얻었어요! 돌 블록 1개가 내 세계로 전달돼요!”',
+          text: '링고: “Ding! Correct! You got the letter B piece! Good job!\n축하합니다! 빛나는 두 번째 황금 B 조각을 얻었어요! 다음 모험으로 함께 떠나요!”',
           voiceClip: 'You got the letter B piece! Good job!',
-          rewardBanner: '🎁 보스 격파 보상: 🅱️ 황금 B 조각 + 🧱 돌 블록 1개 · ❤️ 하트 0.5개 전달!',
+          rewardBanner:'알파벳 조각을 되찾았어요!',
         },
       ]);
       return;
@@ -1108,14 +1070,13 @@ export async function startMagicEnglishStage1App() {
           meaningKo: guideMap.meaning,
           targetKey: wordId,
           guideClip: guideMap.wordClip,
-          rewardHint: '단서 도감 등록 + 랜덤 블록 1~2개·하트 0.5~1개',
+          rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.',
           onPass: () => {
             const disc = recordWordDiscovery(state, wordId);
             allFoundNow = disc.allDiscovered;
-            const r = grantSpeakRewardOnce(
+            const r = recordLearningMilestone(
               state,
               `clue-speak-${wordId}`,
-              10,
               `${info.word} 단서 말하기 보상`
             );
             rewardGrantedNow = r.granted;
@@ -1128,8 +1089,8 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'You found a new word!',
           rewardBanner: () =>
             rewardGrantedNow
-              ? `🎁 ${info.word} 말하기 성공 보상: 🪵 랜덤 블록 보상 전달! & 단서 등록 완료!`
-              : `✓ ${info.word} 단서 복습 완료! (다시 말해도 블록을 받을 수 있어요!)`,
+              ? '영어로 마음을 전했어요! 다시 이야기해 보세요.'
+              : '영어로 마음을 전했어요! 다시 이야기해 보세요.',
         },
 
       ],
@@ -1185,9 +1146,9 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '저는 괜찮아요.',
           targetKey: 'i_am_okay',
           guideClip: 'phrase_i_am_okay',
-          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
+          rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.',
           onPass: () => {
-            const r = grantSpeakRewardOnce(state, 'npc-speak-traveler', 15, '여행객과 안부 인사하기');
+            const r = recordLearningMilestone(state, 'npc-speak-traveler', '여행객과 안부 인사하기');
             rewardGrantedNow = r.granted;
           },
         },
@@ -1198,8 +1159,8 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'traveler_reply_welcome',
           rewardBanner: () =>
             rewardGrantedNow
-              ? '🎁 여행객 대화 성공 보상: 🪵 랜덤 블록 보상 전달!'
-              : `✓ 여행객과 반갑게 인사를 나누었어요! (다시 말해도 블록을 받을 수 있어요!)`,
+              ? '영어로 마음을 전했어요! 다시 이야기해 보세요.'
+              : '영어로 마음을 전했어요! 다시 이야기해 보세요.',
         },
         {type:'praise',npcId:'npc_traveler',speaker:'에이미',text:'',skipIf:()=>!rewardGrantedNow},
       ]
@@ -1225,9 +1186,9 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '좋은 아침이에요!',
           targetKey: 'good_morning',
           guideClip: 'phrase_good_morning',
-          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
+          rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.',
           onPass: () => {
-            const r = grantSpeakRewardOnce(state, 'npc-speak-pilot', 15, '기장님과 아침 인사하기');
+            const r = recordLearningMilestone(state, 'npc-speak-pilot', '기장님과 아침 인사하기');
             rewardGrantedNow = r.granted;
           },
         },
@@ -1238,8 +1199,8 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'pilot_reply_flight',
           rewardBanner: () =>
             rewardGrantedNow
-              ? '🎁 기장님 대화 성공 보상: 🪵 랜덤 블록 보상 전달!'
-              : `✓ 기장님과 반갑게 아침 인사를 나누었어요! (다시 말해도 블록을 받을 수 있어요!)`,
+              ? '영어로 마음을 전했어요! 다시 이야기해 보세요.'
+              : '영어로 마음을 전했어요! 다시 이야기해 보세요.',
         },
         {type:'praise',npcId:'npc_pilot',speaker:'에이미',text:'',skipIf:()=>!rewardGrantedNow},
       ]
@@ -1265,9 +1226,9 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '나는 길동입니다.',
           targetKey: 'i_am_gildong',
           guideClip: 'phrase_i_am_gildong',
-          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
+          rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.',
           onPass: () => {
-            const r = grantSpeakRewardOnce(state, 'npc-speak-guard', 15, '심사관에게 자기소개하기');
+            const r = recordLearningMilestone(state, 'npc-speak-guard', '심사관에게 자기소개하기');
             rewardGrantedNow = r.granted;
           },
         },
@@ -1278,8 +1239,8 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'guard_reply_welcome',
           rewardBanner: () =>
             rewardGrantedNow
-              ? '🎁 심사관 대화 성공 보상: 🪵 랜덤 블록 보상 전달!'
-              : `✓ 심사관에게 멋지게 이름을 소개했어요! (다시 말해도 블록을 받을 수 있어요!)`,
+              ? '영어로 마음을 전했어요! 다시 이야기해 보세요.'
+              : '영어로 마음을 전했어요! 다시 이야기해 보세요.',
         },
         {type:'praise',npcId:'npc_guard',speaker:'에이미',text:'',skipIf:()=>!rewardGrantedNow},
       ]
@@ -1305,9 +1266,9 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '네, 주세요!',
           targetKey: 'yes_please',
           guideClip: 'phrase_yes_please',
-          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
+          rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.',
           onPass: () => {
-            const r = grantSpeakRewardOnce(state, 'npc-speak-cafe', 15, '카페 점원에게 정중히 대답하기');
+            const r = recordLearningMilestone(state, 'npc-speak-cafe', '카페 점원에게 정중히 대답하기');
             rewardGrantedNow = r.granted;
           },
         },
@@ -1318,8 +1279,8 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'cafe_reply_enjoy',
           rewardBanner: () =>
             rewardGrantedNow
-              ? '🎁 카페 대화 성공 보상: 🪵 랜덤 블록 보상 전달!'
-              : `✓ 카페 점원에게 정중하게 인사를 건넸어요! (다시 말해도 블록을 받을 수 있어요!)`,
+              ? '영어로 마음을 전했어요! 다시 이야기해 보세요.'
+              : '영어로 마음을 전했어요! 다시 이야기해 보세요.',
         },
         {type:'praise',npcId:'npc_cafe',speaker:'에이미',text:'',skipIf:()=>!rewardGrantedNow},
       ]
@@ -1345,9 +1306,9 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '고마워!',
           targetKey: 'thank_you',
           guideClip: 'phrase_thank_you',
-          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
+          rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.',
           onPass: () => {
-            const r = grantSpeakRewardOnce(state, 'npc-speak-kid', 15, '꼬마 친구에게 감사 인사하기');
+            const r = recordLearningMilestone(state, 'npc-speak-kid', '꼬마 친구에게 감사 인사하기');
             rewardGrantedNow = r.granted;
           },
         },
@@ -1358,8 +1319,8 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'kid_reply_friends',
           rewardBanner: () =>
             rewardGrantedNow
-              ? '🎁 꼬마 친구 대화 성공 보상: 🪵 랜덤 블록 보상 전달!'
-              : `✓ 꼬마 친구와 고마운 마음을 나누었어요! (다시 말해도 블록을 받을 수 있어요!)`,
+              ? '영어로 마음을 전했어요! 다시 이야기해 보세요.'
+              : '영어로 마음을 전했어요! 다시 이야기해 보세요.',
         },
         {type:'praise',npcId:'npc_kid_traveler',speaker:'에이미',text:'',skipIf:()=>!rewardGrantedNow},
       ]
@@ -1388,10 +1349,10 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '실례합니다. 물어봐도 될까요?',
           targetKey: 'full',
           guideClip: 'sentence_ask',
-          rewardHint: '랜덤 블록 1~2개·하트 0.5~1개 · 완전한 문장: 검 확률 20%',
+          rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.',
           onPass: method => {
             recordPracticeCompletion(state, method);
-            const r = grantSpeakRewardOnce(state, 'npc-speak-amy', 20, '에이미와 질문 대화 연습');
+            const r = recordLearningMilestone(state, 'npc-speak-amy', '에이미와 질문 대화 연습');
             rewardGrantedNow = r.granted;
           },
         },
@@ -1402,8 +1363,8 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'Let us ask for help!',
           rewardBanner: () =>
             rewardGrantedNow
-              ? '🎁 에이미 대화 연습 보상: 🪵 랜덤 블록 보상 전달!'
-              : `✓ 에이미와 대화 연습 완료! (다시 말해도 블록을 받을 수 있어요!)`,
+              ? '영어로 마음을 전했어요! 다시 이야기해 보세요.'
+              : '영어로 마음을 전했어요! 다시 이야기해 보세요.',
         },
 
       ]
@@ -1452,10 +1413,10 @@ export async function startMagicEnglishStage1App() {
           meaningKo: '제 친구예요. 도와주세요!',
           targetKey: 'help_please',
           guideClip: 'My friend. Help, please!',
-          rewardHint: '🔓 분실물 보관소 잠금 해제 + 나무 블록 1~2개',
+          rewardHint:'가이드를 듣고 친구에게 영어 문장으로 대답해 보세요.',
           onPass: method => {
             recordStaffSpeechCompletion(state, method);
-            const r = grantSpeakRewardOnce(state, 'npc-speak-staff', 30, '안내 직원과 실전 영어 대화 완료');
+            const r = recordLearningMilestone(state, 'npc-speak-staff', '안내 직원과 실전 영어 대화 완료');
             rewardGrantedNow = r.granted;
           },
         },
@@ -1466,7 +1427,7 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'staff_friend_over_there',
           rewardBanner: () =>
             rewardGrantedNow
-              ? '🎁 실전 대화 성공 보상: 🔓 분실물 보관소 문 열림 + 🪵 랜덤 블록 보상 전달!'
+              ? '영어로 마음을 전했어요! 다시 이야기해 보세요.'
               : '🔓 분실물 보관소 문이 열려 있어요! 활빈에게 가 보세요!',
         },
 
@@ -1596,20 +1557,12 @@ export async function startMagicEnglishStage1App() {
             <b>첫 번째 모험 황금 A 조각</b>
             <small>미스터 미스스펠 격파 증표</small>
           </div>
-          <div class="me-reward-card">
-            <span class="icon">🪙</span>
-            <b>대화로 모은 블록은 내 세계에서 확인해요</b>
-            <small>조각: 돌 1개 · 완료: 나무·흙·돌 각 5개</small>
-          </div>
         </div>
       `
           : ''
       }
 
       <div class="me-modal-footer">
-        <button type="button" id="open-block-world-from-dex" class="me-primary-btn">
-          🧱 내 블록 세계로 (건축 보상 꾸미기)
-        </button>
         <button type="button" id="close-alphabet-dex-btn" class="me-secondary-btn">
           닫기
         </button>
@@ -1680,11 +1633,6 @@ export async function startMagicEnglishStage1App() {
         openWordDiscoveryModal(wId);
       };
     }
-    wrap.querySelector('#open-block-world-from-dex').onclick = () => {
-      cancelActiveVoice();
-      interactiveModal.close();
-      blockWorldUI.open();
-    };
     wrap.querySelector('#close-alphabet-dex-btn').onclick = () => {
       cancelActiveVoice();
       interactiveModal.close();
@@ -1823,7 +1771,7 @@ export async function startMagicEnglishStage1App() {
         cutsceneLocked = false;
         persist();
         updateSidebar();
-        toast('단서(Airplane·Apple·Ask)와 NPC들에게 말을 걸어 Speak로 대답하고 블록 보상을 받아 보세요!');
+        toast('단서(Airplane·Apple·Ask)와 친구들을 만나 Speak로 영어를 연습해 보세요!');
       }
     );
   }
@@ -1872,7 +1820,7 @@ export async function startMagicEnglishStage1App() {
     }
 
     cutsceneLocked = true;
-    const rescueReward = grantSpeakRewardOnce(state, 'hwalbin-rescued', 20, '파트너 딩고(활빈) 구출 성공');
+    const rescueReward = recordLearningMilestone(state, 'hwalbin-rescued', '파트너 딩고(활빈) 구출 성공');
     if (state.stage !== 'stage1_complete') {
       state.stage = 'battle_misspell';
     }
@@ -2032,8 +1980,8 @@ export async function startMagicEnglishStage1App() {
           voiceClip: 'We found the A piece! The way is open!',
           rewardBanner: () =>
             grantResult.granted
-              ? '🎁 보스 격파 보상: 🅰️ 황금 A 조각 + 돌 블록 1개 + 완료 보상 나무·흙·돌 각 5개!'
-              : `✓ 황금 A 조각 보유 중! (다시 말해도 블록을 받을 수 있어요!)`,
+              ? '영어로 마음을 전했어요! 다시 이야기해 보세요.'
+              : '영어로 마음을 전했어요! 다시 이야기해 보세요.',
         },
 
       ],
@@ -2063,7 +2011,6 @@ export async function startMagicEnglishStage1App() {
       null,
       [
         ['📖 알파벳 조각 & 단어 도감 열기', () => openAlphabetDexModal()],
-        ['🧱 내 블록 세계로 가기', () => blockWorldUI.open()],
         ['📜 링고의 영어 두루마리(복습) 열기', () => openRingoScrollModal()],
         ['계속 공항 둘러보기', () => {}],
       ]
@@ -2385,7 +2332,7 @@ export async function startMagicEnglishStage1App() {
     document.querySelector('.chapter h2').textContent=stage2Active?'사라진 보따리와 B의 버스':'활빈 찾기와 첫 영어 말하기';
     document.querySelector('.partner .eyebrow').textContent='ADVENTURE · BLOCK REWARDS';
     $('#partner').textContent=(isHwalbinFollowing()?'💛 활빈과 동행 중 · ':'활빈을 찾아주세요 · ')+`알파벳 조각: ${state.alphabetPieces.join(' · ') || '아직 없음'}`;
-    $('#party').textContent='대화 성공: 블록 1개·하트 0.5개 · 완전한 문장: 블록 2개·하트 1개 · 조각: 돌 1개 · Stage 완료: 나무·흙·돌 각 5개';
+    $('#party').textContent='친구와 영어로 대화하고 퀘스트를 완료해 알파벳 배지를 모아요.';
     const pending=ensureLearningState(state).pending.length;
     if(pending)$('#party').textContent+=` · 보상 ${pending}건 전달 대기`;
     const label=document.querySelector('.console-bottom span:nth-child(2)');if(label)label.textContent=stage2Active?'MAGIC ENGLISH · STAGE 2':'MAGIC ENGLISH · STAGE 1';
@@ -2652,11 +2599,10 @@ export async function startMagicEnglishStage1App() {
     persist();
   }
 
-  ensureLearningState(state); void flushRewards();
+  ensureLearningState(state);
   $('#loading').hidden = true;
   warmCharacterVoices();
   const savedPortal=walkingPortal(state,state.x,state.y);if(savedPortal?.ready)pendingWalkPortal={...savedPortal,map:state.map};
-  if(new URLSearchParams(location.search).get('arrival')==='adventure'){void arrival('📖 마법영어 모험으로 돌아왔어요!');const url=new URL(location.href);url.searchParams.delete('arrival');history.replaceState(null,'',url.pathname+url.search);}
   updateSidebar();
 
   if (state.stage === 'joseon_intro' && state.map === 'JoseonMarket' && state.steps === 0) {
@@ -2756,38 +2702,9 @@ export async function startMagicEnglishStage1App() {
     toggleMenu(false);
     openAlphabetDexModal();
   });
-  $('#open-hearts-menu')?.addEventListener('click',()=>{
-    toggleMenu(false);held.clear();interactiveModal.replaceChildren();
-    const box=document.createElement('div');box.className='me-scroll-modal me-hearts-modal';
-    const title=document.createElement('h2');title.textContent='❤️ 내가 모은 하트';
-    const count=document.createElement('p');count.className='me-heart-balance';count.setAttribute('role','status');count.textContent='확인 중…';
-    const note=document.createElement('p'),refresh=document.createElement('button'),close=document.createElement('button');
-    refresh.type=close.type='button';refresh.textContent='다시 확인';close.textContent='닫기';close.onclick=()=>interactiveModal.close();
-    let request=0;
-    async function load(){const current=++request;refresh.disabled=true;
-      try{
-        void flushRewards();let rewards=[],offline=false;
-        try{const response=await fetch('/api/magic-english/block-world/rewards?userId='+encodeURIComponent(blockUser),{cache:'no-store',signal:AbortSignal.timeout(8000)});if(!response.ok)throw Error('offline');const data=await response.json();if(data.userId!==blockUser||!Array.isArray(data.rewards))throw Error('offline');rewards=data.rewards;}catch{offline=true;}
-        const summary=adventureHeartSummary(localStorage.getItem('magic-english-block-world-v1:'+blockUser),rewards,blockUser);
-        if(current!==request)return;count.textContent=summary.available.toLocaleString('ko-KR')+'개';
-        note.textContent=offline?'인터넷 연결을 확인해 주세요. 마지막으로 저장된 하트만 표시하고 있어요.':summary.unclaimed>0?'블록 세계에서 받을 하트 '+summary.unclaimed.toLocaleString('ko-KR')+'개가 포함되어 있어요.':'블록 세계에서 사용할 수 있는 하트예요.';
-        if(ensureLearningState(state).pending.length)note.textContent+=' 아직 서버에 전달 중인 보상이 있어요. 잠시 뒤 다시 확인해 주세요.';
-      }catch{count.textContent='확인할 수 없어요';note.textContent='저장 기록을 읽지 못했어요. 기록은 그대로 보관하고 있어요.';}finally{if(current===request)refresh.disabled=false;}
-    }
-    refresh.onclick=()=>void load();box.append(title,count,note,refresh,close);interactiveModal.append(box);interactiveModal.showModal();void load();
-  });
-
   $('#open-alphabet-dex-menu')?.addEventListener('click', () => {
     toggleMenu(false);
     openAlphabetDexModal();
-  });
-  $('#open-block-world-btn')?.addEventListener('click', () => {
-    toggleMenu(false);
-    blockWorldUI.open();
-  });
-  $('#open-block-world-menu')?.addEventListener('click', () => {
-    toggleMenu(false);
-    blockWorldUI.open();
   });
   $('#open-scroll-menu')?.addEventListener('click', () => {
     toggleMenu(false);
@@ -2808,7 +2725,7 @@ export async function startMagicEnglishStage1App() {
     toggleMenu(false);
     say(
       '마법영어 Stage 1 처음부터 다시 시작',
-      '조선 장터 도입부터 Stage 1 모험을 새로 시작할까요?\n(기존 건축 세계와 받은 블록은 그대로 남아요.)',
+      '조선 장터 도입부터 Stage 1 모험을 새로 시작할까요?\n(저장된 모험을 새로 시작합니다.)',
       null,
       [
         [
@@ -2837,16 +2754,11 @@ export async function startMagicEnglishStage1App() {
     openSpeakingModal,
     openAlphabetDexModal,
     startMisspellBossBattle,
-    openBlockWorld: () => blockWorldUI.open(),
-    closeBlockWorld: () => blockWorldUI.close(),
     openRingoScrollModal,
     act,
     move,
   };
 
-  if (new URLSearchParams(location.search).get('view') === 'block-world') {
-    blockWorldUI.open();
-  }
 
   canvas.focus({ preventScroll: true });
   requestAnimationFrame(drawLoop);

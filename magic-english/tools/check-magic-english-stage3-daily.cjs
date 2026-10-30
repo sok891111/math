@@ -5,15 +5,15 @@ const base=process.env.MAGIC_TEST_URL||'http://localhost:3000';
 (async()=>{
  const browser=await chromium.launch({channel:'chrome',headless:true,args:['--autoplay-policy=no-user-gesture-required']});
  try{
-  const page=await browser.newPage({viewport:{width:1100,height:850}}),errors=[],claims=[];let failFirst=true;
+  const page=await browser.newPage({viewport:{width:1100,height:850}}),errors=[],claims=[];
   page.on('pageerror',e=>errors.push(e.message));
   const silent=Buffer.alloc(1644);silent.write('RIFF');silent.writeUInt32LE(1636,4);silent.write('WAVEfmt ',8);silent.writeUInt32LE(16,16);silent.writeUInt16LE(1,20);silent.writeUInt16LE(1,22);silent.writeUInt32LE(16000,24);silent.writeUInt32LE(32000,28);silent.writeUInt16LE(2,32);silent.writeUInt16LE(16,34);silent.write('data',36);silent.writeUInt32LE(1600,40);
   await page.route('**/*.mp3*',r=>r.fulfill({status:200,contentType:'audio/wav',body:silent}));
   await page.route('**/api/magic-english/character-voice',()=>{throw Error('All C voices should be pre-recorded');});
-  await page.route('**/api/magic-english/rewards',r=>{const body=r.request().postDataJSON();claims.push(body);if(failFirst){failFirst=false;return r.fulfill({status:503,body:'{}'});}return r.fulfill({status:200,contentType:'application/json',body:'{"created":true}'});});
+  await page.route('**/api/magic-english/rewards',r=>{claims.push(r.request().postDataJSON());return r.fulfill({status:410,body:'{}'});});
   await page.addInitScript(()=>{
    const original=setTimeout;window.setTimeout=(fn,ms,...args)=>original(fn,ms===750?15:ms,...args);
-   window.__MOCK_SPEECH_RECOGNIZER__=({emitResult})=>setTimeout(()=>{const text=document.querySelector('.me-turn-phrase').textContent.replace(/[“”]/g,'').trim(),count=Number(sessionStorage.getItem('daily-test-speeches')||0)+1;sessionStorage.setItem('daily-test-speeches',String(count));emitResult(text,{passed:true,quality:'complete',quantity:2,recognizedText:text,message:'문장 전체를 말했어요!',blockName:'돌',rewardToken:'mock-daily-'+count});},5);
+   window.__MOCK_SPEECH_RECOGNIZER__=({emitResult})=>setTimeout(()=>{const text=document.querySelector('.me-turn-phrase').textContent.replace(/[“”]/g,'').trim(),count=Number(sessionStorage.getItem('daily-test-speeches')||0)+1;sessionStorage.setItem('daily-test-speeches',String(count));emitResult(text,{passed:true,quality:'complete',recognizedText:text,message:'문장 전체를 말했어요!'});},5);
   });
   await page.goto(base+'/magic-english/test/stage3');await page.waitForFunction(()=>window.__MAGIC_ENGLISH_STAGE1__);
   await page.evaluate(()=>{const s=window.__MAGIC_ENGLISH_STAGE1__.getState();s.words={};const p=s.stage3;p.words={class:true,cat:true,come:true};p.incidentSeen=true;p.tommyReconciled=true;p.restored={class:true,cat:true,come:true};p.boss={round:3,completed:true};p.rescue={phase:'complete',completed:true};p.fragmentC=true;p.introductionCompleted=true;p.completed=true;p.conversations={class:3,teacher:2,cat:3,come:2,tommy:3,introduction:2};s.alphabetPieces=['A','B','C'];document.querySelector('#save-button').click();});
@@ -39,8 +39,8 @@ const base=process.env.MAGIC_TEST_URL||'http://localhost:3000';
   // The companion uses the same 3–5 turn daily flow in C.
   const beforeFriend=await count();await act('s3_hwalbin');await drain();const friendTurns=await count()-beforeFriend;assert(friendTurns>=3&&friendTurns<=5);expected+=friendTurns;
   await page.evaluate(()=>window.dispatchEvent(new Event('online')));await page.waitForFunction(()=>window.__MAGIC_ENGLISH_STAGE1__.getState().learning.pending.length===0);
-  assert.equal(new Set(claims.map(c=>c.token)).size,expected);assert(claims.every(c=>c.type==='speech'&&c.userId.startsWith('stage3-test-')));assert(claims.length>expected,'failed delivery was retried');
+  assert.deepEqual(claims,[],'daily practice never sends resource rewards');
   assert.equal(await count(),expected);assert.deepEqual(errors,[]);
-  console.log('PASS: all 20 C daily NPC/companion conversations have 3–5 turns; reward outbox retries, partial-session reload resumes, and the decorative CLASS stand stops walking without starting a quest.');
+  console.log('PASS: all 20 C daily NPC/companion conversations have 3–5 turns; no resource rewards, partial-session reload resumes, and the decorative CLASS stand stops walking without starting a quest.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

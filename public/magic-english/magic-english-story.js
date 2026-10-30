@@ -13,7 +13,7 @@ export const STAGE1_STAGES = [
   'speak_to_staff',     // 6. 안내 직원에게 “Excuse me. Can I ask?” 말하기
   'reunite_hwalbin',    // 7. 분실물 보관소에서 딩고(활빈) 구출 → 친구로서 따라다니기 시작!
   'battle_misspell',    // 8. 마지막 퀘스트: 미스터 미스스펠과 생활 문장 대결 (글자 마법 해제 격파 후 황금 A 조각 획득!)
-  'stage1_complete',    // 9. 내 블록 세계 건축 & 모험으로 돌아와 BUS → SUB 다음 화 예고
+  'stage1_complete',    // 9. 알파벳 배지 확인 & BUS → SUB 다음 화 예고
 ];
 
 export const STAGE1_WORDS = {
@@ -118,9 +118,9 @@ export const STAGE1_CHECKLIST = [
   },
   {
     id: 'step9',
-    title: '9. 알파벳 도감 확인 & 블록 세계 건축',
-    subtitle: '획득한 황금 A 조각와 알파벳 도감을 확인하고 블록 세계를 꾸며요.',
-    isDone: s => !!s.busHookSeen || (s.blockWorld?.blocks?.length || 0) > 0,
+    title: '9. 알파벳 도감 확인 & 다음 모험',
+    subtitle: '황금 A 배지와 배운 단어를 확인하고 다음 모험으로 떠나요.',
+    isDone: s => !!s.busHookSeen,
   },
 ];
 

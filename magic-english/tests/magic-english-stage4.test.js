@@ -40,8 +40,8 @@ test('every D daily profile has 3–5 turns, checkpoints resume and C conversati
 test('controller grants the D fragment exactly once after the third successful boss utterance',()=>{
  const state=initial(),s=ensureStage4(state),grants=[];let pages;for(const k of Object.keys(s.words))s.words[k]=true;s.doorOpened=s.incidentSeen=true;for(const k of Object.keys(s.trains))s.trains[k]=true;
  const c=createStage4Controller({getState:()=>state,say:(_,p)=>pages=p,save(){},update(){},go(){},queueReward:r=>grants.push(r)});
- c.act({id:'s4_boss'});const turns=pages.filter(p=>p.type==='speak');turns[0].onPass();turns[1].onPass();assert.equal(grants.length,0);turns[2].onPass();turns[2].onPass();assert.equal(grants.length,1);assert.equal(grants[0].id,'stage4:fragment:v2');assert.equal(pages.at(-1).letter,'D');assert.deepEqual(state.alphabetPieces,['D']);
- c.act({id:'s4_meal'});for(const p of pages)if(p.type==='speak')p.onPass();assert(s.completed);assert.equal(grants[1].id,'stage4:clear:v2');c.act({id:'s4_meal'});for(const p of pages)if(p.type==='speak')p.onPass();assert.equal(grants.length,2);
+ c.act({id:'s4_boss'});const turns=pages.filter(p=>p.type==='speak');turns[0].onPass();turns[1].onPass();assert.equal(grants.length,0);turns[2].onPass();turns[2].onPass();assert.equal(grants.length,0);assert.equal(pages.at(-1).letter,'D');assert.deepEqual(state.alphabetPieces,['D']);
+ c.act({id:'s4_meal'});for(const p of pages)if(p.type==='speak')p.onPass();assert(s.completed);assert(state.rewardReceipts['stage4:clear:v2']);c.act({id:'s4_meal'});for(const p of pages)if(p.type==='speak')p.onPass();assert.equal(grants.length,0);
 });
 
 test('D guides and every daily actor have fixed ElevenLabs files, plus sixteen original comic pages',async()=>{

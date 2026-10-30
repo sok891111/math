@@ -65,7 +65,9 @@ if(fs.existsSync(magicDir)){
   const relative=path.relative(magicDir,src),parts=relative.split(path.sep);
   if(!relative)return true;
   if(parts.some(p=>p.startsWith('.')))return false;
-  if(parts[0]==='assets')return true;
+  if(parts[0]==='block-world')return false;
+  if(['magic-english-block-world.js','magic-english-heart-summary.js'].includes(relative))return false;
+  if(parts[0]==='assets')return !parts.includes('mobs');
   if(['block-world','creative'].includes(parts[0]))return fs.statSync(src).isDirectory()||/\.(js|html|css|json|png|jpg|svg|mp3|txt)$/.test(relative);
   return parts.length===1&&/\.(js|html|css)$/.test(relative);
  }});

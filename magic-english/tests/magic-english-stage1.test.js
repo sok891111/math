@@ -113,8 +113,8 @@ test('all 41 pre-generated ElevenLabs NPC, Boss Battle, and word MP3 files exist
   const keys = Object.keys(STAGE1_AUDIO_MANIFEST);
   assert.equal(keys.length, 41);
   for (const item of Object.values(STAGE1_AUDIO_MANIFEST)) {
-    assert.ok(fs.existsSync(item.src), `Missing MP3 file: ${item.src}`);
-    const stat = fs.statSync(item.src);
+    assert.ok(fs.existsSync(new URL('../'+item.src,import.meta.url)), `Missing MP3 file: ${item.src}`);
+    const stat = fs.statSync(new URL('../'+item.src,import.meta.url));
     assert.ok(stat.size > 10000, `MP3 file too small: ${item.src} (${stat.size} bytes)`);
   }
   assert.equal(resolveElevenLabsClip('Are you okay? What happened?')?.id, 'traveler_are_you_okay');
@@ -127,7 +127,7 @@ test('all 41 pre-generated ElevenLabs NPC, Boss Battle, and word MP3 files exist
   assert.ok(STAGE1_AUDIO_MANIFEST.misspell_defeated);
 });
 
-test('self-spoken and assisted completions are distinguished in save state while both unlock Hwalbin and grant identical rewards once', () => {
+test('self-spoken and assisted completions are distinguished in save state while both unlock Hwalbin and retain the A badge without issuing resources', () => {
   const airport = createAirportHallMap();
 
   const selfState = createInitialMagicEnglishState();
@@ -159,22 +159,24 @@ test('self-spoken and assisted completions are distinguished in save state while
   assert.equal(g2.granted, true);
   assert.deepEqual(selfState.alphabetPieces, ['A']);
   assert.deepEqual(assistedState.alphabetPieces, ['A']);
-  assert.equal(selfState.blockWorld.coins, 100);
-  assert.equal(assistedState.blockWorld.coins, 100);
-  assert.equal(selfState.blockWorld.decorations.paper_airplane_deco.owned, 1);
-  assert.equal(assistedState.blockWorld.decorations.paper_airplane_deco.owned, 1);
+  assert.equal(selfState.blockWorld.coins, 0);
+  assert.equal(assistedState.blockWorld.coins, 0);
+  assert.equal(selfState.blockWorld.decorations.paper_airplane_deco.owned, 0);
+  assert.equal(assistedState.blockWorld.decorations.paper_airplane_deco.owned, 0);
 
   // Repeat reward calls (simulating re-talking, refreshing, or re-entering Block World) must NOT add coins or duplicate pieces
   const repeat = grantStage1ClearReward(selfState, 2000);
   assert.equal(repeat.granted, false);
-  assert.equal(selfState.blockWorld.coins, 100);
+  assert.equal(selfState.blockWorld.coins, 0);
   assert.deepEqual(selfState.alphabetPieces, ['A']);
   assert.ok(selfState.rewardReceipts[STAGE1_REWARD_ID]);
 });
 
-test('16x16x8 block world supports placement, removal, special decoration reuse, shop unlocking, and full save/restore', () => {
+test('archived construction data still supports placement, removal, special decoration reuse, shop unlocking, and full save/restore', () => {
   const s = createInitialMagicEnglishState();
   grantStage1ClearReward(s, 12345);
+  // Historical construction inventory is a fixture, never an English learning reward.
+  s.blockWorld.coins=100;s.blockWorld.unlockedBlocks=['dirt','airport_glass'];s.blockWorld.decorations.paper_airplane_deco.owned=1;
 
   // Place starter block and Stage 1 unlocked airport block
   assert.equal(placeBlockInWorld(s, 0, 0, 0, 'dirt').ok, true);

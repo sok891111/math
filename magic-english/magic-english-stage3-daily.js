@@ -93,14 +93,14 @@ export function createStage3Daily({getState,say,save,update,profiles=STAGE3_DAIL
   if(intro)pages.push({type:'npc',speaker:profile.speaker,...(typeof intro==='string'?{text:intro}:intro)});
   for(let index=session.next;index<rows.length;index++){
    const row=rows[index],p=practice[row.key];
-   pages.push({type:'npc',speaker:profile.speaker,text:`${row.question}\n${row.korean}`,voiceClip:row.question},{type:'speak',speaker:'홍길동 · 내 대답 차례',targetKey:row.key,targetPhrase:p.text,guideClip:p.text,meaningKo:p.korean,noFollowup:true,conversationTurn:index+1,conversationTotal:rows.length,rewardHint:'대화 성공: 블록 1~2개·하트 0.5~1개 · 완전한 문장: 무기 확률 20%',onPass:()=>{
+   pages.push({type:'npc',speaker:profile.speaker,text:`${row.question}\n${row.korean}`,voiceClip:row.question},{type:'speak',speaker:'홍길동 · 내 대답 차례',targetKey:row.key,targetPhrase:p.text,guideClip:p.text,meaningKo:p.korean,noFollowup:true,conversationTurn:index+1,conversationTotal:rows.length,rewardHint:'친구의 말을 듣고 영어 문장으로 대답해 보세요.',onPass:()=>{
     const current=memory().active[id];if(!current||current.serial!==session.serial||current.next!==index)return;
     current.next=index+1;
     if(current.next===rows.length){memory().visits[id]=(memory().visits[id]||0)+1;delete memory().active[id];}
     save();update();
    }});
   }
-  pages.push({type:'npc',speaker:profile.speaker,text:'이야기해 줘서 고마워! 다음에 또 만나자.',voiceClip:DAILY_FAREWELL,rewardBanner:'말하기 보상: 블록 1~2개·하트 0.5~1개 · 완전한 문장은 무기 추첨 20%'});
+  pages.push({type:'npc',speaker:profile.speaker,text:'이야기해 줘서 고마워! 다음에 또 만나자.',voiceClip:DAILY_FAREWELL,rewardBanner:'잘했어요! 친구와 마음을 나눴어요.'});
   say(profile.speaker+' · 일상 대화',pages);return true;
  }
  return {open};

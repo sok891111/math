@@ -70,7 +70,7 @@ export function createInitialMagicEnglishState() {
     busHookSeen: false,
     blockWorld: {
       coins: 0,
-      unlockedBlocks: [...STARTER_BLOCKS],
+      unlockedBlocks: [],
       decorations: {
         paper_airplane_deco: { owned: 0, placed: 0 },
       },
@@ -204,26 +204,17 @@ export function recordStaffSpeechCompletion(state, method = 'self') {
 }
 
 /**
- * Atomically grant a per-clue or per-NPC Speak reward once.
+ * Record a per-clue or per-NPC learning milestone without issuing resources.
  */
-export function grantSpeakRewardOnce(state, receiptId, coins = 10, description = '') {
-  if (!state.rewardReceipts) state.rewardReceipts = {};
-  if (state.rewardReceipts[receiptId]) {
-    return { granted: false, coins, description, receipt: state.rewardReceipts[receiptId] };
-  }
-  state.blockWorld.coins += coins;
-  const receipt = {
-    id: receiptId,
-    grantedAt: Date.now(),
-    coins,
-    description,
-  };
-  state.rewardReceipts[receiptId] = receipt;
-  return { granted: true, coins, description, receipt };
+export function recordLearningMilestone(state,receiptId,description=''){
+ state.rewardReceipts??={};const old=state.rewardReceipts[receiptId];if(old)return {granted:false,description,receipt:old};
+ const receipt={id:receiptId,grantedAt:Date.now(),description};state.rewardReceipts[receiptId]=receipt;return {granted:true,description,receipt};
 }
+// Archived callers can record their learning checkpoint, but never receive resources.
+export function grantSpeakRewardOnce(state,receiptId,_coins,description=''){return recordLearningMilestone(state,receiptId,description);}
 
 /**
- * Atomically grant Stage 1 First Clear rewards (`stage-1-first-clear`) exactly once.
+ * Record the Stage 1 A badge (`stage-1-first-clear`) exactly once; archived inventory is unchanged.
  * Subsequent calls with an existing receipt are strict no-ops.
  */
 export function grantStage1ClearReward(state, timestamp = Date.now()) {
@@ -236,25 +227,11 @@ export function grantStage1ClearReward(state, timestamp = Date.now()) {
     state.alphabetPieces.push('A');
   }
 
-  state.blockWorld.coins += 100;
-  for (const blockId of STAGE1_REWARD_BLOCKS) {
-    if (!state.blockWorld.unlockedBlocks.includes(blockId)) {
-      state.blockWorld.unlockedBlocks.push(blockId);
-    }
-  }
-  state.blockWorld.decorations.paper_airplane_deco.owned = Math.max(
-    1,
-    state.blockWorld.decorations.paper_airplane_deco.owned
-  );
-
   const receipt = {
     id: STAGE1_REWARD_ID,
     grantedAt: timestamp,
     speechMethod: state.staffSpeech.method || 'self',
     alphabetPiece: 'A',
-    coins: 100,
-    unlockedBlocks: [...STAGE1_REWARD_BLOCKS],
-    decoration: 'paper_airplane_deco',
   };
   state.rewardReceipts[STAGE1_REWARD_ID] = receipt;
   state.stage = 'stage1_complete';
